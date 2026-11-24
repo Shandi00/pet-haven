@@ -2,6 +2,16 @@
 
 給 AI 開發工具（Claude Code、Codex、Cursor、Copilot 等）與組員的共同開發指引。開始任何工作前先讀完本檔。
 
+規則分三層，進到哪個資料夾就再讀該資料夾的 AGENTS.md：
+
+| 檔案 | 範圍 |
+|---|---|
+| `AGENTS.md`（本檔） | 全專案：流程、分支、共通規則 |
+| [backend/AGENTS.md](backend/AGENTS.md) | 後端：路由、權限、回應格式、LLM 呼叫、jest |
+| [frontend/AGENTS.md](frontend/AGENTS.md) | 前端：頁面、API 呼叫、UI 元件、mock、Playwright |
+
+Codex 會自動合併這三層。Claude Code 透過各層的 `CLAUDE.md`（內容只有 `@AGENTS.md`）讀取同一份內容；`.claude/settings.json` 另外禁止 Claude 讀取 `.env` 和強制推送。規則只改 AGENTS.md，不要在 CLAUDE.md 寫另一份。
+
 ## 專案
 
 Pet Haven（寵愛有家）是寵物配對認養平台，也是「智慧型資訊系統」課程的期末專題，**2026-12-09 展示**。認養者、送養者、收容機構可以在同一個平台完成尋找、配對、申請、審核到完成認養。本期重點是 AI：配對小遊戲、可解釋的 Top 3 推薦、具資料來源的 AI 助理。
@@ -32,7 +42,7 @@ npm run test:e2e       # Playwright e2e（需要前後端都在執行）
 
 1. **規劃**：新功能用 Superpowers：需求規格放 `docs/superpowers/specs/`，實作計畫放 `docs/superpowers/plans/`。小修改不需要。
 2. **分支**：從 `dev` 開 `feat/T<任務編號>-<簡短名稱>`，例如 `feat/T13-top3-ai-reason`；修 bug 用 `fix/T<編號>-<名稱>`。
-3. **PR**：合併回 `dev`，標題格式 `[T13] Top 3 與 AI 理由`；說明中寫出對應的完成定義與測試方式。至少一位組員審查。
+3. **PR**：合併回 `dev`，標題格式 `[T13] Top 3 與 AI 理由`；依 PR 範本填寫完成定義與測試方式。CI 要通過，並且至少一位組員審查。
 4. **發布**：`dev` 驗收通過後才合併到 `main`，展示版加上 tag（例如 `v1.0-demo`）。不要直接 push 到 `main`。
 5. **commit 訊息**：`feat:`、`fix:`、`docs:`、`test:`、`chore:` 開頭，內容用繁體中文。
 

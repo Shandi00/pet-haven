@@ -55,3 +55,6 @@ admin-token.txt
 
 # Misc
 *.log
+
+# Claude Code 個人設定（不共享）
+.claude/settings.local.json
