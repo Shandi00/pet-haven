@@ -50,12 +50,11 @@ pet-haven/
 │   ├── data-import/     政府資料匯入操作
 │   ├── features/        功能清單與使用說明
 │   ├── deployment/      部署檢查表
-│   ├── qa/              QA gates
-│   └── archive/reports/ 歷史實作、修復與測試報告
-├── archive/snapshots/   舊程式備份與依賴清單
+│   ├── qa/              QA gates 與追溯評估
+│   └── presentation/    提案簡報大綱
 ├── .github/             CI 與開發工具設定
 ├── .bmad-core/          BMAD 開發工具設定
 └── web-bundles/         BMAD 代理工具包
 ```
 
-完整入口請見[文件索引](docs/README.md)；整理規則與後續建議請見[專案維護指南](docs/guides/PROJECT_ORGANIZATION.md)。歷史報告記錄的是撰寫當時的結果，目前狀態應以重新執行測試為準。
+完整入口請見[文件索引](docs/README.md)；整理規則與後續建議請見[專案維護指南](docs/guides/PROJECT_ORGANIZATION.md)。歷史報告已移除（可於 git 歷史查閱），目前狀態以重新執行測試為準。

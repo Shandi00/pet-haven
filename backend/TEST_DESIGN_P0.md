@@ -146,7 +146,7 @@ Feature: Favorites sync
 
 文件位置
 - 本設計檔：`backend/TEST_DESIGN_P0.md`
-- 已存在相關文件：`backend/POST_MORTEM.md`, `backend/TEST_CASES_REPORT.md`, `backend/test-integration-verbose.js`, `backend/.env.example`
+- 已存在相關文件：`backend/test-integration-verbose.js`, `backend/.env.example`
 
 後續（建議）
 - 把這些測試故事列為 QA backlog（可直接匯入或我幫你產生 Markdown / CSV）。

@@ -27,7 +27,7 @@ trace:
     full: 5
     partial: 3
     none: 0
-  planning_ref: 'backend/qa-assessments/epic1.story1.1-trace-20251126.md'
+  planning_ref: 'docs/qa/assessments/epic1.story1.1-trace-20251126.md'
   uncovered: []
   notes: 'All requirements have test coverage. Partial coverage items are non-critical enhancements.'
 test_execution:

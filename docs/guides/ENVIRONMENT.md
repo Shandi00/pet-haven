@@ -17,4 +17,4 @@ JWT_SECRET 與 SESSION_SECRET 請使用各自獨立的隨機值。開發時可�
 
 前端預設連到 http://localhost:5000/api。若需覆寫，建立 frontend/.env.local 並設定 `REACT_APP_API_URL`；環境變數更新後要重新啟動前端。實際支援的其他前端變數可在 frontend/src 搜尋 process.env。
 
-Google 登入流程詳見 [設定指南](../auth/GOOGLE_LOGIN_SETUP.md)。日誌詳見 [LOGGING.md](../../backend/LOGGING.md)。
+Google 登入流程詳見 [Google 登入](../auth/GOOGLE_LOGIN.md)。日誌詳見 [LOGGING.md](../../backend/LOGGING.md)。

@@ -103,14 +103,7 @@
 - OAuth/第三方服務（Google）測試僅做存在性/保護性檢查，不需真實登入流程。
 
 ## 9. 成果物
-- `backend/TEST_CASES_REPORT.md` - 執行用例與結果
-- `TEST_SUMMARY.md` - 整體測試總覽（73 個測試）
-- `UNIT_TEST_REPORT.md` - 單元測試詳細報告（50 個測試）
-- `INTEGRATION_TEST_REPORT.md` - 整合測試報告（12 個測試）
-- `E2E_TEST_REPORT.md` - E2E 測試報告（11 個測試）
-- `SECURITY_TEST_REPORT.md` - 安全測試報告（7 個漏洞修復）
-- `SECURITY_FIX_REPORT.md` - 安全修復執行報告
-- `SECURITY_FUNCTION_TEST_REPORT.md` - 安全功能測試報告（14 個測試）
+- 測試報告不再存放於版本庫；請重新執行測試取得目前結果。舊報告可在 git 歷史（commit 3a6df08）找到。
 - `frontend/E2E_TESTING_GUIDE.md` - E2E 測試使用指南
 - 若需: 針對失敗項目的修正計畫與 PR
 
@@ -145,9 +138,6 @@
    - 總計: 14/14 測試通過 (100%)
 
 3. **測試文檔完善**
-   - 新增 `SECURITY_TEST_REPORT.md` - 安全測試報告
-   - 新增 `SECURITY_FIX_REPORT.md` - 修復執行報告
-   - 新增 `SECURITY_FUNCTION_TEST_REPORT.md` - 功能測試報告
    - 新增 `TEST_SUMMARY.md` - 整體測試總覽
    - 新增 `UNIT_TEST_REPORT.md` - 單元測試詳細報告
    - 更新 `E2E_TEST_REPORT.md` - E2E 測試 100% 通過

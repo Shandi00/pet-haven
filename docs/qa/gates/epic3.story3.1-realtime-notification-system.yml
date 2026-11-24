@@ -34,7 +34,7 @@ trace:
     full: 10
     partial: 2
     none: 0
-  planning_ref: 'backend/qa-assessments/epic3.story3.1-trace-20251126.md'
+  planning_ref: 'docs/qa/assessments/epic3.story3.1-trace-20251126.md'
   uncovered: []
   notes: 'All requirements now covered. Performance testing (AC12) implemented via Artillery framework.'
 test_execution:
@@ -57,7 +57,7 @@ test_execution:
   date: '2025-11-26'
   ci_status: 'passing'
   notes: 'All test suites passing and validated. Load testing completed with excellent median performance (36.2ms). System ready for production.'
-  documentation: 'backend/TEST_IMPROVEMENTS.md'
+  documentation: 'backend/TEST_IMPROVEMENTS.md（已移除，見 git 歷史 3a6df08）'
 production_readiness:
   staging: 'APPROVED'
   production: 'APPROVED'

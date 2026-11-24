@@ -190,9 +190,8 @@ curl https://your-domain.com/api/health
 ##  相關文檔
 
 - [環境變數說明](../guides/ENVIRONMENT.md)
-- [啟動指南](../guides/STARTUP_GUIDE.md)
+- [開發指南](../guides/DEVELOPMENT.md)
 - [日誌設定](../../backend/LOGGING.md)
-- [日誌管理](../../backend/LOGGING.md)
 - [API 文檔](../../backend/SWAGGER_API_DOCS.md)
 
 ---

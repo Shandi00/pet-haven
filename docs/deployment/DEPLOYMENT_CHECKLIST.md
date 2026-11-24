@@ -212,6 +212,6 @@
 - Monitoring Setup: `MONITORING_GUIDE.md`
 - Architecture: `docs/architecture.md`
 - Quality Gates: `docs/qa/gates/`
-- Test Reports: `backend/TEST_IMPROVEMENTS.md`
+- Test Docs: `backend/README_TESTING.md`
 
 **Last Updated**: 2025-11-26 by James (Dev Agent)

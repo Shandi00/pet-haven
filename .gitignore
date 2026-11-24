@@ -44,6 +44,7 @@ coverage/
 playwright-report/
 test-results/
 blob-report/
+backend/security-test-results.json
 
 # Local process IDs, credentials and ad-hoc backups
 *.pid
@@ -51,12 +52,6 @@ admin-token.txt
 *.bak
 *.backup
 *.old
-
-# Historical snapshots are intentionally retained
-!archive/**/
-!archive/**/*.bak
-!archive/**/*.backup
-!archive/**/*.old
 
 # Misc
 *.log

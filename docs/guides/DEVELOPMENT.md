@@ -37,10 +37,19 @@ E2E 測試需先啟動後端，再於根目錄執行 `npm.cmd run test:e2e`。Pl
 
 ## 資料操作
 
-後端根目錄與 backend/scripts 包含匯入、清理、補值等工具，可能寫入或刪除資料。執行前先檢查該腳本的連線來源與作用範圍，使用測試資料庫驗證。
+backend/scripts 包含匯入、清理、補值等工具，可能寫入或刪除資料。執行前先檢查該腳本的連線來源與作用範圍，使用測試資料庫驗證。示範資料載入方式見 [DATA_LOADING_GUIDE](DATA_LOADING_GUIDE.md)。
 
-`npm --prefix backend run seed` 現在正確指向 backend/seed.js；本次整理未執行任何資料匯入、清理或 seed。
+- `npm --prefix backend run seed`：載入示範資料（backend/seed.js）
+- `node backend/create-admin.js`：建立管理員帳號
+- `node backend/scripts/import-moa-licensed-shops.js`：匯入農業部「合法特定寵物業名單」
 
 ## Windows 啟動入口
 
 `start.bat`、`quick-start.bat`、`start-frontend.bat` 會先切換至腳本所在目錄。quick-start.bat 不再停止所有 Node 程序；啟動前請自行關閉占用 3000、5000 埠的專案服務。
+
+## 常見問題
+
+- **無法連接資料庫**：確認 MongoDB 已啟動，且 backend/.env 的 `MONGODB_URI` 正確。可執行 `npm --prefix backend run test:db` 檢查連線。
+- **PowerShell 無法執行 npm.ps1**：改用 `npm.cmd`，或執行 `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`。
+- **埠號被占用**：關閉占用 3000、5000 埠的舊服務後再啟動。
+- **啟動成功的判斷**：http://localhost:5000/api/ready 回應正常，http://localhost:3000 顯示首頁。
