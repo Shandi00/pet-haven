@@ -38,7 +38,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22' # 與本機開發版本一致
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install backend deps
         working-directory: backend
@@ -88,6 +90,7 @@ jobs:
           node test-socketio-resilience.js
 
       - name: Run quick load test (smoke test)
+        if: github.ref == 'refs/heads/main' # 負載測試較慢，只在 main 執行
         working-directory: backend
         run: |
           echo "Running quick load test..."
