@@ -10,7 +10,7 @@
     "test:unit": "jest tests/",
     "test:unit:watch": "jest tests/ --watch",
     "test:coverage": "jest tests/ --coverage",
-    "seed": "node scripts/seed.js",
+    "seed": "node seed.js",
     "test:db": "node test-db-connection.js",
     "test:socketio": "node test-socketio-resilience.js",
     "test:load": "artillery run load-test-notifications.yml",

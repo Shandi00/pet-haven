@@ -1,0 +1,192 @@
+[
+    {
+        "From":  "QUICK_START.md",
+        "To":  "docs/guides/QUICK_START.md",
+        "Sha256":  "86EDC01B02D6A859512FD5D7BD6BAF1BD04BCB159860B1D7BB629BDC5083F254"
+    },
+    {
+        "From":  "STARTUP_GUIDE.md",
+        "To":  "docs/guides/STARTUP_GUIDE.md",
+        "Sha256":  "518DBD5D0147982A7581C8404CB684FC04C1F236CA3A4C2685A28DB6083C096D"
+    },
+    {
+        "From":  "DATA_LOADING_GUIDE.md",
+        "To":  "docs/guides/DATA_LOADING_GUIDE.md",
+        "Sha256":  "80D913E1AC8479C26B5ADD3312828C3FB04A73E04AD61146FEFC1691B849BB98"
+    },
+    {
+        "From":  "GOOGLE_CONSOLE_SETUP_GUIDE.md",
+        "To":  "docs/auth/GOOGLE_CONSOLE_SETUP_GUIDE.md",
+        "Sha256":  "6EF862447BF47F8AFB9F5DB3CD7E5E7321FB131680262D255C08B104BCE7662E"
+    },
+    {
+        "From":  "GOOGLE_LOGIN_QUICK_START.md",
+        "To":  "docs/auth/GOOGLE_LOGIN_QUICK_START.md",
+        "Sha256":  "4DDFCA9B77E78CFE855819A4198A4EF7B40FD3B481764CFA6EAD72DCF0702A70"
+    },
+    {
+        "From":  "GOOGLE_LOGIN_SETUP.md",
+        "To":  "docs/auth/GOOGLE_LOGIN_SETUP.md",
+        "Sha256":  "6B9CE5DABD035BD3A81E69BCBE9C006E5343EF75A516D539F14672596FBC0AA2"
+    },
+    {
+        "From":  "GOOGLE_LOGIN_TROUBLESHOOTING.md",
+        "To":  "docs/auth/GOOGLE_LOGIN_TROUBLESHOOTING.md",
+        "Sha256":  "090E6E9BF706348BA9379E32CF333DAC33A4630041301669A29183F64CAF8C82"
+    },
+    {
+        "From":  "匯入步驟指南.md",
+        "To":  "docs/data-import/匯入步驟指南.md",
+        "Sha256":  "974031501E4D80F5A3C8AB7DA7F5E5DBC86103DD2CFEA0A8977F74F723B8E25B"
+    },
+    {
+        "From":  "政府資料匯入快速參考.md",
+        "To":  "docs/data-import/政府資料匯入快速參考.md",
+        "Sha256":  "AD9E4D6AD79C9B41F244C5149C6F11AAD6DA8702706C843FF2354DC417354484"
+    },
+    {
+        "From":  "政府資料匯入與審核測試流程.md",
+        "To":  "docs/data-import/政府資料匯入與審核測試流程.md",
+        "Sha256":  "DBB1BB13FDF3CCF8540D3E20BA677C4458D4CEA46CF9F1FF2855BEAE007B26AA"
+    },
+    {
+        "From":  "資料匯入指南.md",
+        "To":  "docs/data-import/資料匯入指南.md",
+        "Sha256":  "C960B5F551DBF8C1DBBB18887BE259BA018C5474E16CDAD6C9F3A88A6E8F00C1"
+    },
+    {
+        "From":  "開始匯入-操作指南.md",
+        "To":  "docs/data-import/開始匯入-操作指南.md",
+        "Sha256":  "E223F1F529D3DC05C55AB8F93B15C256D3189E0F12BAFB58AA849BBC95DBE4F1"
+    },
+    {
+        "From":  "FEATURE_CHECKLIST.md",
+        "To":  "docs/features/FEATURE_CHECKLIST.md",
+        "Sha256":  "F3AFDB8AE190BB638705898FE936F0667E04BEEA99D8471230E2511B7B01B1C9"
+    },
+    {
+        "From":  "管理員編輯功能說明.md",
+        "To":  "docs/features/管理員編輯功能說明.md",
+        "Sha256":  "2BAFC5B33D57C7AAEF3E19366B601C3BB405AA1738C64BCE0AC97CCEAD819038"
+    },
+    {
+        "From":  "送養功能更新說明.md",
+        "To":  "docs/features/送養功能更新說明.md",
+        "Sha256":  "DC41C0C5D3FEF62A2103A9B75C4AC4F149E7FD0554CC1C638403E33B9E07B8E4"
+    },
+    {
+        "From":  "E2E_TEST_REPORT.md",
+        "To":  "docs/archive/reports/E2E_TEST_REPORT.md",
+        "Sha256":  "7AAA6BEA57B080F025525BA84F619EDEDC825B5CE61DA7423FD222AE06C60D6C"
+    },
+    {
+        "From":  "FIX_SUMMARY.md",
+        "To":  "docs/archive/reports/FIX_SUMMARY.md",
+        "Sha256":  "1EF17176C598CFE28EF6A9462F3C822ADEC1F19612E9D51522A1CD8A0D93ACEE"
+    },
+    {
+        "From":  "GOOGLE_LOGIN_IMPLEMENTATION.md",
+        "To":  "docs/archive/reports/GOOGLE_LOGIN_IMPLEMENTATION.md",
+        "Sha256":  "0F18FD0EA3DC8D6DF1D6A2F1601ACA98481BE4DEA74CCA64C33ADE2CA47A35C5"
+    },
+    {
+        "From":  "INTEGRATION_TEST_REPORT.md",
+        "To":  "docs/archive/reports/INTEGRATION_TEST_REPORT.md",
+        "Sha256":  "31CD2B1047E4B2F07521E7AEB232DDF3C802EFF8E4FB691B86C96C7A16182EC0"
+    },
+    {
+        "From":  "SECURITY_FIX_REPORT.md",
+        "To":  "docs/archive/reports/SECURITY_FIX_REPORT.md",
+        "Sha256":  "8B66734A3B9B3F482CBFE4CAA7243F4B02B2400E100110295F0B2E9169859D28"
+    },
+    {
+        "From":  "SECURITY_FUNCTION_TEST_REPORT.md",
+        "To":  "docs/archive/reports/SECURITY_FUNCTION_TEST_REPORT.md",
+        "Sha256":  "C68152DF9854712379E0CA0C107F50BE2A4B4BCBEAC934F496C6CFEA3BBBD35C"
+    },
+    {
+        "From":  "SECURITY_TEST_REPORT.md",
+        "To":  "docs/archive/reports/SECURITY_TEST_REPORT.md",
+        "Sha256":  "843538038C10B7EDF8A71F6A0B9BDECCE93EC30030AA308D6684A3A1AAE6D711"
+    },
+    {
+        "From":  "STORY_1.1_IMPLEMENTATION.md",
+        "To":  "docs/archive/reports/STORY_1.1_IMPLEMENTATION.md",
+        "Sha256":  "1DA84C6E1AF9751466E4916A1A3F772D5B40A5A2B7F7E9419B8B51C33C752273"
+    },
+    {
+        "From":  "STORY_3.1_SUMMARY.md",
+        "To":  "docs/archive/reports/STORY_3.1_SUMMARY.md",
+        "Sha256":  "481F38F9F7BEB661040BA18CE5325E7E40FBCD7FB0E00FAC3C9815860A53DF78"
+    },
+    {
+        "From":  "TEST_SUMMARY.md",
+        "To":  "docs/archive/reports/TEST_SUMMARY.md",
+        "Sha256":  "120436C5EBC1DC1863D078BD2A2C33A15A396CCEF5027177D93CDD2C707077AC"
+    },
+    {
+        "From":  "UNIT_TEST_REPORT.md",
+        "To":  "docs/archive/reports/UNIT_TEST_REPORT.md",
+        "Sha256":  "B0C4D8E41DC9921938E0374F4271FCF629CDD6936FE70357A9082FF7C84D4668"
+    },
+    {
+        "From":  "修復狀態報告.md",
+        "To":  "docs/archive/reports/修復狀態報告.md",
+        "Sha256":  "CDFC99ECD7D520F73630ADBDA656F57FB03981847B9E210773576EFDB2448556"
+    },
+    {
+        "From":  "功能實作完成報告.md",
+        "To":  "docs/archive/reports/功能實作完成報告.md",
+        "Sha256":  "189D1F23A823D8E6094D6393E0798B25C1DD006A01706C8D4352EE63D9C75778"
+    },
+    {
+        "From":  "問題修復清單.md",
+        "To":  "docs/archive/reports/問題修復清單.md",
+        "Sha256":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+        "From":  "新功能完成報告.md",
+        "To":  "docs/archive/reports/新功能完成報告.md",
+        "Sha256":  "FB108073B8426BFD703C9E49678E2F209101B950AC52B7075E929580FAF965B2"
+    },
+    {
+        "From":  "before-fix-backend.txt",
+        "To":  "archive/snapshots/before-fix-backend.txt",
+        "Sha256":  "5220404FE5C111FEE8EAD663A4F4837D98EBC89AF4F2D302DCB665B5A61EF666"
+    },
+    {
+        "From":  "before-fix-frontend.txt",
+        "To":  "archive/snapshots/before-fix-frontend.txt",
+        "Sha256":  "F4C56027251B1CF0C3DFF45F07307515743BE6230E064F45F96919B493C81589"
+    },
+    {
+        "From":  "backend/server.js.bak",
+        "To":  "archive/snapshots/backend/server.js.bak",
+        "Sha256":  "B1DB6D6937059229C7706ADE277A9979558F88BB53DA3AD8CC38A01DFDDEDD79"
+    },
+    {
+        "From":  "backend/seed.js.old",
+        "To":  "archive/snapshots/backend/seed.js.old",
+        "Sha256":  "E22468C7ED4AE27123F9F3A6B6A2C869047A62AD5244C5007B2253A0DDBB082A"
+    },
+    {
+        "From":  "backend/routes/auth.js.backup",
+        "To":  "archive/snapshots/backend/routes/auth.js.backup",
+        "Sha256":  "82C06C9E24B094E862DDEB53C0B2A76BBD38090F94646F1794968EC16C2FBDFD"
+    },
+    {
+        "From":  "frontend/package.json.backup",
+        "To":  "archive/snapshots/frontend/package.json.backup",
+        "Sha256":  "A424CCBCEE929C270ADBB68DFFF1BCCE074EDAA54837BA42A71B565C80CC051B"
+    },
+    {
+        "From":  "frontend/src/pages/ProfilePage.js.backup",
+        "To":  "archive/snapshots/frontend/src/pages/ProfilePage.js.backup",
+        "Sha256":  "922901F780C3C85510D3071AF229C5690DB5B39141FA86D4B7B9956258F31010"
+    },
+    {
+        "From":  "frontend/src/pages/tabs-fix.txt",
+        "To":  "archive/snapshots/frontend/src/pages/tabs-fix.txt",
+        "Sha256":  "DFB8E6D5E4859E8541E5F3991AFDCDE3E5F4AC7E2ED232B71FA2E7D26E9A85D3"
+    }
+]

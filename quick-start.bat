@@ -1,16 +1,12 @@
 ﻿@echo off
 chcp 65001 >nul
+cd /d "%~dp0"
 cls
 
 echo ========================================
 echo Pet Adoption Platform - Quick Start
 echo ========================================
 echo.
-
-REM Stop any running Node processes
-echo Stopping existing processes...
-taskkill /F /IM node.exe >nul 2>&1
-timeout /t 2 /nobreak >nul
 
 REM Start Backend
 echo Starting Backend Server...
