@@ -39,7 +39,7 @@
 1. backend 根目錄仍有 seed、create-admin 與整合測試腳本。可再將整合測試移至 tests/integration，搬移時必須同時處理 require 相對路徑、dotenv 工作目錄、npm scripts 與 CI。
 2. 依領域整理前端功能，例如 pets、adoptions、community、notifications；共用 UI 留在 components/ui。以單一功能逐步重構。
 3. 拆分 backend/server.js 的應用設定、資料庫啟動與 Socket.IO 初始化，讓測試與啟動流程更容易獨立驗證。
-4. docs/deployment 有兩份僅大小寫不同的檢查表（DEPLOYMENT_CHECKLIST.md 與 deployment-checklist.md），在預設不分大小寫的檔案系統會衝突；比較內容後合併為一份。
+4. （2026-11-25 已處理）docs/deployment 原有兩份僅大小寫不同的檢查表，已移除英文版 DEPLOYMENT_CHECKLIST.md，保留 deployment-checklist.md；舊內容可在 git 歷史查閱。
 5. backend/admin-token.txt 已停止追蹤，但仍存在於 git 歷史。若該 token 仍有效，應撤銷並重新產生；若版本庫曾推送到遠端，也要視為已外洩。
 6. 部分文件（功能清單、資料載入、匯入測試流程）列出測試帳號與密碼。這些帳號不可用於正式環境。
 7. frontend/server.js 目前沒有被任何腳本引用，確認部署方式後決定保留或刪除。

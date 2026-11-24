@@ -46,7 +46,7 @@ npm run test:e2e       # Playwright e2e（需要前後端都在執行）
 4. **發布**：`dev` 驗收通過後才合併到 `main`，展示版加上 tag（例如 `v1.0-demo`）。不要直接 push 到 `main`。
 5. **commit 訊息**：`feat:`、`fix:`、`docs:`、`test:`、`chore:` 開頭，內容用繁體中文。
 
-`.bmad-core/` 和程式註解中的「Story x.x」是之前使用 BMAD 框架留下的，保留作為參考；**目前流程以 Superpowers 加任務編號為準**，不要再新增 BMAD story。
+程式註解中的「Story x.x」是之前使用 BMAD 框架開發時留下的編號；BMAD 設定檔已於 2026-11-25 移除（可在 git 歷史找回）。**目前流程以 Superpowers 加任務編號為準**，不要再新增 BMAD story。
 
 ## 規則
 
@@ -60,7 +60,7 @@ npm run test:e2e       # Playwright e2e（需要前後端都在執行）
 
 ### 不可以做
 
-- 金鑰、`.env`、token、測試帳號密碼都不能進 repo。新的環境變數只寫進 `.env.example`，值留空。
+- 金鑰、`.env`、token、真實帳號密碼都不能進 repo。新的環境變數只寫進 `.env.example`，值留空。`backend/seed.js` 裡的測試帳號只能用在本機與 CI，不可用在任何對外環境。
 - 真實姓名、電話、Email 等個資不進 repo、不寫進 log、不送給 LLM。本 repo 是**公開的**，文件中的組員一律以角色稱呼（PM／AI、前端、後端）。
 - AI 產生的推薦理由與回答，只能引用資料庫中真實存在的欄位或知識庫中有標示來源的內容；沒有資料時要明確說不知道，不可以編造。疾病與醫療問題不做判斷，提醒使用者就醫。
 - LLM 呼叫只能在後端進行；前端不可以直接呼叫 LLM，也不可以拿到金鑰。LLM 失敗或逾時時，要退回既有的規則理由，不能讓主線中斷。
