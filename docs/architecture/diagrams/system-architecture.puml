@@ -29,7 +29,7 @@ title Pet Haven 系統架構（12/9 展示目標）
 
 actor "認養者／送養者／\n收容機構／管理者" as U
 
-rectangle "本機 Docker Compose 展示環境（T20）" <<new>> {
+rectangle "展示機（本機直接執行，T20）" <<existing>> {
 
   rectangle "前端｜React 18 SPA（:3000）" as FE <<existing>> {
     rectangle "動物瀏覽、篩選、詳情" as FE_PET <<existing>>
@@ -56,7 +56,7 @@ rectangle "本機 Docker Compose 展示環境（T20）" <<new>> {
 
   database "MongoDB\nUser、Pet、Adoption、Message、\nNotification、Post、Comment、\nBrowsingHistory、LicensedShop\n＋遊戲答案、回饋紀錄（T03）" as DB <<enhance>>
   database "FAQ 知識庫\n（形式由 T06 決定，T11 整理）" as KB <<new>>
-  rectangle "uploads volume\n動物照片" as VOL <<new>>
+  rectangle "backend/uploads/\n動物照片（展示前備份）" as VOL <<existing>>
 }
 
 cloud "LLM API\n（供應商由 T06 決定）" as LLM <<new>>

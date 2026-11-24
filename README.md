@@ -6,7 +6,9 @@
 
 ## 開始開發
 
-以下指令在專案根目錄執行。CI 使用 Node.js 20；本機還需要 npm 與 MongoDB。
+組員與 AI 工具請先讀 [AGENTS.md](AGENTS.md)。
+
+以下指令在專案根目錄執行。需要 Node.js 22（與 CI 相同）、npm 與 MongoDB。
 
 1. 執行 `npm run setup`，依照前後端各自的 lockfile 安裝依賴。
 2. 將 `backend/.env.example` 複製成 `backend/.env`，填入資料庫連線與 JWT、Session 密鑰。
@@ -52,9 +54,9 @@ pet-haven/
 │   ├── deployment/      部署檢查表
 │   ├── qa/              QA gates 與追溯評估
 │   └── presentation/    提案簡報大綱
-├── .github/             CI 與開發工具設定
-├── .bmad-core/          BMAD 開發工具設定
-└── web-bundles/         BMAD 代理工具包
+├── .github/             CI 與 PR 範本
+├── .claude/             Claude Code 共用設定
+└── AGENTS.md            組員與 AI 工具的開發指引
 ```
 
 完整入口請見[文件索引](docs/README.md)；整理規則與後續建議請見[專案維護指南](docs/guides/PROJECT_ORGANIZATION.md)。歷史報告已移除（可於 git 歷史查閱），目前狀態以重新執行測試為準。
