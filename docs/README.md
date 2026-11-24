@@ -2,6 +2,12 @@
 
 請先閱讀 [專案首頁](../README.md)、[開發指南](guides/DEVELOPMENT.md)與[整理規則](guides/PROJECT_ORGANIZATION.md)。指令預設從專案根目錄執行。
 
+## 期末專題（2026-12-09 展示）
+
+- [開發指引 AGENTS.md](../AGENTS.md)：組員與 AI 工具共用的流程、分支與規則
+- [需求與展示範圍](superpowers/specs/2026-11-25-需求與展示範圍-design.md)：任務 01 到 22 的需求來源
+- [現況架構](architecture/現況架構.md)：既有系統的架構、資料模型、API 與已知缺口
+
 ## 開發與維護
 
 - [開發指南](guides/DEVELOPMENT.md)：安裝、啟動、測試、常見問題
@@ -34,6 +40,6 @@
 
 ## 其他
 
-- [10 分鐘提案簡報大綱](presentation/提案簡報大綱_10分鐘.md)
+- [10 分鐘提案簡報大綱](presentation/提案簡報大綱_10分鐘.md)（早期試營運版本，與 10/21 提案簡報不同，期末簡報會依需求文件重寫）
 
 歷史測試、修復與實作報告已從版本庫移除，需要時可在 git 歷史（commit 3a6df08）查閱；目前狀態以重新執行測試為準。
