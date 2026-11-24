@@ -498,6 +498,16 @@ export const matchingAPI = {
   
   // 更新環境檔案
   updateEnvironmentProfile: (data) => api.put('/matching/profile/environment', data),
+
+  // 以下為本期新增，契約見 docs/api/新增API契約.md；後端完成前可用 aiMock.js
+  saveGameResult: (data) => api.put('/matching/profile/game', data),
+  getTop3: () => api.get('/matching/top3'),
+  sendFeedback: (petId, verdict) => api.post('/matching/feedback', { petId, verdict }),
+  resetFeedback: () => api.delete('/matching/feedback'),
+};
+
+export const aiAPI = {
+  chat: (message, history = []) => api.post('/ai/chat', { message, history }),
 };
 
 export default api;
