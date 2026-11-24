@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const Notification = require('../models/Notification');
+const { auth, authorize } = require('../middleware/auth');
 
 // 開發用：建立並發送測試通知
-// 只在開發模式啟用以避免安全問題
-router.post('/emit', async (req, res) => {
+// 只在開發模式啟用，且限管理員，避免本機展示（development 模式）時任何人都能發通知
+router.post('/emit', auth, authorize('admin'), async (req, res) => {
   if (process.env.NODE_ENV !== 'development') {
     return res.status(403).json({ error: 'Not allowed in non-development environment' });
   }
