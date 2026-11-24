@@ -11,7 +11,7 @@ Pet Haven（寵愛有家）是寵物配對認養平台，也是「智慧型資�
 | 文件 | 內容 |
 |---|---|
 | [需求與展示範圍](docs/superpowers/specs/2026-11-25-需求與展示範圍-design.md) | **需求來源**：任務 01 到 22、完成定義、必做與選做、展示主線、非功能需求 |
-| [現況架構](docs/architecture/現況架構.md) | 技術組成、目錄、資料模型、API、主要流程、已知缺口 |
+| [現況架構](docs/architecture/現況架構.md) | 系統架構圖、使用案例圖、技術組成、目錄、資料模型、API、主要流程、已知缺口 |
 | [docs/README.md](docs/README.md) | 其他文件索引 |
 | `http://localhost:5000/api-docs` | 執行中的 Swagger API 文件 |
 
@@ -45,6 +45,7 @@ npm run test:e2e       # Playwright e2e（需要前後端都在執行）
 - 先重用既有程式：`services/advancedMatchingService.js`（規則配對）、`services/recommendationService.js`（熱門推薦）、`PUT /api/matching/profile/*`（配對檔案）、`components/MatchAnalysisPanel.js`。不要另寫一套功能相同的程式。
 - 會改資料的 API 一律驗證登入與角色；只能處理自己的資源（自己的申請、自己的動物）。`admin` 例外。
 - 改動 API 時同步更新 swagger 註解。
+- 新增或移除元件、角色、使用案例時，同步更新 `docs/architecture/diagrams/` 的 `.puml`，重新輸出 `.svg`，兩者一起 commit。
 - 新增的邏輯要附測試；動到展示主線時要跑 e2e。
 
 ### 不可以做

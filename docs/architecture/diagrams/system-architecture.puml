@@ -1,0 +1,98 @@
+@startuml system-architecture
+' Pet Haven 系統架構圖（12/9 展示時的目標架構）
+' 依據：docs/architecture/現況架構.md、docs/superpowers/specs/2026-11-25-需求與展示範圍-design.md
+' 顏色：綠＝既有、黃＝補強、橘＝本期新增、灰＝選做或未來延伸
+!pragma layout smetana
+skinparam defaultFontName "Microsoft JhengHei"
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam rectangle {
+  BackgroundColor<<existing>> #E6F1EC
+  BackgroundColor<<enhance>> #FFF4D6
+  BackgroundColor<<new>> #FBE3D6
+  BackgroundColor<<future>> #EDEDED
+  BorderColor<<future>> #9A9A9A
+  FontColor<<future>> #6B6B6B
+}
+skinparam database {
+  BackgroundColor<<existing>> #E6F1EC
+  BackgroundColor<<enhance>> #FFF4D6
+  BackgroundColor<<new>> #FBE3D6
+}
+skinparam cloud {
+  BackgroundColor<<existing>> #E6F1EC
+  BackgroundColor<<new>> #FBE3D6
+}
+hide stereotype
+
+title Pet Haven 系統架構（12/9 展示目標）
+
+actor "認養者／送養者／\n收容機構／管理者" as U
+
+rectangle "本機 Docker Compose 展示環境（T20）" <<new>> {
+
+  rectangle "前端｜React 18 SPA（:3000）" as FE <<existing>> {
+    rectangle "動物瀏覽、篩選、詳情" as FE_PET <<existing>>
+    rectangle "個人檔案、動物建檔\n（T09）" as FE_PROFILE <<enhance>>
+    rectangle "8 題配對小遊戲\n（T10）" as FE_GAME <<new>>
+    rectangle "Top 3 推薦卡片\n適合／不適合回饋（T15）" as FE_REC <<new>>
+    rectangle "AI 助理聊天視窗\n（T15）" as FE_CHAT <<new>>
+    rectangle "認養申請、我的申請\n收容所儀表板" as FE_ADOPT <<existing>>
+    rectangle "社群、走失協尋、私訊、通知\n資源頁" as FE_SOCIAL <<existing>>
+  }
+
+  rectangle "後端｜Node.js + Express（:5000）" as BE <<existing>> {
+    rectangle "安全層\nJWT、角色檢查、速率限制、helmet" as BE_SEC <<enhance>>
+    rectangle "認養 API\n/api/adoptions\n（T07 放寬擁有者權限）" as BE_ADOPT <<enhance>>
+    rectangle "動物與帳號 API\n/api/pets、/api/auth、/api/users" as BE_PET <<existing>>
+    rectangle "配對 API\n/api/matching" as BE_MATCH <<existing>>
+    rectangle "規則配對計分\nadvancedMatchingService" as SVC_MATCH <<existing>>
+    rectangle "熱門推薦\nrecommendationService" as SVC_POP <<existing>>
+    rectangle "Top 3、硬條件篩選\n回饋重排（T13）" as SVC_TOP3 <<new>>
+    rectangle "AI 服務 /api/ai/explain、/api/ai/chat\n金鑰、逾時、退回規則理由（T12）" as SVC_AI <<new>>
+    rectangle "政府資料匯入\n/api/data-import" as BE_IMPORT <<existing>>
+    rectangle "Socket.IO\n即時訊息與通知" as BE_IO <<existing>>
+  }
+
+  database "MongoDB\nUser、Pet、Adoption、Message、\nNotification、Post、Comment、\nBrowsingHistory、LicensedShop\n＋遊戲答案、回饋紀錄（T03）" as DB <<enhance>>
+  database "FAQ 知識庫\n（形式由 T06 決定，T11 整理）" as KB <<new>>
+  rectangle "uploads volume\n動物照片" as VOL <<new>>
+}
+
+cloud "LLM API\n（供應商由 T06 決定）" as LLM <<new>>
+cloud "Google OAuth" as GOOGLE <<existing>>
+cloud "政府開放資料 API" as GOV <<existing>>
+
+rectangle "未來延伸（不在 12/9 範圍）\n線上捐款與金流、依位置推薦店家與旅宿" as FUTURE <<future>>
+
+U --> FE : 瀏覽器
+FE --> BE_SEC : REST /api/*
+FE <--> BE_IO : WebSocket
+BE_SEC --> BE_PET
+BE_SEC --> BE_ADOPT
+BE_SEC --> BE_MATCH
+BE_SEC --> SVC_AI
+BE_MATCH --> SVC_TOP3
+SVC_TOP3 --> SVC_MATCH : 延用計分
+SVC_TOP3 --> SVC_AI : 產生理由
+SVC_POP ..> SVC_TOP3 : 成效比較基準（T19）
+SVC_AI --> KB : 檢索
+SVC_AI --> LLM : 只送不含個資的欄位
+BE_ADOPT --> BE_IO : 狀態通知
+BE_PET --> DB
+BE_ADOPT --> DB
+SVC_MATCH --> DB
+BE_PET --> VOL
+BE_IMPORT --> GOV
+BE_IMPORT --> DB
+BE_SEC --> GOOGLE : 登入
+
+legend right
+  |= 顏色 |= 意義 |
+  |<#E6F1EC>| 既有，驗證後延用 |
+  |<#FFF4D6>| 補強既有程式 |
+  |<#FBE3D6>| 本期新增 |
+  |<#EDEDED>| 未來延伸 |
+  T 編號對應需求文件的任務編號
+endlegend
+@enduml

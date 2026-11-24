@@ -7,6 +7,7 @@
 - [開發指引 AGENTS.md](../AGENTS.md)：組員與 AI 工具共用的流程、分支與規則
 - [需求與展示範圍](superpowers/specs/2026-11-25-需求與展示範圍-design.md)：任務 01 到 22 的需求來源
 - [現況架構](architecture/現況架構.md)：既有系統的架構、資料模型、API 與已知缺口
+- [架構圖與使用案例圖](architecture/diagrams/)：PlantUML 原始檔與輸出的 SVG
 
 ## 開發與維護
 

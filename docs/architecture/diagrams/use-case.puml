@@ -1,0 +1,109 @@
+@startuml use-case
+' Pet Haven 使用案例圖（12/9 展示範圍＋選做與未來延伸）
+' 依據：docs/superpowers/specs/2026-11-25-需求與展示範圍-design.md
+' 顏色：綠＝既有、黃＝補強、橘＝本期新增、灰＝選做或未來延伸；①～⑧ 為展示主線步驟
+!pragma layout smetana
+skinparam defaultFontName "Microsoft JhengHei"
+skinparam shadowing false
+left to right direction
+skinparam usecase {
+  BackgroundColor<<existing>> #E6F1EC
+  BackgroundColor<<enhance>> #FFF4D6
+  BackgroundColor<<new>> #FBE3D6
+  BackgroundColor<<future>> #EDEDED
+  BorderColor<<future>> #9A9A9A
+  FontColor<<future>> #6B6B6B
+}
+hide stereotype
+
+title Pet Haven 使用案例（12/9 展示範圍）
+
+actor "訪客" as Guest
+actor "認養者" as Adopter
+actor "送養者" as Owner
+actor "個人送養者" as Personal
+actor "收容機構" as Shelter
+actor "平台管理者" as Admin
+actor "LLM 服務" as LLM <<system>>
+
+Adopter -|> Guest
+Personal -|> Owner
+Shelter -|> Owner
+Admin -|> Owner
+
+  package "帳號與瀏覽" {
+    usecase "註冊／登入\n（含 Google 登入）①" as UC_Login <<existing>>
+    usecase "瀏覽、篩選動物\n查看詳情" as UC_Browse <<existing>>
+    usecase "瀏覽社群與走失協尋" as UC_Community <<existing>>
+  }
+
+  package "智慧配對（本期重點）" {
+    usecase "建立配對檔案\n（作息、住所、經驗）" as UC_Profile <<enhance>>
+    usecase "玩 8 題配對小遊戲\n得到毛孩類型 ②" as UC_Game <<new>>
+    usecase "查看 Top 3 推薦\n與 AI 理由 ③" as UC_Top3 <<new>>
+    usecase "回饋「不適合」\n推薦當場重排 ③" as UC_Feedback <<new>>
+    usecase "詢問 AI 助理\n（附來源、醫療引導就醫）④" as UC_Chat <<new>>
+    usecase "產生推薦理由\n（失敗時退回規則理由）" as UC_Reason <<new>>
+  }
+
+  package "認養流程" {
+    usecase "提出認養申請 ⑤" as UC_Apply <<existing>>
+    usecase "追蹤申請進度與通知 ⑧" as UC_Track <<existing>>
+    usecase "私訊送養者" as UC_Message <<existing>>
+    usecase "審核認養申請 ⑥" as UC_Review <<enhance>>
+    usecase "標記完成認養 ⑦" as UC_Complete <<enhance>>
+  }
+
+  package "送養與管理" {
+    usecase "發布、編輯送養動物" as UC_Publish <<existing>>
+    usecase "查看儀表板與統計" as UC_Dashboard <<existing>>
+    usecase "匯入政府動物資料" as UC_Import <<existing>>
+    usecase "管理使用者與內容" as UC_Manage <<existing>>
+  }
+
+  package "選做與未來延伸" {
+    usecase "依縣市查看持照業者\n（選做）" as UC_Shop <<future>>
+    usecase "AI 助理直接找動物\n（選做）" as UC_ChatSearch <<future>>
+    usecase "線上捐款\n（未來延伸）" as UC_Donate <<future>>
+    usecase "依位置推薦店家與旅宿\n（未來延伸）" as UC_Nearby <<future>>
+  }
+
+Guest --> UC_Login
+Guest --> UC_Browse
+Guest --> UC_Community
+
+Adopter --> UC_Game
+Adopter --> UC_Top3
+Adopter --> UC_Chat
+Adopter --> UC_Apply
+Adopter --> UC_Track
+Adopter --> UC_Message
+
+UC_Game ..> UC_Profile : <<include>>
+UC_Top3 ..> UC_Reason : <<include>>
+UC_Feedback ..> UC_Top3 : <<extend>>
+UC_ChatSearch ..> UC_Chat : <<extend>>
+
+UC_Reason --> LLM
+UC_Chat --> LLM
+
+Owner --> UC_Publish
+Owner --> UC_Review
+Owner --> UC_Complete
+Owner --> UC_Dashboard
+
+Admin --> UC_Import
+Admin --> UC_Manage
+
+legend right
+  |= 顏色 |= 意義 |
+  |<#E6F1EC>| 既有，驗證後延用 |
+  |<#FFF4D6>| 補強既有程式 |
+  |<#FBE3D6>| 本期新增 |
+  |<#EDEDED>| 選做或未來延伸 |
+  ①～⑧ 為展示主線步驟
+  審核與完成：送養者只能處理自己的動物，管理者可處理全部
+  「回饋重排」延伸自「查看 Top 3」，因此認養者不另外連線
+  選做與未來延伸項目僅列出範圍，展示時不操作
+endlegend
+@enduml
