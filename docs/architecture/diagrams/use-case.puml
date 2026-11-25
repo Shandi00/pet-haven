@@ -24,7 +24,7 @@ actor "送養者" as Owner
 actor "個人送養者" as Personal
 actor "收容機構" as Shelter
 actor "平台管理者" as Admin
-actor "LLM 服務" as LLM <<system>>
+actor "Gemini（LLM 服務）" as LLM <<system>>
 
 Adopter -|> Guest
 Personal -|> Owner
