@@ -155,8 +155,9 @@ def apply_defaults(schema: dict, doc: dict) -> dict:
 
 def _check(f: F, value: Any, path: str, root: dict, errors: list, partial: bool) -> None:
     if value is None or value == "" and f.type == "str":
-        if f.required and not partial:
-            msg = f.required if isinstance(f.required, str) else f"Path `{path}` is required."
+        required = f.required(root) if callable(f.required) else f.required
+        if required and not partial:
+            msg = required if isinstance(required, str) else f"Path `{path}` is required."
             errors.append((path, msg))
         return
     if f.enum is not None and value not in f.enum:

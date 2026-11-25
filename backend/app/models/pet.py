@@ -184,3 +184,17 @@ def pet_json(doc: dict | None) -> dict | None:
     else:
         out["daysInShelter"] = None
     return out
+
+
+async def set_pet_status(pet_id, status: str) -> None:
+    """改認養狀態並同步狀態標籤（舊版 pet.save() 的 hook）；用原子更新，避免舊資料驗證失敗。"""
+    from app.db import get_db
+
+    pet = await get_db().pets.find_one({"_id": pet_id}, {"tags": 1})
+    if not pet:
+        return
+    tags = [t for t in (pet.get("tags") or []) if t not in STATUS_TAGS.values()]
+    if status in STATUS_TAGS:
+        tags.append(STATUS_TAGS[status])
+    await get_db().pets.update_one({"_id": pet_id}, {"$set": {
+        "adoptionStatus": status, "tags": tags, "updatedAt": _now()}})
