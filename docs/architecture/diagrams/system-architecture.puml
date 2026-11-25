@@ -42,12 +42,12 @@ rectangle "展示機（本機直接執行，T20）" <<existing>> {
   }
 
   rectangle "後端｜Python + FastAPI（:5000）" as BE <<existing>> {
-    rectangle "安全層\nJWT、角色檢查、速率限制、helmet" as BE_SEC <<enhance>>
+    rectangle "安全層\nJWT、角色檢查、速率限制、請求大小限制" as BE_SEC <<enhance>>
     rectangle "認養 API\n/api/adoptions\n（T07 放寬擁有者權限）" as BE_ADOPT <<enhance>>
     rectangle "動物與帳號 API\n/api/pets、/api/auth、/api/users" as BE_PET <<existing>>
     rectangle "配對 API\n/api/matching" as BE_MATCH <<existing>>
-    rectangle "規則配對計分\nadvancedMatchingService" as SVC_MATCH <<existing>>
-    rectangle "熱門推薦\nrecommendationService" as SVC_POP <<existing>>
+    rectangle "規則配對計分\nadvanced_matching.py" as SVC_MATCH <<existing>>
+    rectangle "熱門推薦\nrecommendation.py" as SVC_POP <<existing>>
     rectangle "Top 3、硬條件篩選\n回饋重排（T13）" as SVC_TOP3 <<new>>
     rectangle "AI 服務 /api/ai/explain、/api/ai/chat\n金鑰、逾時、退回規則理由（T12）" as SVC_AI <<new>>
     rectangle "政府資料匯入\n/api/data-import" as BE_IMPORT <<existing>>
@@ -55,11 +55,11 @@ rectangle "展示機（本機直接執行，T20）" <<existing>> {
   }
 
   database "MongoDB Atlas\nUser、Pet、Adoption、Message、\nNotification、Post、Comment、\nBrowsingHistory、LicensedShop\n＋遊戲答案、回饋紀錄（T03）" as DB <<enhance>>
-  database "FAQ 知識庫\n（形式由 T06 決定，T11 整理）" as KB <<new>>
+  database "FAQ 知識庫\nknowledge_base.json\n（T11 整理，T14 檢索）" as KB <<new>>
   rectangle "backend/uploads/\n動物照片（展示前備份）" as VOL <<existing>>
 }
 
-cloud "LLM API\n（供應商由 T06 決定）" as LLM <<new>>
+cloud "Google Gemini API\ngemini-3.8-flash（T06）" as LLM <<new>>
 cloud "Google OAuth" as GOOGLE <<existing>>
 cloud "政府開放資料 API" as GOV <<existing>>
 

@@ -6,8 +6,12 @@
 
 - [開發指引 AGENTS.md](../AGENTS.md)：組員與 AI 工具共用的流程、分支與規則
 - [需求與展示範圍](superpowers/specs/2026-11-25-需求與展示範圍-design.md)：任務 01 到 22 的需求來源
-- [現況架構](architecture/現況架構.md)：既有系統的架構、資料模型、API 與已知缺口
+- [現況架構](architecture/現況架構.md)：系統架構、ERD、認養狀態圖、主要流程與已知缺口（T03）
+- [資料庫結構](architecture/資料庫結構.md)：每個 collection 的欄位、型別、可用值、索引，含本期新增欄位（T03、T08）
+- [新增 API 契約](api/新增API契約.md)：本期新增 API 的格式、權限、錯誤碼與 AI 規則（T04、T06，定稿 v1）
+- [API 清單](api/API清單.md)：全部 API 的方法、路徑與權限，以及 Socket.IO 事件（T04）
 - [架構圖與使用案例圖](architecture/diagrams/)：PlantUML 原始檔與輸出的 SVG
+- 實作計畫：[後端組員任務](superpowers/plans/2026-11-25-後端組員任務-T07-T08-T12.md)、[前端組員任務](superpowers/plans/2026-11-25-前端組員任務-T09-T10-T11-T15.md)
 
 ## 開發與維護
 
@@ -27,12 +31,9 @@
 
 ## 測試、API 與部署
 
-- [後端測試說明](../backend/README_TESTING.md)
-- [QA 測試計畫](../backend/QA_TEST_PLAN.md)
-- [P0 測試設計](../backend/TEST_DESIGN_P0.md)
-- [Swagger API 文件](../backend/SWAGGER_API_DOCS.md)
-- [日誌管理](../backend/LOGGING.md)
-- [貼文清理腳本](../backend/scripts/CLEANUP_GUIDE.md)
+- 後端測試：`npm run test:backend`（pytest），寫法見 [backend/AGENTS.md](../backend/AGENTS.md)
+- API 文件：執行中的 Swagger `http://localhost:5000/api-docs`（FastAPI 自動產生）與 [API 清單](api/API清單.md)
+- 舊 Node 版文件（只供參考，內容不適用 FastAPI 版）：[測試說明](../backend-legacy/README_TESTING.md)、[QA 測試計畫](../backend-legacy/QA_TEST_PLAN.md)、[P0 測試設計](../backend-legacy/TEST_DESIGN_P0.md)、[Swagger 說明](../backend-legacy/SWAGGER_API_DOCS.md)、[日誌管理](../backend-legacy/LOGGING.md)、[貼文清理腳本](../backend-legacy/scripts/CLEANUP_GUIDE.md)
 - [前端 E2E 指南](../frontend/E2E_TESTING_GUIDE.md)
 - [錯誤邊界說明](../frontend/ERROR_BOUNDARY.md)
 - [共用 UI 元件](../frontend/src/components/ui/README.md)
