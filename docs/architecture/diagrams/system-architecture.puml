@@ -41,7 +41,7 @@ rectangle "展示機（本機直接執行，T20）" <<existing>> {
     rectangle "社群、走失協尋、私訊、通知\n資源頁" as FE_SOCIAL <<existing>>
   }
 
-  rectangle "後端｜Node.js + Express（:5000）" as BE <<existing>> {
+  rectangle "後端｜Python + FastAPI（:5000）" as BE <<existing>> {
     rectangle "安全層\nJWT、角色檢查、速率限制、helmet" as BE_SEC <<enhance>>
     rectangle "認養 API\n/api/adoptions\n（T07 放寬擁有者權限）" as BE_ADOPT <<enhance>>
     rectangle "動物與帳號 API\n/api/pets、/api/auth、/api/users" as BE_PET <<existing>>
@@ -54,7 +54,7 @@ rectangle "展示機（本機直接執行，T20）" <<existing>> {
     rectangle "Socket.IO\n即時訊息與通知" as BE_IO <<existing>>
   }
 
-  database "MongoDB\nUser、Pet、Adoption、Message、\nNotification、Post、Comment、\nBrowsingHistory、LicensedShop\n＋遊戲答案、回饋紀錄（T03）" as DB <<enhance>>
+  database "MongoDB Atlas\nUser、Pet、Adoption、Message、\nNotification、Post、Comment、\nBrowsingHistory、LicensedShop\n＋遊戲答案、回饋紀錄（T03）" as DB <<enhance>>
   database "FAQ 知識庫\n（形式由 T06 決定，T11 整理）" as KB <<new>>
   rectangle "backend/uploads/\n動物照片（展示前備份）" as VOL <<existing>>
 }

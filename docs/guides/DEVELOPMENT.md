@@ -1,5 +1,7 @@
 # 開發指南
 
+> **注意**：後端已改為 Python FastAPI（2026-11-25），本文件中後端相關的 Node 指令是舊版說明，只適用於 `backend-legacy/`。目前的安裝與啟動方式以 [README](../../README.md) 與 [backend/AGENTS.md](../../backend/AGENTS.md) 為準。
+
 所有指令都從專案根目錄執行；PowerShell 可以使用 `npm.cmd` 取代 `npm`。
 
 ## 本機開發

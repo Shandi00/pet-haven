@@ -18,8 +18,8 @@ run-e2e-tests.bat
 
 #### 步驟 1: 啟動後端服務
 ```bash
-cd backend
-node server.js
+# 在專案根目錄執行
+npm run dev:backend
 ```
 
 #### 步驟 2: 啟動前端服務 (新終端)

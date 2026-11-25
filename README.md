@@ -2,16 +2,16 @@
 
 提供寵物搜尋、認養申請、使用者與收容所管理，並包含社群、訊息、通知及政府資料匯入功能。
 
-前端使用 React 18、React Router、React Query 與 Tailwind CSS；後端使用 Express、MongoDB / Mongoose、JWT 與 Socket.IO。
+前端使用 React 18、React Router、React Query 與 Tailwind CSS；後端使用 Python FastAPI 與 MongoDB Atlas（PyMongo），正在從舊 Node.js 版搬遷，搬遷進度與規則見[後端改用 FastAPI 規格](docs/superpowers/specs/2026-11-25-後端改用FastAPI-design.md)。
 
 ## 開始開發
 
 組員與 AI 工具請先讀 [AGENTS.md](AGENTS.md)。
 
-以下指令在專案根目錄執行。需要 Node.js 22（與 CI 相同）、npm 與 MongoDB。
+以下指令在專案根目錄執行。需要 Node.js 22（前端）、Python 3.11 以上（後端）與 npm；資料庫使用 MongoDB Atlas，請先請管理者把你的 IP 加進 Atlas 的 Network Access，否則會連不上。
 
-1. 執行 `npm run setup`，依照前後端各自的 lockfile 安裝依賴。
-2. 將 `backend/.env.example` 複製成 `backend/.env`，填入資料庫連線與 JWT、Session 密鑰。
+1. 執行 `npm run setup`，建立 `backend/.venv` 並安裝後端 Python 套件，再依前端 lockfile 安裝依賴。
+2. 將 `backend/.env.example` 複製成 `backend/.env`，填入 `MONGODB_URI`（Atlas 連線字串）與 `MONGODB_DB`。
 3. 在第一個終端執行 `npm run dev:backend`。
 4. 在第二個終端執行 `npm run dev:frontend`。
 
@@ -37,13 +37,14 @@ Windows 也可執行 `start.bat`。詳見[開發指南](docs/guides/DEVELOPMENT.
 | `npm run test:frontend` | 執行前端單元測試，不進入監看模式 |
 | `npm run test:e2e` | 執行 Playwright，需先啟動後端 |
 
-根目錄的 package.json 只集中開發指令；依賴與 lockfile 分別留在 backend、frontend。
+根目錄的 package.json 只集中開發指令；後端依賴在 `backend/requirements.txt`，前端依賴與 lockfile 在 `frontend/`。
 
 ## 專案結構
 
 ```text
 pet-haven/
-├── backend/             Express API、模型、路由、服務與測試
+├── backend/             FastAPI 後端（app/、tests/、requirements.txt）
+├── backend-legacy/      舊 Node.js 後端，只供搬遷參考，搬完後刪除
 ├── frontend/            React 頁面、元件、API 服務與 E2E 測試
 ├── scripts/             專案診斷工具
 ├── docs/

@@ -7,7 +7,7 @@
 | 檔案 | 範圍 |
 |---|---|
 | `AGENTS.md`（本檔） | 全專案：流程、分支、共通規則 |
-| [backend/AGENTS.md](backend/AGENTS.md) | 後端：路由、權限、回應格式、LLM 呼叫、jest |
+| [backend/AGENTS.md](backend/AGENTS.md) | 後端（FastAPI）：路由、權限、回應格式、LLM 呼叫、pytest |
 | [frontend/AGENTS.md](frontend/AGENTS.md) | 前端：頁面、API 呼叫、UI 元件、mock、Playwright |
 
 Codex 會自動合併這三層。Claude Code 透過各層的 `CLAUDE.md`（內容只有 `@AGENTS.md`）讀取同一份內容；`.claude/settings.json` 另外禁止 Claude 讀取 `.env` 和強制推送。規則只改 AGENTS.md，不要在 CLAUDE.md 寫另一份。
@@ -21,6 +21,7 @@ Pet Haven（寵愛有家）是寵物配對認養平台，也是「智慧型資�
 | 文件 | 內容 |
 |---|---|
 | [需求與展示範圍](docs/superpowers/specs/2026-11-25-需求與展示範圍-design.md) | **需求來源**：任務 01 到 22、完成定義、必做與選做、展示主線、非功能需求 |
+| [後端改用 FastAPI 規格](docs/superpowers/specs/2026-11-25-後端改用FastAPI-design.md) | 後端搬遷的相容規則與順序；舊 Node 後端在 `backend-legacy/` 只供參考 |
 | [現況架構](docs/architecture/現況架構.md) | 系統架構圖、使用案例圖、技術組成、目錄、資料模型、API、主要流程、已知缺口 |
 | [docs/README.md](docs/README.md) | 其他文件索引 |
 | `http://localhost:5000/api-docs` | 執行中的 Swagger API 文件 |
@@ -30,11 +31,11 @@ Pet Haven（寵愛有家）是寵物配對認養平台，也是「智慧型資�
 ## 指令
 
 ```bash
-npm run setup          # 安裝前後端套件
+npm run setup          # 建立 backend/.venv 並安裝後端 Python 套件、安裝前端套件（需要 Python 3.11+、Node.js 22）
 npm run dev:backend    # 後端 :5000（需要 backend/.env，可參考 backend/.env.example）
 npm run dev:frontend   # 前端 :3000，API 由 setupProxy 轉給 :5000
-npm --prefix backend run seed   # 載入測試資料
-npm test               # 後端 jest＋前端單元測試
+# 測試資料：Python 版 seed 尚未完成，見後端改用 FastAPI 規格 §7
+npm test               # 後端 pytest＋前端單元測試
 npm run test:e2e       # Playwright e2e（需要前後端都在執行）
 ```
 
@@ -52,7 +53,7 @@ npm run test:e2e       # Playwright e2e（需要前後端都在執行）
 
 ### 一定要做
 
-- 先重用既有程式：`services/advancedMatchingService.js`（規則配對）、`services/recommendationService.js`（熱門推薦）、`PUT /api/matching/profile/*`（配對檔案）、`components/MatchAnalysisPanel.js`。不要另寫一套功能相同的程式。
+- 先重用既有邏輯：後端搬遷時以 `backend-legacy/` 的實作為準，例如 `services/advancedMatchingService.js`（規則配對）、`services/recommendationService.js`（熱門推薦）、`PUT /api/matching/profile/*`（配對檔案），不要另寫一套邏輯不同的程式；前端重用 `components/MatchAnalysisPanel.js`。
 - 會改資料的 API 一律驗證登入與角色；只能處理自己的資源（自己的申請、自己的動物）。`admin` 例外。
 - 改動 API 時同步更新 swagger 註解。
 - 新增或移除元件、角色、使用案例時，同步更新 `docs/architecture/diagrams/` 的 `.puml`，重新輸出 `.svg`，兩者一起 commit。
@@ -60,7 +61,7 @@ npm run test:e2e       # Playwright e2e（需要前後端都在執行）
 
 ### 不可以做
 
-- 金鑰、`.env`、token、真實帳號密碼都不能進 repo。新的環境變數只寫進 `.env.example`，值留空。`backend/seed.js` 裡的測試帳號只能用在本機與 CI，不可用在任何對外環境。
+- 金鑰、`.env`、token、真實帳號密碼都不能進 repo。新的環境變數只寫進 `.env.example`，值留空。seed 腳本裡的測試帳號只能用在本機與 CI，不可用在任何對外環境。
 - 真實姓名、電話、Email 等個資不進 repo、不寫進 log、不送給 LLM。本 repo 是**公開的**，文件中的組員一律以角色稱呼（PM／AI、前端、後端）。
 - AI 產生的推薦理由與回答，只能引用資料庫中真實存在的欄位或知識庫中有標示來源的內容；沒有資料時要明確說不知道，不可以編造。疾病與醫療問題不做判斷，提醒使用者就醫。
 - LLM 呼叫只能在後端進行；前端不可以直接呼叫 LLM，也不可以拿到金鑰。LLM 失敗或逾時時，要退回既有的規則理由，不能讓主線中斷。

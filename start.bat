@@ -19,9 +19,10 @@ echo.
 
 echo [1/4] Checking backend dependencies...
 cd backend
-if not exist node_modules (
-    echo Installing backend packages...
-    call npm install
+if not exist .venv (
+    echo Installing backend Python packages...
+    python -m venv .venv
+    .venv\Scripts\python.exe -m pip install -r requirements.txt
     if errorlevel 1 (
         echo [ERROR] Backend installation failed
         cd ..
@@ -62,13 +63,13 @@ if not exist node_modules (
 
 echo [4/4] Starting servers...
 echo.
-cd ..\backend
+cd ..
 echo Starting backend server on port 5000...
-start "Pet Adoption Backend" cmd /k "node server.js"
+start "Pet Adoption Backend" cmd /k "npm run dev:backend"
 
 timeout /t 3 /nobreak >nul
 
-cd ..\frontend
+cd frontend
 echo Starting frontend application on port 3000...
 start "Pet Adoption Frontend" cmd /k "npm start"
 

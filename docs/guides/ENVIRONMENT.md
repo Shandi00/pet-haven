@@ -1,5 +1,7 @@
 # 環境設定
 
+> **注意**：後端已改為 Python FastAPI（2026-11-25），本文件中後端相關的 Node 指令是舊版說明，只適用於 `backend-legacy/`。目前的安裝與啟動方式以 [README](../../README.md) 與 [backend/AGENTS.md](../../backend/AGENTS.md) 為準。
+
 後端設定範本位於 [backend/.env.example](../../backend/.env.example)。複製到同一目錄的 .env 後填入本機值；不要將 .env 納入版本控制。
 
 | 變數 | 用途 |

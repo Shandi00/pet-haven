@@ -10,9 +10,7 @@ echo.
 
 REM Start Backend
 echo Starting Backend Server...
-cd backend
-start "Pet Adoption Backend" cmd /k "npm run dev"
-cd ..
+start "Pet Adoption Backend" cmd /k "npm run dev:backend"
 
 REM Wait for backend to start
 timeout /t 5 /nobreak >nul

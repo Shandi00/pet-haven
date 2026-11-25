@@ -30,7 +30,7 @@ module.exports = defineConfig({
 
   // 需要手動啟動前後端服務
   // 前端: cd frontend && npm start
-  // 後端: cd backend && node server.js
+  // 後端: 在專案根目錄執行 npm run dev:backend
   webServer: {
     command: 'npm start',
     url: 'http://localhost:3000',
