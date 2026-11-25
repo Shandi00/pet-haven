@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app import db
 from app.config import get_settings
+from app.core.logging import RequestContextMiddleware, setup_logging
 from app.realtime import sio
 from app.responses import register_error_handlers
 from app.routers import (adoptions, auth, browsing_history, comments, data_import, health, matching, messages,
@@ -16,6 +17,8 @@ from app.routers import (adoptions, auth, browsing_history, comments, data_impor
 
 ROUTERS = [health, auth, pets, adoptions, notifications, matching, recommendations, messages, users,
            browsing_history, stats, posts, comments, data_import]
+
+setup_logging(get_settings().log_level)
 
 
 @asynccontextmanager
@@ -41,7 +44,10 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Request-ID"],
 )
+# 最後加入的在最外層：request id 與存取紀錄涵蓋所有請求（含 CORS 預檢）
+app.add_middleware(RequestContextMiddleware)
 register_error_handlers(app)
 for module in ROUTERS:
     app.include_router(module.router)

@@ -15,6 +15,7 @@ from pymongo import ReturnDocument
 from pymongo.errors import DuplicateKeyError
 
 from app.config import get_settings
+from app.core.logging import audit
 from app.core.ids import oid
 from app.core.ratelimit import auth_limiter
 from app.core.security import create_token, decode_token, hash_password, verify_password
@@ -115,6 +116,7 @@ async def register(request: Request, body: dict | None = None):
     except DuplicateKeyError:
         auth_limiter.fail(request)
         raise _err(400, "Registration failed", details="Email or username already exists")
+    audit("register", user=doc["_id"])
     return {"message": "Registration successful", "token": create_token(doc["_id"], doc["role"]),
             "user": user_json(doc)}
 
@@ -130,8 +132,10 @@ async def login(request: Request, body: dict | None = None):
     user = await get_db().users.find_one({"email": data["email"].lower()})
     if not user or not user.get("isActive", True) or not verify_password(data["password"], user.get("password")):
         auth_limiter.fail(request)
+        audit("login_failed", user=user["_id"] if user else "unknown")
         raise _err(401, "Invalid email or password")
     user = await _touch_login(user["_id"])
+    audit("login_success", user=user["_id"])
     return {"message": "Login successful", "token": create_token(user["_id"], user.get("role", "user")),
             "user": user_json(user)}
 
@@ -169,6 +173,7 @@ async def change_password(body: dict | None = None, user: dict = Depends(token_u
     await get_db().users.update_one(
         {"_id": user["_id"]},
         {"$set": {"password": hash_password(new), "updatedAt": datetime.now(timezone.utc)}})
+    audit("password_changed", user=user["_id"])
     return {"message": "Password changed successfully"}
 
 
@@ -182,6 +187,7 @@ async def delete_account(body: dict | None = None, user: dict = Depends(token_us
         raise _err(400, "Incorrect password")
     await get_db().users.update_one(
         {"_id": user["_id"]}, {"$set": {"isActive": False, "updatedAt": datetime.now(timezone.utc)}})
+    audit("account_deactivated", user=user["_id"])
     return {"message": "Account deleted successfully"}
 
 
@@ -250,6 +256,7 @@ async def google_verify(request: Request, body: dict | None = None):
     if not payload.get("email_verified"):
         raise _err(400, "Email not verified", details="Please verify your email with Google")
     user = await _google_user(payload)
+    audit("login_success", user=user["_id"], provider="google")
     return {"message": "Google login successful", "token": create_token(user["_id"], user.get("role", "user")),
             "user": user_json(user)}
 

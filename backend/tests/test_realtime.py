@@ -1,0 +1,83 @@
+"""Socket.IO 事件處理：連線必須帶有效 JWT，只能加入自己的房間，不能冒名轉送訊息。"""
+import pytest
+from bson import ObjectId
+
+from app import realtime
+from app.core.security import create_token
+
+
+class FakeSio:
+    def __init__(self):
+        self.sessions, self.rooms, self.emitted = {}, [], []
+
+    async def save_session(self, sid, data):
+        self.sessions[sid] = data
+
+    async def get_session(self, sid):
+        return self.sessions.get(sid, {})
+
+    async def enter_room(self, sid, room):
+        self.rooms.append((sid, room))
+
+    async def emit(self, event, data=None, room=None, skip_sid=None):
+        self.emitted.append((event, data, room))
+
+
+@pytest.fixture
+def fake(monkeypatch):
+    f = FakeSio()
+    for name in ("save_session", "get_session", "enter_room", "emit"):
+        monkeypatch.setattr(realtime.sio, name, getattr(f, name))
+    return f
+
+
+def run(api, fn, *args):
+    return api.portal.call(fn, *args)
+
+
+def test_connect_requires_valid_token(api, make_user, fake):
+    user, h = make_user()
+    token = h["Authorization"].split()[1]
+    assert run(api, realtime.connect, "s1", {}, None) is False
+    assert run(api, realtime.connect, "s1", {}, {"token": "bad"}) is False
+    assert run(api, realtime.connect, "s1", {}, {"token": create_token(ObjectId(), "user")}) is False
+    inactive, ih = make_user(isActive=False)
+    assert run(api, realtime.connect, "s1", {}, {"token": ih["Authorization"].split()[1]}) is False
+    assert run(api, realtime.connect, "s1", {}, {"token": token}) is True
+    assert fake.sessions["s1"]["user_id"] == str(user["_id"])
+    # 連線成功就自動加入自己的房間
+    assert ("s1", str(user["_id"])) in fake.rooms
+
+
+def test_join_only_own_room(api, make_user, fake):
+    user, h = make_user()
+    run(api, realtime.connect, "s1", {}, {"token": h["Authorization"].split()[1]})
+    fake.rooms.clear()
+    run(api, realtime.join, "s1", str(ObjectId()))
+    assert fake.rooms == []
+    run(api, realtime.join, "s1", str(user["_id"]))
+    assert fake.rooms == [("s1", str(user["_id"]))]
+
+
+def test_send_message_rejects_spoofed_sender(api, make_user, fake):
+    user, h = make_user()
+    other = str(ObjectId())
+    run(api, realtime.connect, "s1", {}, {"token": h["Authorization"].split()[1]})
+    run(api, realtime.sendMessage, "s1", {"receiverId": other, "message": {"sender": {"_id": str(ObjectId())}}})
+    assert not [e for e in fake.emitted if e[0] == "newMessage"]
+    msg = {"content": "hi", "sender": {"_id": str(user["_id"])}}
+    run(api, realtime.sendMessage, "s1", {"receiverId": other, "message": msg})
+    assert ("newMessage", msg, other) in fake.emitted
+
+
+def test_typing_uses_authenticated_user_id(api, make_user, fake):
+    user, h = make_user()
+    run(api, realtime.connect, "s1", {}, {"token": h["Authorization"].split()[1]})
+    run(api, realtime.typing, "s1", {"receiverId": "r1", "isTyping": True})
+    assert ("userTyping", {"isTyping": True, "userId": str(user["_id"])}, "r1") in fake.emitted
+
+
+def test_events_ignored_without_session(api, fake):
+    run(api, realtime.sendMessage, "nosession", {"receiverId": "r", "message": {"sender": {"_id": "x"}}})
+    run(api, realtime.typing, "nosession", {"receiverId": "r", "isTyping": True})
+    assert fake.emitted == []

@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, Request
 from pymongo import ReturnDocument
 
 from app.core.forms import read_body
+from app.core.logging import audit
 from app.core.ids import oid, same_id
 from app.core.populate import populate
 from app.core.schema import MongooseError, cast, flatten, validate as schema_validate
@@ -358,6 +359,7 @@ async def delete_pet(pet_id: str, user: dict = Depends(token_user_zh)):
         raise _err(403, "您沒有權限刪除此寵物資訊")
     await get_db().pets.update_one({"_id": pet["_id"]}, {"$set": {
         "isActive": False, "updatedBy": user["_id"], "updatedAt": datetime.now(timezone.utc)}})
+    audit("pet_deleted", by=user["_id"], pet=pet["_id"])
     return {"message": "寵物資料已刪除"}
 
 

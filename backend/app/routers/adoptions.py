@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from bson import ObjectId
 from fastapi import APIRouter, Depends, Request
 
+from app.core.logging import audit
 from app.core.ids import oid, same_id
 from app.core.populate import populate
 from app.core.schema import MongooseError, cast
@@ -549,6 +550,7 @@ async def update_status(adoption_id: str, body: dict | None = None, user: dict =
     await populate(updated, "pet", "pets", "name species breed photos adoptionStatus")
     await populate(updated, "applicant", "users", "firstName lastName email phone")
     await populate(updated, "reviewDecision.reviewer", "users", "firstName lastName")
+    audit("adoption_status_changed", by=user["_id"], adoption=adoption["_id"], status=status)
     return {"message": "申請狀態更新成功", "adoption": adoption_json(updated)}
 
 
@@ -584,6 +586,7 @@ async def complete(adoption_id: str, body: dict | None = None, user: dict = Depe
     updated["pet"] = await get_db().pets.find_one({"_id": pet["_id"]})
     out = adoption_json(updated)
     out["pet"] = pet_json(updated["pet"])
+    audit("adoption_completed", by=user["_id"], adoption=adoption["_id"])
     return {"message": "認養流程完成", "adoption": out}
 
 
@@ -615,6 +618,7 @@ async def cancel(adoption_id: str, user: dict = Depends(token_user_zh)):
     out = adoption_json(updated)
     if isinstance(updated.get("pet"), dict):
         out["pet"] = pet_json(updated["pet"])
+    audit("adoption_cancelled", by=user["_id"], adoption=adoption["_id"])
     return {"message": "認養申請已取消", "adoption": out}
 
 
@@ -671,6 +675,7 @@ async def review(adoption_id: str, body: dict | None = None, user: dict = Depend
             await get_db().messages.insert_one(msg)
         except Exception:
             logger.exception("建立聊天室訊息失敗")
+    audit("adoption_reviewed", by=user["_id"], adoption=adoption["_id"], decision=decision)
     return {"success": True, "message": f"申請已{'核准' if decision == 'approved' else '拒絕'}",
             "adoption": {"_id": str(adoption["_id"]), "status": decision, "reviewDecision": to_json(decision_doc)}}
 

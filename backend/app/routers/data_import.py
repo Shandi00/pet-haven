@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 import httpx
 from fastapi import APIRouter, Depends, Request
 
+from app.core.logging import audit
 from app.core.schema import MongooseError
 from app.core.serialize import to_json
 from app.db import get_db
@@ -160,6 +161,8 @@ async def import_animals(body: dict | None = None, user: dict = Depends(current_
         except MongooseError as e:
             result["failed"] += 1
             result["errors"].append({"animalId": a.get("animal_id"), "error": str(e)})
+    audit("animals_imported", by=user["_id"], imported=result["imported"], skipped=result["skipped"],
+          failed=result["failed"])
     return {"success": True, "data": result}
 
 

@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     google_callback_url: str = "http://localhost:5000/api/auth/google/callback"
 
     upload_path: str = "uploads"
+    log_level: str = "INFO"
 
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

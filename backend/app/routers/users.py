@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 
+from app.core.logging import audit
 from app.core.ids import oid, same_id
 from app.core.populate import populate
 from app.core.schema import F, cast, validate as schema_validate
@@ -277,6 +278,7 @@ async def admin_role(user_id: str, body: dict | None = None, admin: dict = Depen
     await _target(user_id)
     await get_db().users.update_one({"_id": oid(user_id)}, {"$set": {
         "role": role, "updatedAt": datetime.now(timezone.utc)}})
+    audit("user_role_changed", by=admin["_id"], target=user_id, role=role)
     return {"message": "使用者角色更新成功", "user": user_json(await _target(user_id))}
 
 
@@ -290,6 +292,7 @@ async def admin_active(user_id: str, body: dict | None = None, admin: dict = Dep
     await _target(user_id)
     await get_db().users.update_one({"_id": oid(user_id)}, {"$set": {
         "isActive": value, "updatedAt": datetime.now(timezone.utc)}})
+    audit("user_active_changed", by=admin["_id"], target=user_id, active=value)
     return {"message": f"使用者帳號已{'啟用' if value else '停用'}", "user": user_json(await _target(user_id))}
 
 
