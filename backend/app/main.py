@@ -10,7 +10,7 @@ from app import db
 from app.config import get_settings
 from app.realtime import sio
 from app.responses import register_error_handlers
-from app.routers import adoptions, auth, health, matching, notifications, pets
+from app.routers import adoptions, auth, health, matching, notifications, pets, recommendations
 
 
 @asynccontextmanager
@@ -41,6 +41,7 @@ app.include_router(pets.router)
 app.include_router(adoptions.router)
 app.include_router(notifications.router)
 app.include_router(matching.router)
+app.include_router(recommendations.router)
 
 _uploads = Path(get_settings().upload_path)
 _uploads.mkdir(parents=True, exist_ok=True)
