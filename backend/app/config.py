@@ -12,6 +12,17 @@ class Settings(BaseSettings):
     mongodb_db: str = "pet_haven"
     cors_origins: str = "http://localhost:3000"
 
+    jwt_secret: str = Field(min_length=1)
+    # development 時登入限制較寬鬆；test 時不限制
+    app_env: str = "development"
+    frontend_url: str = "http://localhost:3000"
+
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    google_callback_url: str = "http://localhost:5000/api/auth/google/callback"
+
+    upload_path: str = "uploads"
+
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 

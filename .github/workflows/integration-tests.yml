@@ -24,6 +24,9 @@ jobs:
       # CI 不連 Atlas，用上面的 mongo service
       MONGODB_URI: mongodb://localhost:27017
       MONGODB_DB: pet_haven_test
+      TEST_MONGODB_URI: mongodb://localhost:27017
+      JWT_SECRET: test_jwt_secret_for_ci_only
+      APP_ENV: test
       READINESS_RETRIES: 60
       READINESS_DELAY_MS: 2000
 
@@ -49,7 +52,7 @@ jobs:
       - name: Start backend server
         working-directory: backend
         run: |
-          nohup python -m uvicorn app.main:app --port 5000 > server.log 2>&1 &
+          nohup python -m uvicorn app.main:asgi_app --port 5000 > server.log 2>&1 &
           echo "started server, PID: $!"
 
       - name: Wait for readiness

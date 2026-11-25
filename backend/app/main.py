@@ -1,10 +1,14 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 
+import socketio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app import db
 from app.config import get_settings
+from app.realtime import sio
 from app.responses import register_error_handlers
 from app.routers import health
 
@@ -32,3 +36,10 @@ app.add_middleware(
 )
 register_error_handlers(app)
 app.include_router(health.router)
+
+_uploads = Path(get_settings().upload_path)
+_uploads.mkdir(parents=True, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=_uploads), name="uploads")
+
+# uvicorn 啟動的是這個：Socket.IO 處理 /socket.io/，其他請求交給 FastAPI
+asgi_app = socketio.ASGIApp(sio, other_asgi_app=app)

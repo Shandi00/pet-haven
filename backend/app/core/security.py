@@ -1,0 +1,38 @@
+from datetime import datetime, timedelta, timezone
+
+import bcrypt
+import jwt
+
+from app.config import get_settings
+
+TOKEN_DAYS = 7
+BCRYPT_ROUNDS = 12
+
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(BCRYPT_ROUNDS)).decode("utf-8")
+
+
+def verify_password(password: str, hashed: str | None) -> bool:
+    # Google 登入的帳號沒有密碼
+    if not hashed or not password:
+        return False
+    try:
+        return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
+    except ValueError:
+        return False
+
+
+def create_token(user_id, role: str) -> str:
+    payload = {
+        "userId": str(user_id),
+        "role": role,
+        "exp": datetime.now(timezone.utc) + timedelta(days=TOKEN_DAYS),
+        "iat": datetime.now(timezone.utc),
+    }
+    return jwt.encode(payload, get_settings().jwt_secret, algorithm="HS256")
+
+
+def decode_token(token: str) -> dict:
+    """失敗時丟 jwt.ExpiredSignatureError 或 jwt.InvalidTokenError。"""
+    return jwt.decode(token, get_settings().jwt_secret, algorithms=["HS256"])
