@@ -1,7 +1,7 @@
 # 後端改用 Python FastAPI：骨架與遷移規格
 
 - **日期**：2026-11-25
-- **狀態**：草稿，待組內確認
+- **狀態**：骨架與完整搬遷已完成（見 §10）
 - **相關**：[需求與展示範圍](2026-11-25-需求與展示範圍-design.md)、[現況架構](../../architecture/現況架構.md)
 
 ## 1. 目的
@@ -198,3 +198,36 @@ Windows 與 Linux 的 venv 路徑不同（`Scripts/` 和 `bin/`），由實作�
 
 - **Atlas 上能不能放 seed 測試帳號**：AGENTS.md 規定 `seed.js` 的測試帳號只能用在本機與 CI。Atlas 是共用的雲端資料庫，需要組內決定是否視為「本機開發」。建議：開發用 `pet_haven_dev`，展示用另一個資料庫名稱，展示機的測試帳號另設密碼。
 - **後端組員實作計畫**：T07、T08、T12 要改寫成 Python 版，並依 §7 重新分配搬遷工作。
+
+## 10. 搬遷結果（2026-11-25）
+
+組內後來決定整個後端一次搬完，技術選型同步確認如下：
+
+| 類型 | 選型 |
+|---|---|
+| 前端 | React（本期維持，不改 Vue） |
+| 後端 | Python FastAPI＋python-socketio |
+| 資料庫 | MongoDB Atlas |
+| AI | Gemini（`GEMINI_API_KEY`，T12 實作，本次只加變數） |
+| 啟動 | `npm run dev:*` 直接執行；另提供 `docker-compose.yml`（後端 5000、前端 3000） |
+| 測試 | pytest（後端）、Playwright（e2e） |
+
+**範圍**：舊版 98 條路由全部搬完（`debug-notifications` 依 §7 不搬），另有 seed、`scripts/create_admin.py`、`scripts/import_licensed_shops.py`。`backend-legacy/scripts/` 其他一次性修補腳本不搬。
+
+**驗證方式**
+- pytest：連 Atlas 上的 `pet_haven_test`，每個測試前清空。
+- 規則配對與推薦計分：用舊版 JS 產生 golden 資料（`tests/fixtures/*_golden.json`），新版結果逐項比對相同。
+- Socket.IO：用前端的 socket.io-client 實測 `newNotification`、`newMessage`、`userTyping`、`messageReadConfirm`。
+- 前端 Playwright e2e：11 個測試對新後端全部通過。
+
+**和舊版不同的行為**（舊版的錯誤或安全問題，搬遷時修正；前端呼叫方式不變）
+- 權限：`PUT /api/users/profile` 改為白名單欄位（舊版可把自己改成 admin）；寵物編輯／刪除只限擁有者或 admin（舊版任何 shelter 都可以）；認養審核、改狀態、完成、備註依 T07 限寵物擁有者或 admin。
+- 輸入：搜尋字串跳脫正規表示式；刪除寵物照片只能刪該寵物自己的檔案；body 不能改 `createdBy`、`likes`、`views`；政府 API 的 `$filter` 跳脫單引號。
+- 不合法的 id 回 404／400，不再回 500。
+- 原本壞掉的功能：取消申請的通知、`/api/users/admin/search`、收容所統計（舊版永遠是 0）、政府資料匯入（舊版每筆都失敗）、推薦快取清除、同標題貼文、訊息檔案附件、`create-admin`。
+- 管理員角色可以設為 `shelter`；不再接受 schema 沒有的 `volunteer`。
+- 完成認養時通知認養者（T07）。
+- `create_admin` 不再寫死密碼。
+- 啟動時建立 email、slug、applicationId 等 unique 索引。
+
+**未決**：§9 的 Atlas 測試帳號問題仍待組內決定；本次沒有對開發資料庫 `pet_haven` 執行 seed。

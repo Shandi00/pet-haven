@@ -2,28 +2,31 @@
 
 在 `backend/` 工作時適用；根目錄 [AGENTS.md](../AGENTS.md) 的規則仍然有效。
 
-後端是 Python FastAPI，正在從舊 Node 版（`backend-legacy/`）搬遷。搬遷規則與順序見 [後端改用 FastAPI 規格](../docs/superpowers/specs/2026-11-25-後端改用FastAPI-design.md)。
+後端是 Python FastAPI，已從舊 Node 版（`backend-legacy/`，只供參考）完整搬遷，路徑與回應格式與舊版相同。相容規則見 [後端改用 FastAPI 規格](../docs/superpowers/specs/2026-11-25-後端改用FastAPI-design.md)。
 
 ## 結構
 
-- `app/main.py`：建立 app，router 在這裡用 `include_router` 註冊。
-- `app/routers/`：一個資源一個檔案，路徑前綴沿用舊版（例如 `/api/pets`）。商業邏輯較多時放進 `app/services/`，不要全部寫在路由裡。
-- `app/db.py`：用 `get_db()` 取得資料庫。collection 名稱與欄位沿用舊版 Mongoose，不改 schema；新增欄位要有預設值，舊資料才不會壞掉。
+- `app/main.py`：建立 app，新的 router 加進 `ROUTERS`。uvicorn 啟動的是 `app.main:asgi_app`（含 Socket.IO）。
+- `app/routers/`：一個資源一個檔案，路徑前綴沿用舊版（例如 `/api/pets`）。商業邏輯放 `app/services/`（例如 `advanced_matching.py` 規則配對、`recommendation.py` 推薦）。
+- `app/models/`：每個 collection 一個檔，定義 Mongoose 對應的 `SCHEMA`（`app/core/schema.py`）、建立新文件的 `prepare_new_*` 與輸出用的 `*_json`（含虛擬欄位）。collection 名稱與欄位沿用舊版，不改 schema；新增欄位要有預設值。
+- `app/core/`：`serialize`（輸出格式同 Mongoose toJSON）、`validation`（Joi 相容的輸入驗證）、`populate`、`security`（JWT、bcrypt）、`uploads`。
+- `app/deps.py`：`current_user`／`optional_user`／`require_roles`，以及舊版 pets、adoptions、users 用的 `token_user_zh`（錯誤格式 `{ error }`）。
+- `app/realtime.py`：Socket.IO；推送用 `emit_to_user(user_id, event, data)`。通知一律用 `app.models.notification.create_notification` 或 `safe_notify`，會同時推送。
 - `app/config.py`：所有環境變數從 `Settings` 讀取；新的變數寫進 `.env.example`，值留空。
 
 ## 寫法
 
-- **搬遷**：以 `backend-legacy/` 的行為為準（路徑、欄位、JWT、密碼雜湊、Socket.IO 事件），遵守規格 §6 的相容規則。
-- **只能處理自己的資源**：修改申請或動物前，確認目前使用者是擁有者。`admin` 例外。
-- **輸入驗證**：用 Pydantic model；驗證失敗會自動回 400。
-- **回應格式**：成功時回傳 `ok(data)`，也就是 `{ success: true, data }`；失敗時 `raise HTTPException(狀態碼, "繁體中文訊息")`，會轉成 `{ success: false, message }`。
+- **回應格式**：每個路由檔沿用舊版的格式（有的是 `{ success, data }`，有的是 `{ error }`），前端依賴這些格式，不要改。新的 API 用 `{ success: true, data }`／`{ success: false, message }`。
+- **只能處理自己的資源**：修改申請或動物前，確認目前使用者是擁有者（`same_id`）。`admin` 例外。認養申請用 `can_manage_adoption`。
+- **ID**：路徑上的 id 用 `oid()` 轉換，不合法時回 404 或 400，不能 500。
+- **輸入驗證**：照 Joi 的寫法用 `app/core/validation.py`（`O`、`S`、`N`…），寫入資料庫前用 model 的 `SCHEMA` 驗證；不要直接把 request body 寫進資料庫。
 - **記錄**：用 `logging`，不要 `print`；log 裡不能有密碼、token、Email、電話。
 - **路由順序**：固定路徑（如 `/featured`）要寫在參數路徑（如 `/{id}`）之前。
-- **Swagger**：FastAPI 會自動產生；每支路由要寫 `summary`，必要時寫 `responses`。
+- **Swagger**：FastAPI 自動產生；每支路由要寫 `summary`。
 
 ## AI 與 LLM
 
-- 只有後端可以呼叫 LLM；金鑰從 `app.config` 讀取，新的變數名稱寫進 `.env.example`，值留空。
+- 只有後端可以呼叫 LLM（Gemini，金鑰 `GEMINI_API_KEY`）；金鑰從 `app.config` 讀取。
 - 送給 LLM 的內容只放動物與配對欄位，不放使用者姓名、Email、電話、地址。
 - 一定要設逾時；逾時或失敗時改回傳規則理由，並在回應中標示 `source: "rule"`，讓前端知道這次沒有用到 AI。
 
@@ -33,5 +36,6 @@
 npm run test:backend   # 在專案根目錄執行，等同 backend/.venv 的 python -m pytest
 ```
 
-- 測試放在 `tests/test_*.py`；單元測試不連真的資料庫（用 `app.dependency_overrides` 或 monkeypatch）。
+- 測試放在 `tests/test_*.py`。用 `api` fixture 的測試會連到 `pet_haven_test` 資料庫（CI 用 `TEST_MONGODB_URI`，本機用 `backend/.env` 的連線字串），每個測試前清空；`client` fixture 不連資料庫。
+- `make_user`、`make_pet` fixture 建立測試資料。外部服務（Google、政府開放資料）一律 monkeypatch。
 - 新的 service 函式要有單元測試；權限相關的修改要有「別人不能做」的測試案例。

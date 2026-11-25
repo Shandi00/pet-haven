@@ -1,0 +1,19 @@
+# 用法：先準備 backend/.env（參考 backend/.env.example），再執行 docker compose up --build
+# 前端 http://localhost:3000，後端 http://localhost:5000（前端程式直接呼叫 5000 port）
+services:
+  backend:
+    build: ./backend
+    env_file: ./backend/.env
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend/uploads:/app/uploads
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

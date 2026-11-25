@@ -2,7 +2,7 @@
 
 提供寵物搜尋、認養申請、使用者與收容所管理，並包含社群、訊息、通知及政府資料匯入功能。
 
-前端使用 React 18、React Router、React Query 與 Tailwind CSS；後端使用 Python FastAPI 與 MongoDB Atlas（PyMongo），正在從舊 Node.js 版搬遷，搬遷進度與規則見[後端改用 FastAPI 規格](docs/superpowers/specs/2026-11-25-後端改用FastAPI-design.md)。
+前端使用 React 18、React Router、React Query 與 Tailwind CSS；後端使用 Python FastAPI、MongoDB Atlas（PyMongo）、JWT 與 Socket.IO（python-socketio），已從舊 Node.js 版完整搬遷（舊程式在 `backend-legacy/` 只供參考），規則見[後端改用 FastAPI 規格](docs/superpowers/specs/2026-11-25-後端改用FastAPI-design.md)。
 
 ## 開始開發
 
@@ -11,9 +11,12 @@
 以下指令在專案根目錄執行。需要 Node.js 22（前端）、Python 3.11 以上（後端）與 npm；資料庫使用 MongoDB Atlas，請先請管理者把你的 IP 加進 Atlas 的 Network Access，否則會連不上。
 
 1. 執行 `npm run setup`，建立 `backend/.venv` 並安裝後端 Python 套件，再依前端 lockfile 安裝依賴。
-2. 將 `backend/.env.example` 複製成 `backend/.env`，填入 `MONGODB_URI`（Atlas 連線字串）與 `MONGODB_DB`。
-3. 在第一個終端執行 `npm run dev:backend`。
-4. 在第二個終端執行 `npm run dev:frontend`。
+2. 將 `backend/.env.example` 複製成 `backend/.env`，填入 `MONGODB_URI`（Atlas 連線字串）、`MONGODB_DB` 與 `JWT_SECRET`。
+3. 第一次使用時執行 `npm run seed` 載入展示測資。
+4. 在第一個終端執行 `npm run dev:backend`。
+5. 在第二個終端執行 `npm run dev:frontend`。
+
+也可以用 Docker：準備好 `backend/.env` 後執行 `docker compose up --build`。
 
 PowerShell 若無法執行 `npm.ps1`，上述指令改用 `npm.cmd` 即可。
 
@@ -31,6 +34,7 @@ Windows 也可執行 `start.bat`。詳見[開發指南](docs/guides/DEVELOPMENT.
 | `npm run setup` | 安裝前後端依賴 |
 | `npm run dev:backend` | 啟動後端開發伺服器 |
 | `npm run dev:frontend` | 啟動前端開發伺服器 |
+| `npm run seed` | 載入展示測資（可重複執行） |
 | `npm run build` | 建置前端 |
 | `npm test` | 依序執行前後端單元測試，失敗時停止 |
 | `npm run test:backend` | 執行後端單元測試 |
