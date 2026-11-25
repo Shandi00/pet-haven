@@ -28,9 +28,12 @@ async def save_images(files: list[UploadFile], subdir: str, prefix: str, max_fil
     saved: list[dict] = []
     for f in files:
         ext = os.path.splitext(f.filename)[1].lower()
-        if ext not in IMAGE_EXTS or (f.content_type or "").lower() not in IMAGE_MIME:
-            raise HTTPException(400, "只允許上傳圖片檔案 (jpeg, jpg, png, gif, webp)")
-        data = await f.read()
+        try:
+            if ext not in IMAGE_EXTS or (f.content_type or "").lower() not in IMAGE_MIME:
+                raise HTTPException(400, "只允許上傳圖片檔案 (jpeg, jpg, png, gif, webp)")
+            data = await f.read()
+        finally:
+            await f.close()
         if len(data) > max_bytes:
             raise HTTPException(400, "檔案大小超過限制")
         name = f"{prefix}-{int(time.time() * 1000)}-{random.randint(0, 10**9)}{ext}"

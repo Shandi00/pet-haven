@@ -61,3 +61,29 @@ def require_roles(*roles: str):
         return user
 
     return checker
+
+
+def legacy_token_user(missing: str, invalid_user: str, invalid_token: str):
+    """部分舊路由檔（auth、pets、adoptions、users）自己的 authenticateToken：
+    錯誤格式是 { error }，token 無效回 403。"""
+    from app.responses import RawError
+
+    async def dep(request: Request) -> dict:
+        parts = (request.headers.get("authorization") or "").split(" ")
+        token = parts[1] if len(parts) > 1 else None
+        if not token:
+            raise RawError(401, {"error": missing})
+        try:
+            payload = decode_token(token)
+        except jwt.InvalidTokenError:
+            raise RawError(403, {"error": invalid_token})
+        user = await _load_user(payload.get("userId"))
+        if not user or not user.get("isActive", True):
+            raise RawError(401, {"error": invalid_user})
+        return user
+
+    return dep
+
+
+# pets.js、adoptions.js、users.js 共用的中文版
+token_user_zh = legacy_token_user("需要提供存取權杖", "無效的使用者帳號", "無效的存取權杖")

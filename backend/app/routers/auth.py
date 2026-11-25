@@ -20,6 +20,7 @@ from app.core.ratelimit import auth_limiter
 from app.core.security import create_token, decode_token, hash_password, verify_password
 from app.core.validation import A, B, O, S, validate
 from app.db import get_db
+from app.deps import legacy_token_user
 from app.models.user import new_user_doc, user_json
 from app.responses import RawError
 
@@ -75,22 +76,7 @@ def _err(status: int, error: str, **extra) -> RawError:
     return RawError(status, {"error": error, **extra})
 
 
-async def token_user(request: Request) -> dict:
-    """舊版 auth.js 自己的 authenticateToken：錯誤格式是 { error }，token 無效回 403。"""
-    header = request.headers.get("authorization") or ""
-    parts = header.split(" ")
-    token = parts[1] if len(parts) > 1 else None
-    if not token:
-        raise _err(401, "Authentication token required")
-    try:
-        payload = decode_token(token)
-    except jwt.InvalidTokenError:
-        raise _err(403, "Invalid token")
-    uid = oid(payload.get("userId"))
-    user = await get_db().users.find_one({"_id": uid}, {"password": 0}) if uid else None
-    if not user or not user.get("isActive", True):
-        raise _err(401, "Invalid user account")
-    return user
+token_user = legacy_token_user("Authentication token required", "Invalid user account", "Invalid token")
 
 
 async def _touch_login(user_id) -> dict:

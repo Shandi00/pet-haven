@@ -13,7 +13,7 @@ os.environ["MONGODB_URI"] = _test_uri
 os.environ["MONGODB_DB"] = _TEST_DB
 os.environ["APP_ENV"] = "test"
 os.environ["CORS_ORIGINS"] = "http://localhost:3000"
-os.environ.setdefault("JWT_SECRET", "test-secret")
+os.environ.setdefault("JWT_SECRET", "test-secret-for-pytest-only-0123456789")
 
 import bcrypt  # noqa: E402
 import pytest  # noqa: E402
@@ -94,5 +94,30 @@ def make_user(sync_db):
         doc["_id"] = sync_db.users.insert_one(doc).inserted_id
         token = create_token(doc["_id"], role)
         return doc, {"Authorization": f"Bearer {token}"}
+
+    return _make
+
+
+PET_DESC = "這是一隻非常親人又活潑的狗狗，喜歡散步和玩球，已經完成基本訓練，適合有院子的家庭認養照顧，個性穩定不怕生，也能和其他狗狗相處融洽。"
+
+
+@pytest.fixture
+def make_pet(sync_db):
+    """用與 API 相同的 prepare_new_pet 建立寵物文件。"""
+    from app.models.pet import prepare_new_pet
+
+    def _make(owner: dict, **fields):
+        data = {
+            "name": "小白", "species": "dog", "breed": "米克斯", "gender": "male",
+            "age": {"value": 2, "unit": "years"}, "size": "medium", "color": "白色",
+            "description": PET_DESC,
+            "personality": {"activityLevel": "moderate", "traits": ["friendly"]},
+            "shelterInfo": {"source": "stray", "location": "台北市"},
+            "createdBy": owner["_id"],
+        }
+        data.update(fields)
+        doc = prepare_new_pet(data)
+        doc["_id"] = sync_db.pets.insert_one(doc).inserted_id
+        return doc
 
     return _make
