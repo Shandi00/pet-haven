@@ -10,7 +10,11 @@ from app import db
 from app.config import get_settings
 from app.realtime import sio
 from app.responses import register_error_handlers
-from app.routers import adoptions, auth, health, matching, notifications, pets, recommendations
+from app.routers import (adoptions, auth, browsing_history, comments, health, matching, messages, notifications,
+                         pets, posts, recommendations, stats, users)
+
+ROUTERS = [health, auth, pets, adoptions, notifications, matching, recommendations, messages, users,
+           browsing_history, stats, posts, comments]
 
 
 @asynccontextmanager
@@ -35,13 +39,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 register_error_handlers(app)
-app.include_router(health.router)
-app.include_router(auth.router)
-app.include_router(pets.router)
-app.include_router(adoptions.router)
-app.include_router(notifications.router)
-app.include_router(matching.router)
-app.include_router(recommendations.router)
+for module in ROUTERS:
+    app.include_router(module.router)
 
 _uploads = Path(get_settings().upload_path)
 _uploads.mkdir(parents=True, exist_ok=True)
