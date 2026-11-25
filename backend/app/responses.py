@@ -25,7 +25,18 @@ class ApiError(Exception):
         self.status_code, self.message, self.extra = status_code, message, extra
 
 
+class RawError(Exception):
+    """原樣回傳舊版的錯誤 body（例如 auth 路由的 { error: ... }），讓前端不用改。"""
+
+    def __init__(self, status_code: int, body: dict) -> None:
+        self.status_code, self.body = status_code, body
+
+
 def register_error_handlers(app: FastAPI) -> None:
+    @app.exception_handler(RawError)
+    async def _raw_error(request: Request, exc: RawError) -> JSONResponse:
+        return JSONResponse(status_code=exc.status_code, content=exc.body)
+
     @app.exception_handler(ApiError)
     async def _api_error(request: Request, exc: ApiError) -> JSONResponse:
         return fail(exc.status_code, exc.message, **exc.extra)

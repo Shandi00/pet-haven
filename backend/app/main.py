@@ -10,7 +10,7 @@ from app import db
 from app.config import get_settings
 from app.realtime import sio
 from app.responses import register_error_handlers
-from app.routers import health
+from app.routers import auth, health
 
 
 @asynccontextmanager
@@ -36,6 +36,7 @@ app.add_middleware(
 )
 register_error_handlers(app)
 app.include_router(health.router)
+app.include_router(auth.router)
 
 _uploads = Path(get_settings().upload_path)
 _uploads.mkdir(parents=True, exist_ok=True)
