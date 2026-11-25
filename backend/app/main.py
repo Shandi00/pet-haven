@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -10,17 +11,20 @@ from app import db
 from app.config import get_settings
 from app.realtime import sio
 from app.responses import register_error_handlers
-from app.routers import (adoptions, auth, browsing_history, comments, health, matching, messages, notifications,
-                         pets, posts, recommendations, stats, users)
+from app.routers import (adoptions, auth, browsing_history, comments, data_import, health, matching, messages,
+                         notifications, pets, posts, recommendations, stats, users)
 
 ROUTERS = [health, auth, pets, adoptions, notifications, matching, recommendations, messages, users,
-           browsing_history, stats, posts, comments]
+           browsing_history, stats, posts, comments, data_import]
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db.connect(get_settings())
+    # 背景建立索引：Atlas 連不上時不擋住啟動，/api/ready 會回 503
+    index_task = asyncio.create_task(db.ensure_indexes())
     yield
+    index_task.cancel()
     await db.close()
 
 
