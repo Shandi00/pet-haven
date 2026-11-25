@@ -23,6 +23,8 @@ Pet Haven（寵愛有家）是寵物配對認養平台，也是「智慧型資�
 | [需求與展示範圍](docs/superpowers/specs/2026-11-25-需求與展示範圍-design.md) | **需求來源**：任務 01 到 22、完成定義、必做與選做、展示主線、非功能需求 |
 | [後端改用 FastAPI 規格](docs/superpowers/specs/2026-11-25-後端改用FastAPI-design.md) | 後端搬遷的相容規則與順序；舊 Node 後端在 `backend-legacy/` 只供參考 |
 | [現況架構](docs/architecture/現況架構.md) | 系統架構圖、使用案例圖、技術組成、目錄、資料模型、API、主要流程、已知缺口 |
+| [資料庫結構](docs/architecture/資料庫結構.md) | 每個 collection 的欄位、型別、可用值與索引；本期新增欄位標示 🆕 |
+| [新增 API 契約](docs/api/新增API契約.md)、[API 清單](docs/api/API清單.md) | 本期新增 API 的格式與 AI 規則（定稿）；全部 API 的路徑與權限 |
 | [docs/README.md](docs/README.md) | 其他文件索引 |
 | `http://localhost:5000/api-docs` | 執行中的 Swagger API 文件 |
 

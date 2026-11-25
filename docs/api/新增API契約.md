@@ -14,6 +14,9 @@
 | 3 | `POST /api/matching/feedback`、`DELETE /api/matching/feedback` | T13、T15 | 前端推薦頁 |
 | 4 | `POST /api/ai/chat` | T12、T14 | 前端聊天 |
 | 5 | `POST /api/ai/explain` | T12 | 後端 Top 3 內部共用；前端可選用（例如動物詳情頁） |
+| 6 | `GET /api/resources/licensed-shops`（**選做**） | T16 | 前端資源頁 |
+
+既有 100 支 API 的方法、路徑與權限整理在 [API 清單](API清單.md)；資料欄位見 [資料庫結構](../architecture/資料庫結構.md)。
 
 ---
 
@@ -238,9 +241,50 @@
 - 送給 Gemini 的提示要求回傳 JSON `{ "summary", "highlights", "cautions" }`；解析失敗或欄位不符合長度限制，視同失敗。
 - `petId` 不合法回 400；動物不存在回 404。
 
+## 6. 持照寵物業者依縣市列表（T16，選做）
+
+`GET /api/resources/licensed-shops?county=臺北市&page=1&limit=20`
+
+**公開，不需要登入**（資源頁給所有人看）。既有的 `GET /api/data-import/legal-pet-shops-db` 有縣市篩選，但限 `admin`／`shelter`，而且會回傳負責人姓名，所以另開這支只讀、只回公開欄位的 API。12/5 前沒完成就移出展示，不影響主線。
+
+查詢參數：
+
+| 參數 | 說明 |
+|---|---|
+| `county` | 可省略。22 個縣市名稱之一（`臺北市`、`新北市`、`桃園市`、`臺中市`、`臺南市`、`高雄市`、`基隆市`、`新竹市`、`嘉義市`、`新竹縣`、`苗栗縣`、`彰化縣`、`南投縣`、`雲林縣`、`嘉義縣`、`屏東縣`、`宜蘭縣`、`花蓮縣`、`臺東縣`、`澎湖縣`、`金門縣`、`連江縣`），比對 `address` 開頭；「台」與「臺」視為相同。不在清單內回 400 |
+| `page` | 預設 1 |
+| `limit` | 預設 20，最大 50 |
+
+回應：
+
+```json
+{
+  "success": true,
+  "data": {
+    "shops": [
+      {
+        "_id": "65f0c0ffee0000000000b001",
+        "name": "（範例）毛孩寵物店",
+        "address": "臺北市大安區……",
+        "businessItem": "買賣",
+        "animalType": "犬、貓",
+        "validDate": "2027-06-30T00:00:00.000Z",
+        "rankText": "甲等"
+      }
+    ],
+    "pagination": { "page": 1, "limit": 20, "total": 135 }
+  }
+}
+```
+
+- **只回傳上面 7 個欄位**；`ownerName`、`bossName`（負責人姓名，屬個資）、`originalData`、`validNumber` 一律不回傳。
+- 排序：依 `name` 遞增，分頁結果才穩定。
+
 ---
 
 ## 附錄：資料欄位（新增到 `User`，T03、T08）
+
+完整欄位與規則見 [資料庫結構](../architecture/資料庫結構.md) 的 User 表（標示 🆕 的列）。
 
 | 欄位 | 型別 | 說明 |
 |---|---|---|
