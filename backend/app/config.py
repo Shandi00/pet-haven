@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -7,7 +8,7 @@ class Settings(BaseSettings):
     # 舊 .env 還有 Node 用的變數，忽略即可
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    mongodb_uri: str
+    mongodb_uri: str = Field(min_length=1)
     mongodb_db: str = "pet_haven"
     cors_origins: str = "http://localhost:3000"
 

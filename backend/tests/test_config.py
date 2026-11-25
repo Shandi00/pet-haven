@@ -21,3 +21,10 @@ def test_settings_require_mongodb_uri(monkeypatch):
 def test_cors_origin_list_strips_spaces(monkeypatch):
     monkeypatch.setenv("CORS_ORIGINS", "http://a:3000, http://b:3000,")
     assert Settings(_env_file=None).cors_origin_list() == ["http://a:3000", "http://b:3000"]
+
+
+def test_settings_reject_empty_mongodb_uri(monkeypatch):
+    # .env.example 複製過來後 MONGODB_URI= 留空，要在讀設定時就報錯
+    monkeypatch.setenv("MONGODB_URI", "")
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None)
