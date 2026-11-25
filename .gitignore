@@ -44,7 +44,7 @@ coverage/
 playwright-report/
 test-results/
 blob-report/
-backend/security-test-results.json
+backend-legacy/security-test-results.json
 
 # Local process IDs, credentials and ad-hoc backups
 *.pid
@@ -58,3 +58,8 @@ admin-token.txt
 
 # Claude Code 個人設定（不共享）
 .claude/settings.local.json
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
