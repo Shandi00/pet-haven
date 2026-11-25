@@ -5,28 +5,46 @@
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const ok = (data) => ({ data: { success: true, data } });
 
+const ACTIVITY_LABEL = { low: '低', moderate: '中', high: '高' };
+const SPECIES_LABEL = { dog: '狗', cat: '貓' };
+
 const pets = [
-  { _id: 'mock-pet-1', name: '小黑', species: 'dog', breed: '米克斯', age: 2, size: 'medium', photo: '', activity: '高' },
-  { _id: 'mock-pet-2', name: '奶茶', species: 'cat', breed: '橘貓', age: 1, size: 'small', photo: '', activity: '中' },
-  { _id: 'mock-pet-3', name: '豆豆', species: 'dog', breed: '柴犬', age: 4, size: 'medium', photo: '', activity: '中' },
-  { _id: 'mock-pet-4', name: '雪球', species: 'cat', breed: '米克斯', age: 6, size: 'small', photo: '', activity: '低' },
+  { _id: 'mock-pet-1', name: '小黑', species: 'dog', breed: '米克斯', age: { value: 2, unit: 'years' }, ageCategory: 'adult', size: 'medium', activityLevel: 'high', photo: '' },
+  { _id: 'mock-pet-2', name: '奶茶', species: 'cat', breed: '橘貓', age: { value: 8, unit: 'months' }, ageCategory: 'young', size: 'small', activityLevel: 'moderate', photo: '' },
+  { _id: 'mock-pet-3', name: '豆豆', species: 'dog', breed: '柴犬', age: { value: 4, unit: 'years' }, ageCategory: 'adult', size: 'medium', activityLevel: 'moderate', photo: '' },
+  { _id: 'mock-pet-4', name: '雪球', species: 'cat', breed: '米克斯', age: { value: 6, unit: 'years' }, ageCategory: 'adult', size: 'small', activityLevel: 'low', photo: '' },
 ];
 
-let disliked = [];
+let disliked = []; // 最新的在前，與契約 avoided 的順序相同
 
-const toItem = ({ activity, ...pet }, i) => ({
+const ageText = ({ value, unit }) => `${value} ${unit === 'months' ? '個月' : '歲'}`;
+
+const toItem = (pet, i) => ({
   pet,
   score: 92 - i * 7,
-  matchLevel: i === 0 ? 'excellent' : 'good',
+  matchLevel: i === 0 ? 'perfect' : 'excellent',
   reason: {
-    summary: `${pet.name}的活動量${activity}，和你填寫的作息相符。`,
-    highlights: [`活動量：${activity}`, `年齡：${pet.age} 歲`],
+    summary: `${pet.name}的活動量${ACTIVITY_LABEL[pet.activityLevel]}，和你填寫的作息相符。`,
+    highlights: [`活動量：${ACTIVITY_LABEL[pet.activityLevel]}`, `年齡：${ageText(pet.age)}`],
     cautions: pet.species === 'dog' ? ['住公寓需留意吠叫'] : [],
     source: i === 2 ? 'rule' : 'ai', // 第 3 筆示範 LLM 失敗時的規則理由
   },
 });
 
+const avoided = () =>
+  disliked.map((petId) => {
+    const pet = pets.find((p) => p._id === petId);
+    return {
+      petId,
+      name: pet ? pet.name : '',
+      note: pet
+        ? `已避開：${pet.name}（${SPECIES_LABEL[pet.species]}，活動量${ACTIVITY_LABEL[pet.activityLevel]}），並降低相似動物的排序`
+        : '已避開這隻動物',
+    };
+  });
+
 const top3 = () => pets.filter((p) => !disliked.includes(p._id)).slice(0, 3).map(toItem);
+const top3Data = () => ({ items: top3(), avoided: avoided(), generatedAt: new Date().toISOString() });
 
 export const aiMock = {
   saveGameResult: async (data) => {
@@ -36,19 +54,14 @@ export const aiMock = {
 
   getTop3: async () => {
     await delay(500);
-    return ok({ items: top3(), avoided: [], generatedAt: new Date().toISOString() });
+    return ok(top3Data());
   },
 
   sendFeedback: async (petId, verdict) => {
     await delay(400);
     if (verdict === 'like') return ok({ recorded: true });
-    disliked = [...disliked, petId];
-    const pet = pets.find((p) => p._id === petId);
-    return ok({
-      items: top3(),
-      avoided: [{ petId, note: pet ? `已避開活動量${pet.activity}的${pet.species === 'dog' ? '狗' : '貓'}` : '已避開這隻動物' }],
-      generatedAt: new Date().toISOString(),
-    });
+    disliked = [petId, ...disliked.filter((id) => id !== petId)];
+    return ok(top3Data());
   },
 
   resetFeedback: async () => {
@@ -59,8 +72,15 @@ export const aiMock = {
 
   chat: async (message) => {
     await delay(800);
-    if (/生病|發燒|嘔吐|拉肚子|藥/.test(message)) {
-      return ok({ reply: '這可能和健康狀況有關，建議盡快帶牠去看獸醫。', sources: [], actions: [], refused: true, source: 'ai' });
+    // 醫療問題：後端不呼叫 LLM，source 為 rule（契約 §4）
+    if (/生病|發燒|嘔吐|拉肚子|腹瀉|咳嗽|受傷|流血|藥|症狀/.test(message)) {
+      return ok({
+        reply: '這可能和健康狀況有關，建議盡快帶牠去看獸醫。',
+        sources: [],
+        actions: [{ label: '看推薦動物', to: '/recommendations' }],
+        refused: true,
+        source: 'rule',
+      });
     }
     return ok({
       reply: '建議先準備：貓砂盆與貓砂、飼料與水碗、貓抓板、外出籠。想知道哪隻貓適合你嗎？',
