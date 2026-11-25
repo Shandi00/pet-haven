@@ -62,8 +62,9 @@ async def _find(comment_id: str) -> dict:
 
 
 async def _post(post_id) -> dict | None:
+    """已刪除的貼文視同不存在：不能再看留言、留言或回覆。"""
     pid = oid(post_id)
-    return await get_db().posts.find_one({"_id": pid}) if pid else None
+    return await get_db().posts.find_one({"_id": pid, "status": {"$ne": "deleted"}}) if pid else None
 
 
 @router.get("/post/{post_id}", summary="貼文的留言（不含回覆）")

@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app import db
 from app.config import get_settings
+from app.core.limits import BodySizeLimitMiddleware
 from app.core.logging import RequestContextMiddleware, setup_logging
 from app.realtime import sio
 from app.responses import register_error_handlers
@@ -46,7 +47,8 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["X-Request-ID"],
 )
-# 最後加入的在最外層：request id 與存取紀錄涵蓋所有請求（含 CORS 預檢）
+app.add_middleware(BodySizeLimitMiddleware)
+# 最後加入的在最外層：request id 與存取紀錄涵蓋所有請求（含 CORS 預檢與 413）
 app.add_middleware(RequestContextMiddleware)
 register_error_handlers(app)
 for module in ROUTERS:

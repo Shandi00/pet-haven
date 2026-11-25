@@ -23,6 +23,8 @@ class Settings(BaseSettings):
 
     upload_path: str = "uploads"
     log_level: str = "INFO"
+    # 單一請求上限：寵物最多 10 張 5MB 照片，加上表單欄位
+    max_request_bytes: int = 55 * 1024 * 1024
 
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

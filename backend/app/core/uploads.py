@@ -32,7 +32,8 @@ async def save_files(files: list[UploadFile], subdir: str, prefix: str, *, allow
             mime_ok = allowed_mime is None or (f.content_type or "").lower() in allowed_mime
             if ext not in allowed_exts or not mime_ok:
                 raise HTTPException(400, type_error)
-            data = await f.read()
+            # 最多讀 max_bytes+1，不把超大檔案整個讀進記憶體
+            data = await f.read(max_bytes + 1)
         finally:
             await f.close()
         if len(data) > max_bytes:

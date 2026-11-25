@@ -122,16 +122,34 @@ async def _find(post_id: str) -> dict:
     return post
 
 
+# 草稿與已刪除的貼文只有作者與管理員看得到（舊版知道 id 就能讀）
+HIDDEN_STATUSES = ("draft", "deleted")
+
+
+def is_visible(post: dict, user: dict | None) -> bool:
+    if post.get("status") not in HIDDEN_STATUSES:
+        return True
+    return bool(user) and (user.get("role") == "admin" or same_id(post.get("author"), user["_id"]))
+
+
+async def _find_visible(post_id: str, user: dict | None) -> dict:
+    post = await _find(post_id)
+    if not is_visible(post, user):
+        raise HTTPException(404, "找不到指定的文章")
+    return post
+
+
 @router.get("/{post_id}", summary="貼文詳情（含留言）")
 async def get_post(post_id: str, user: dict | None = Depends(optional_user)):
-    post = await _find(post_id)
+    post = await _find_visible(post_id, user)
     await get_db().posts.update_one({"_id": post["_id"]}, {"$inc": {"stats.views": 1}})
     post.setdefault("stats", {})["views"] = (post.get("stats") or {}).get("views", 0) + 1
     await populate(post, "author", "users", AUTHOR_BRIEF + " introduction")
     await populate(post, "relatedPets", "pets", "name species breed photos adoptionStatus")
-    comments = await get_db().comments.find({"post": post["_id"]}).to_list(None)
+    # 只回傳已核准的留言（舊版連已刪除的留言也回傳）
+    comments = await get_db().comments.find({"post": post["_id"], "status": "approved"}).to_list(None)
     await populate(comments, "author", "users", AUTHOR_BRIEF)
-    out =_with_status(post, user, await _saved_ids(user))
+    out = _with_status(post, user, await _saved_ids(user))
     out["comments"] = [comment_json(c) for c in comments]
     return {"success": True, "data": out}
 
@@ -225,7 +243,9 @@ async def delete_post(post_id: str, user: dict = Depends(current_user)):
 
 @router.post("/{post_id}/like", summary="按讚／取消按讚")
 async def like_post(post_id: str, user: dict = Depends(current_user)):
-    post = await _find(post_id)
+    post = await _find_visible(post_id, user)
+    if post.get("status") == "deleted":
+        raise HTTPException(404, "找不到指定的文章")
     liked = any(same_id(x, user["_id"]) for x in post.get("likedBy") or [])
     if liked:
         op = {"$pull": {"likedBy": user["_id"]}, "$inc": {"stats.likes": -1}}

@@ -72,3 +72,25 @@ def test_comments_reply_like_report_edit(api, make_user, sync_db):
     assert api.delete(f"/api/comments/{cid}", headers=rh).json()["message"] == "評論已刪除"
     assert sync_db.posts.find_one({"_id": ObjectId(pid)})["stats"]["comments"] == 1
     assert api.get(f"/api/comments/user/{reader['_id']}").json()["data"]["pagination"]["total"] == 0
+    # 貼文詳情不能再出現已刪除的留言
+    detail = api.get(f"/api/posts/{pid}").json()["data"]["comments"]
+    assert [c["_id"] for c in detail] != [] and cid not in [c["_id"] for c in detail]
+
+
+def test_deleted_and_draft_posts_are_hidden_from_others(api, make_user):
+    author, ah = make_user()
+    _, rh = make_user()
+    _, admin_h = make_user("admin")
+    draft = api.post("/api/posts", json={"title": "草稿標題", "content": "還沒寫完的草稿內容內容",
+                                         "status": "draft"}, headers=ah).json()["data"]["_id"]
+    gone = api.post("/api/posts", json={"title": "要刪除的", "content": "之後會刪掉的內容內容"},
+                    headers=ah).json()["data"]["_id"]
+    api.delete(f"/api/posts/{gone}", headers=ah)
+    for pid in (draft, gone):
+        assert api.get(f"/api/posts/{pid}").status_code == 404
+        assert api.get(f"/api/posts/{pid}", headers=rh).status_code == 404
+        assert api.get(f"/api/posts/{pid}", headers=admin_h).status_code == 200
+    assert api.get(f"/api/posts/{draft}", headers=ah).status_code == 200
+    # 已刪除的貼文也不能再按讚、留言
+    assert api.post(f"/api/posts/{gone}/like", headers=rh).status_code == 404
+    assert api.post("/api/comments", json={"content": "嗨", "post": gone}, headers=rh).status_code == 404

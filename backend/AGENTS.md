@@ -20,7 +20,10 @@
 - **只能處理自己的資源**：修改申請或動物前，確認目前使用者是擁有者（`same_id`）。`admin` 例外。認養申請用 `can_manage_adoption`。
 - **ID**：路徑上的 id 用 `oid()` 轉換，不合法時回 404 或 400，不能 500。
 - **輸入驗證**：照 Joi 的寫法用 `app/core/validation.py`（`O`、`S`、`N`…），寫入資料庫前用 model 的 `SCHEMA` 驗證；不要直接把 request body 寫進資料庫。
-- **記錄**：用 `logging`，不要 `print`；log 裡不能有密碼、token、Email、電話。
+- **記錄**：用 `logging.getLogger(__name__)`，不要 `print`；log 裡不能有密碼、token、Email、電話。每筆 log 自動帶 request id（回應標頭 `X-Request-ID`），存取紀錄由 `app/core/logging.py` 統一產生，不含 query string。
+- **稽核**：登入、權限、管理員操作、認養審核這類動作用 `audit("動作", user=..., target=...)` 記錄，只放 id、角色、狀態；401／403 會自動記錄。
+- **Socket.IO**：連線必須帶有效 JWT，只能加入自己的房間；新增事件時要用 `sio.get_session(sid)` 取得目前使用者，不能相信 client 送來的 userId。
+- **請求大小**：單一請求上限是 `MAX_REQUEST_BYTES`（預設 55MB），上傳檔案用 `app/core/uploads.py`，不要自己把檔案整個讀進記憶體。
 - **路由順序**：固定路徑（如 `/featured`）要寫在參數路徑（如 `/{id}`）之前。
 - **Swagger**：FastAPI 自動產生；每支路由要寫 `summary`。
 
