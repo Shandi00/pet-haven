@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
+import MatchingProfileTab from '../components/MatchingProfileTab';
 
 const ProfilePage = () => {
   const { user } = useAuth();
@@ -14,6 +15,7 @@ const ProfilePage = () => {
 
   const tabs = [
     { id: 'profile', label: '個人資料' },
+    { id: 'matching', label: '配對檔案' },
     { id: 'favorites', label: '我的收藏' },
     { id: 'savedPosts', label: '收藏的貼文' }
   ];
@@ -30,13 +32,14 @@ const ProfilePage = () => {
         {/* Tab 導航 */}
         <div className="bg-white rounded-lg shadow-sm mb-6">
           <div className="border-b border-gray-200">
-            <nav className="flex -mb-px">
+            {/* 分頁多了「配對檔案」，手機寬度放不下時可以左右滑動 */}
+            <nav className="flex -mb-px overflow-x-auto">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`
-                    py-4 px-6 text-sm font-medium border-b-2 transition-colors
+                    py-4 px-4 sm:px-6 text-sm font-medium whitespace-nowrap border-b-2 transition-colors
                     ${activeTab === tab.id
                       ? 'border-orange-500 text-orange-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -53,6 +56,7 @@ const ProfilePage = () => {
         {/* Tab 內容 */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           {activeTab === 'profile' && <ProfileTab />}
+          {activeTab === 'matching' && <MatchingProfileTab />}
           {activeTab === 'favorites' && <FavoritesTab />}
           {activeTab === 'savedPosts' && <SavedPostsTab />}
         </div>
