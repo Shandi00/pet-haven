@@ -76,3 +76,11 @@ def test_user_rate_limiter_disabled_in_test_env():
     limiter = UserRateLimiter(1, 60)
     for _ in range(3):
         limiter.check("u1")
+
+
+def test_failure_log_has_status_but_no_prompt(monkeypatch, caplog):
+    err = httpx.HTTPStatusError("404", request=httpx.Request("POST", "http://x"), response=httpx.Response(404))
+    _fake_post(monkeypatch, err)
+    with caplog.at_level("WARNING", logger="app.services.llm"):
+        asyncio.run(llm.generate_json("sys", "秘密提示"))
+    assert "status=404" in caplog.text and "秘密提示" not in caplog.text and "test-key" not in caplog.text

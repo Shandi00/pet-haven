@@ -37,7 +37,8 @@ async def generate_json(system: str, prompt: str) -> dict | None:
             raise ValueError("not a JSON object")
         return result
     except Exception as exc:  # noqa: BLE001 — 任何失敗都改用備援，不能讓主線中斷
-        # 只記類型與耗時，不記提示或回覆內容
-        logger.warning("gemini call failed type=%s elapsed_ms=%d", type(exc).__name__,
+        # 只記類型、HTTP 狀態碼與耗時，不記提示或回覆內容
+        status = exc.response.status_code if isinstance(exc, httpx.HTTPStatusError) else "-"
+        logger.warning("gemini call failed type=%s status=%s elapsed_ms=%d", type(exc).__name__, status,
                        (time.monotonic() - start) * 1000)
         return None
