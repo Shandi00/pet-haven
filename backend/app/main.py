@@ -13,11 +13,11 @@ from app.core.limits import BodySizeLimitMiddleware
 from app.core.logging import RequestContextMiddleware, setup_logging
 from app.realtime import sio
 from app.responses import register_error_handlers
-from app.routers import (adoptions, auth, browsing_history, comments, data_import, health, matching, messages,
+from app.routers import (adoptions, ai, auth, browsing_history, comments, data_import, health, matching, messages,
                          notifications, pets, posts, recommendations, stats, users)
 
 ROUTERS = [health, auth, pets, adoptions, notifications, matching, recommendations, messages, users,
-           browsing_history, stats, posts, comments, data_import]
+           browsing_history, stats, posts, comments, data_import, ai]
 
 setup_logging(get_settings().log_level)
 
