@@ -69,27 +69,28 @@ const Layout = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 導航欄 */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+      {/* relative z-50：選單要疊在下方「點擊外部關閉」的遮罩（z-40）之上，否則手機選單的連結點不到 */}
+      <nav className="relative z-50 bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             {/* Logo 和主導航 */}
-            <div className="flex items-center">
-              <Link to="/" className="flex items-center space-x-2">
+            <div className="flex items-center min-w-0">
+              <Link to="/" className="flex items-center space-x-2 shrink-0">
                 <Heart className="h-8 w-8 text-primary-600" />
-                <span className="font-bold text-xl text-gray-900">
+                <span className="font-bold text-lg sm:text-xl text-gray-900 whitespace-nowrap">
                   愛心認養平台
                 </span>
               </Link>
 
-              {/* 桌面版導航 */}
-              <div className="hidden md:ml-10 md:flex md:space-x-8">
+              {/* 桌面版導航：五個連結在平板寬度放不下，lg 以上才顯示 */}
+              <div className="hidden lg:ml-8 lg:flex lg:space-x-6">
                 {navigation.map((item) => {
                   const Icon = item.icon;
                   return (
                     <Link
                       key={item.name}
                       to={item.href}
-                      className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors duration-200 ${
+                      className={`inline-flex items-center whitespace-nowrap px-1 pt-1 text-sm font-medium border-b-2 transition-colors duration-200 ${
                         isActivePath(item.href)
                           ? 'border-primary-500 text-primary-600'
                           : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
@@ -104,15 +105,17 @@ const Layout = ({ children }) => {
             </div>
 
             {/* 右側按鈕 */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4 shrink-0">
               {isAuthenticated ? (
                 <>
                   {/* 通知鈴鐺 */}
                   <NotificationBell />
-                  
+
                   <div className="relative">
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    aria-label="使用者選單"
+                    aria-expanded={isUserMenuOpen}
                     className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none"
                   >
                     <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
@@ -120,7 +123,7 @@ const Layout = ({ children }) => {
                         {user?.firstName?.charAt(0) || user?.username?.charAt(0) || 'U'}
                       </span>
                     </div>
-                    <span className="hidden md:block">
+                    <span className="hidden lg:block whitespace-nowrap">
                       {user?.firstName} {user?.lastName}
                     </span>
                   </button>
@@ -155,16 +158,16 @@ const Layout = ({ children }) => {
                 </div>
                 </>
               ) : (
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 sm:space-x-4">
                   <Link
                     to="/login"
-                    className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
+                    className="text-gray-600 hover:text-gray-900 px-2 sm:px-3 py-2 text-sm font-medium whitespace-nowrap"
                   >
                     登入
                   </Link>
                   <Link
                     to="/register"
-                    className="btn-primary text-sm"
+                    className="btn-primary text-sm whitespace-nowrap"
                   >
                     註冊
                   </Link>
@@ -174,7 +177,9 @@ const Layout = ({ children }) => {
               {/* 手機版選單按鈕 */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                aria-label={isMobileMenuOpen ? '關閉選單' : '開啟選單'}
+                aria-expanded={isMobileMenuOpen}
+                className="lg:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
@@ -184,7 +189,7 @@ const Layout = ({ children }) => {
 
         {/* 手機版導航選單 */}
         {isMobileMenuOpen && (
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <div className="pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
               {navigation.map((item) => {
                 const Icon = item.icon;

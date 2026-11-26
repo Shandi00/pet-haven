@@ -125,7 +125,7 @@ const MyApplicationsPage = () => {
 
     const config = statusConfig[status] || statusConfig.pending;
     return (
-      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
+      <span className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
         {config.icon}
         {config.label}
       </span>
@@ -199,8 +199,8 @@ const MyApplicationsPage = () => {
 
                   {/* 申請資訊 */}
                   <div className="flex-1 p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
+                    <div className="flex justify-between items-start gap-3 mb-4">
+                      <div className="min-w-0">
                         <Link
                           to={`/pets/${application.pet?._id}`}
                           className="text-xl font-semibold text-gray-900 hover:text-purple-600 transition-colors"
@@ -273,7 +273,7 @@ const MyApplicationsPage = () => {
                     )}
 
                     {/* 操作按鈕 */}
-                    <div className="mt-4 flex gap-3">
+                    <div className="mt-4 flex flex-wrap gap-3">
                       <Link
                         to={`/pets/${application.pet?._id}`}
                         className="btn-secondary text-sm"

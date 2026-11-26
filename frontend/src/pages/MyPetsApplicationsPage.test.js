@@ -13,8 +13,8 @@ const app = (status) => ({
   _id: `app-${status}`, status, pet: { _id: 'p1', name: `小白-${status}` }, applicant: { _id: 'u1', username: 'adopter1' },
 });
 
-const renderPage = (applications) => {
-  global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ data: { applications } }) });
+const renderPage = (applications, ok = true) => {
+  global.fetch = jest.fn().mockResolvedValue({ ok, json: async () => ({ data: { applications } }) });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
@@ -47,5 +47,13 @@ describe('MyPetsApplicationsPage 完成認養', () => {
     renderPage([app('approved')]);
     fireEvent.click(await screen.findByRole('button', { name: '完成認養' }));
     expect(adoptionAPI.completeAdoption).not.toHaveBeenCalled();
+  });
+});
+
+describe('MyPetsApplicationsPage 載入狀態', () => {
+  test('載入失敗時顯示錯誤，而不是「暫無申請記錄」', async () => {
+    renderPage([], false);
+    expect(await screen.findByRole('alert')).toHaveTextContent('載入失敗，請稍後再試');
+    expect(screen.queryByText('暫無申請記錄')).not.toBeInTheDocument();
   });
 });
