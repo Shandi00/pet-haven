@@ -60,12 +60,12 @@ def _created_at(pet: dict) -> datetime:
 def rank(pets: list[dict], user: dict, disliked_pets: list[dict]) -> list[dict]:
     scored = []
     for p in pets:
-        raw = calculate_match(p, user)["matchScore"] - penalty(p, disliked_pets)
-        # 既有計分在沒填偏好時會超過 100（舊版 JS 行為）；顯示夾在 0–100，排序用原始分數才不會全部並列
         # 四捨五入用 floor(x + 0.5)；round() 是銀行家捨入，扣 5 分後可能差 1
-        score = min(100, max(0, math.floor(raw + 0.5)))
-        scored.append({"pet": p, "raw": raw, "score": score, "matchLevel": match_level(score)["level"]})
-    scored.sort(key=lambda r: (r["raw"], _created_at(r["pet"])), reverse=True)
+        rounded = math.floor(calculate_match(p, user)["matchScore"] - penalty(p, disliked_pets) + 0.5)
+        # 既有計分在沒填偏好時會超過 100（舊版 JS 行為）；顯示夾在 0–100，排序用未夾的整數才不會全部並列
+        score = min(100, max(0, rounded))
+        scored.append({"pet": p, "rounded": rounded, "score": score, "matchLevel": match_level(score)["level"]})
+    scored.sort(key=lambda r: (r["rounded"], _created_at(r["pet"])), reverse=True)
     return [{k: r[k] for k in ("pet", "score", "matchLevel")} for r in scored[:TOP_N]]
 
 

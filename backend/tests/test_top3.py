@@ -74,6 +74,15 @@ def test_rank_clamps_score_to_100_but_keeps_order():
     assert [r["pet"]["name"] for r in ranked] == ["不同", "相似"]
 
 
+def test_rank_equal_rounded_scores_tie_break_by_newer(monkeypatch):
+    # 契約：分數（四捨五入後的整數）相同時，較新上架的排前面，不看小數
+    raw = {"舊": 87.2, "新": 86.6}
+    monkeypatch.setattr(top3, "calculate_match", lambda p, u: {"matchScore": raw[p["name"]]})
+    older = pet(name="舊", createdAt=datetime(2026, 1, 1, tzinfo=timezone.utc))
+    newer = pet(name="新", createdAt=datetime(2026, 11, 1, tzinfo=timezone.utc))
+    assert [r["pet"]["name"] for r in top3.rank([older, newer], {}, [])] == ["新", "舊"]
+
+
 def test_pet_summary_photo_and_avoided_note():
     assert top3.pet_summary(pet())["photo"] == ""
     photos = [{"url": "/a.jpg"}, {"url": "/b.jpg", "isPrimary": True}]
