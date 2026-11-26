@@ -23,7 +23,7 @@ class Settings(BaseSettings):
 
     # AI（T12）：只在後端讀取；規則見 docs/api/新增API契約.md §0
     gemini_api_key: str = ""
-    gemini_model: str = "gemini-3.8-flash"
+    gemini_model: str = "gemini-3.1-flash-lite"
     llm_timeout_seconds: float = 8
 
     upload_path: str = "uploads"

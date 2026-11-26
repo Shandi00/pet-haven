@@ -25,7 +25,7 @@
 | 項目 | 決定 |
 |---|---|
 | LLM 供應商 | **Google Gemini**（Gemini API，非 Vertex AI） |
-| 模型 | 環境變數 `GEMINI_MODEL`，預設 `gemini-3.8-flash`（2026-11 時的最新穩定版 Flash）。換模型只改環境變數，不改程式 |
+| 模型 | 環境變數 `GEMINI_MODEL`，預設 `gemini-3.1-flash-lite`（穩定版 Flash-Lite）。2026-11-26 由 `gemini-3.8-flash` 改：實測 3.8 一直回 503（模型忙碌）／429，3.1-flash-lite 可正常產生理由。換模型只改環境變數，不改程式 |
 | 金鑰 | `GEMINI_API_KEY`，只放在 `backend/.env`；前端拿不到，也不直接呼叫 LLM |
 | 呼叫方式 | 後端用已安裝的 `httpx` 呼叫 Gemini REST API，不另外加 SDK |
 | 逾時 | 環境變數 `LLM_TIMEOUT_SECONDS`，預設 **8 秒**；不重試。逾時、錯誤、空回應、回傳格式不對，一律改用備援，HTTP 仍回 200 |
