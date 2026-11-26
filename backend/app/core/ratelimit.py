@@ -41,3 +41,29 @@ class FailureLimiter:
 
 
 auth_limiter = FailureLimiter()
+
+
+class UserRateLimiter:
+    """每位使用者在 window_seconds 內最多 limit 次（sliding window）；APP_ENV=test 時不限制。
+    shortcut: 存在單一程序的記憶體，多個 worker 時各自計算，要部署多台時改用 Redis。"""
+
+    def __init__(self, limit: int, window_seconds: int, enabled: bool | None = None) -> None:
+        self.limit, self.window, self._enabled = limit, window_seconds, enabled
+        self._hits: dict[str, deque] = defaultdict(deque)
+
+    def check(self, user_id) -> None:
+        enabled = self._enabled if self._enabled is not None else get_settings().app_env != "test"
+        if not enabled:
+            return
+        q = self._hits[str(user_id)]
+        now = time.monotonic()
+        while q and now - q[0] > self.window:
+            q.popleft()
+        if len(q) >= self.limit:
+            raise HTTPException(429, "呼叫太頻繁，請稍後再試")
+        q.append(now)
+
+
+# 契約 §0：聊天每分鐘 10 次；top3、feedback、explain 合計每分鐘 30 次
+ai_chat_limiter = UserRateLimiter(10, 60)
+matching_limiter = UserRateLimiter(30, 60)

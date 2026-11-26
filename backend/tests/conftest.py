@@ -14,6 +14,8 @@ os.environ["MONGODB_DB"] = _TEST_DB
 os.environ["APP_ENV"] = "test"
 os.environ["CORS_ORIGINS"] = "http://localhost:3000"
 os.environ.setdefault("JWT_SECRET", "test-secret-for-pytest-only-0123456789")
+# 測試不能打真的 Gemini：蓋掉 backend/.env 的金鑰；要測 LLM 路徑時 monkeypatch llm.generate_json
+os.environ["GEMINI_API_KEY"] = ""
 
 import bcrypt  # noqa: E402
 import pytest  # noqa: E402
