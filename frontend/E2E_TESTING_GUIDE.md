@@ -93,6 +93,11 @@ npm run test:e2e:headed
 -  需要一般使用者帳號：執行前設定環境變數 `E2E_USER_EMAIL`、`E2E_USER_PASSWORD`（見 `frontend/.env.example`），沒設定時會跳過
 -  後端完成 `PUT /api/matching/profile/game` 前，測試會打開假資料開關保存遊戲結果
 
+### 配對檔案分頁測試 (profile.spec.js，T09)
+-  在個人中心「配對檔案」分頁儲存生活方式，重新整理後活動量仍然是「高」
+-  從分頁上的「去玩配對遊戲」（玩過則是「再玩一次」）前往 `/match-game`
+-  需要一般使用者帳號，環境變數同上；測試會改寫該帳號的生活方式檔案，請用測試帳號
+
 ## 測試狀態
 
 | 測試類型 | 通過 | 總數 | 成功率 |

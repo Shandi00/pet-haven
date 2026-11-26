@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import { matchingAPI } from '../services/api';
 import { toast } from 'react-hot-toast';
+import { Button } from './ui';
 import {
   Home,
   Award,
@@ -10,7 +11,8 @@ import {
   Check
 } from 'lucide-react';
 
-const ProfileSettingsForm = ({ initialData, onSave }) => {
+// bare：不包白底卡片，給已經在卡片裡的地方用（例如個人中心的配對檔案分頁）；預設維持原本的卡片樣式
+const ProfileSettingsForm = ({ initialData, onSave, bare = false }) => {
   const [activeTab, setActiveTab] = useState('lifestyle');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState({
@@ -95,17 +97,18 @@ const ProfileSettingsForm = ({ initialData, onSave }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm">
+    <div className={bare ? '' : 'bg-white rounded-xl shadow-sm'}>
       {/* Tabs */}
       <div className="border-b border-gray-200">
-        <div className="flex space-x-8 px-6">
+        {/* 手機寬度放不下三個分頁時可以左右滑動 */}
+        <div className={`flex space-x-4 sm:space-x-8 overflow-x-auto ${bare ? '' : 'px-4 sm:px-6'}`}>
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex items-center gap-2 transition-colors ${
                 activeTab === tab.id
-                  ? 'border-primary-600 text-primary-600'
+                  ? 'border-primary-500 text-primary-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
@@ -120,7 +123,7 @@ const ProfileSettingsForm = ({ initialData, onSave }) => {
       </div>
 
       {/* 表單內容 */}
-      <div className="p-6">
+      <div className={bare ? 'pt-6' : 'p-6'}>
         {activeTab === 'lifestyle' && (
           <LifestyleForm
             data={lifestyleData}
@@ -167,7 +170,7 @@ const LifestyleForm = ({ data, onChange, onSave, saving }) => {
         <select
           value={data.activityLevel}
           onChange={(e) => onChange({ ...data, activityLevel: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         >
           <option value="">請選擇</option>
           <option value="low">低 - 偶爾散步即可</option>
@@ -183,7 +186,7 @@ const LifestyleForm = ({ data, onChange, onSave, saving }) => {
         <select
           value={data.availableTime}
           onChange={(e) => onChange({ ...data, availableTime: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         >
           <option value="">請選擇</option>
           <option value="minimal">有限 - 每天 1-2 小時</option>
@@ -199,7 +202,7 @@ const LifestyleForm = ({ data, onChange, onSave, saving }) => {
         <select
           value={data.housingType}
           onChange={(e) => onChange({ ...data, housingType: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         >
           <option value="">請選擇</option>
           <option value="apartment">公寓</option>
@@ -210,14 +213,15 @@ const LifestyleForm = ({ data, onChange, onSave, saving }) => {
         </select>
       </div>
 
-      <button
+      <Button
         onClick={onSave}
         disabled={saving || !data.activityLevel || !data.availableTime || !data.housingType}
-        className="w-full btn-primary py-3 flex items-center justify-center gap-2"
+        fullWidth
+        className="py-3 flex items-center justify-center gap-2"
       >
         <Save className="w-5 h-5" />
         {saving ? '儲存中...' : '儲存生活方式'}
-      </button>
+      </Button>
     </motion.div>
   );
 };
@@ -256,13 +260,13 @@ const ExperienceForm = ({ data, onChange, onSave, saving }) => {
         <select
           value={data.petOwnershipExperience}
           onChange={(e) => onChange({ ...data, petOwnershipExperience: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         >
           <option value="">請選擇</option>
-          <option value="none">沒有經驗</option>
-          <option value="beginner">初學者（1-2年）</option>
-          <option value="intermediate">中級（3-5年）</option>
-          <option value="experienced">資深（5年以上）</option>
+          <option value="none">從來沒養過</option>
+          <option value="beginner">幫忙照顧過別人的寵物</option>
+          <option value="intermediate">養過一兩隻</option>
+          <option value="experienced">養過好幾隻</option>
         </select>
       </div>
 
@@ -289,14 +293,14 @@ const ExperienceForm = ({ data, onChange, onSave, saving }) => {
             placeholder="物種（如：狗、貓）"
             value={newPet.species}
             onChange={(e) => setNewPet({ ...newPet, species: e.target.value })}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           />
           <input
             type="number"
             placeholder="年數"
             value={newPet.yearsOwned}
             onChange={(e) => setNewPet({ ...newPet, yearsOwned: e.target.value })}
-            className="w-24 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+            className="w-24 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           />
           <button
             onClick={addPreviousPet}
@@ -313,21 +317,22 @@ const ExperienceForm = ({ data, onChange, onSave, saving }) => {
           id="trainingExperience"
           checked={data.trainingExperience}
           onChange={(e) => onChange({ ...data, trainingExperience: e.target.checked })}
-          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+          className="h-4 w-4 text-primary-500 focus:ring-primary-500 border-gray-300 rounded"
         />
         <label htmlFor="trainingExperience" className="ml-2 text-sm text-gray-700">
           我有寵物訓練經驗
         </label>
       </div>
 
-      <button
+      <Button
         onClick={onSave}
         disabled={saving || !data.petOwnershipExperience}
-        className="w-full btn-primary py-3 flex items-center justify-center gap-2"
+        fullWidth
+        className="py-3 flex items-center justify-center gap-2"
       >
         <Save className="w-5 h-5" />
         {saving ? '儲存中...' : '儲存經驗檔案'}
-      </button>
+      </Button>
     </motion.div>
   );
 };
@@ -373,7 +378,7 @@ const EnvironmentForm = ({ data, onChange, onSave, saving }) => {
             id="hasChildren"
             checked={data.hasChildren}
             onChange={(e) => onChange({ ...data, hasChildren: e.target.checked, childrenAges: e.target.checked ? data.childrenAges : [] })}
-            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+            className="h-4 w-4 text-primary-500 focus:ring-primary-500 border-gray-300 rounded"
           />
           <label htmlFor="hasChildren" className="ml-2 text-sm font-medium text-gray-700">
             家中有小孩
@@ -389,7 +394,7 @@ const EnvironmentForm = ({ data, onChange, onSave, saving }) => {
                   type="checkbox"
                   checked={data.childrenAges.includes(age)}
                   onChange={() => toggleChildAge(age)}
-                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-primary-500 focus:ring-primary-500 border-gray-300 rounded"
                 />
                 <span className="ml-2 text-sm text-gray-700">{age} 歲</span>
               </label>
@@ -405,7 +410,7 @@ const EnvironmentForm = ({ data, onChange, onSave, saving }) => {
             id="hasOtherPets"
             checked={data.hasOtherPets}
             onChange={(e) => onChange({ ...data, hasOtherPets: e.target.checked, otherPets: e.target.checked ? data.otherPets : [] })}
-            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+            className="h-4 w-4 text-primary-500 focus:ring-primary-500 border-gray-300 rounded"
           />
           <label htmlFor="hasOtherPets" className="ml-2 text-sm font-medium text-gray-700">
             家中有其他寵物
@@ -433,14 +438,14 @@ const EnvironmentForm = ({ data, onChange, onSave, saving }) => {
                 placeholder="物種"
                 value={newOtherPet.species}
                 onChange={(e) => setNewOtherPet({ ...newOtherPet, species: e.target.value })}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
               <input
                 type="text"
                 placeholder="性情"
                 value={newOtherPet.temperament}
                 onChange={(e) => setNewOtherPet({ ...newOtherPet, temperament: e.target.value })}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
               <button
                 onClick={addOtherPet}
@@ -459,7 +464,7 @@ const EnvironmentForm = ({ data, onChange, onSave, saving }) => {
           id="noiseSensitive"
           checked={data.noiseSensitive}
           onChange={(e) => onChange({ ...data, noiseSensitive: e.target.checked })}
-          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+          className="h-4 w-4 text-primary-500 focus:ring-primary-500 border-gray-300 rounded"
         />
         <label htmlFor="noiseSensitive" className="ml-2 text-sm text-gray-700">
           對噪音敏感
@@ -472,21 +477,22 @@ const EnvironmentForm = ({ data, onChange, onSave, saving }) => {
           id="hasAllergies"
           checked={data.hasAllergies}
           onChange={(e) => onChange({ ...data, hasAllergies: e.target.checked })}
-          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+          className="h-4 w-4 text-primary-500 focus:ring-primary-500 border-gray-300 rounded"
         />
         <label htmlFor="hasAllergies" className="ml-2 text-sm text-gray-700">
           有寵物過敏問題
         </label>
       </div>
 
-      <button
+      <Button
         onClick={onSave}
         disabled={saving}
-        className="w-full btn-primary py-3 flex items-center justify-center gap-2"
+        fullWidth
+        className="py-3 flex items-center justify-center gap-2"
       >
         <Save className="w-5 h-5" />
         {saving ? '儲存中...' : '儲存環境檔案'}
-      </button>
+      </Button>
     </motion.div>
   );
 };
