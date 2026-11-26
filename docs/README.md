@@ -40,6 +40,7 @@
 - [共用 UI 元件](../frontend/src/components/ui/README.md)
 - [部署檢查表](deployment/deployment-checklist.md)
 - QA gates 與追溯評估：docs/qa/gates、docs/qa/assessments
+- [T19 推薦比較紀錄](qa/T19-推薦比較.md)（亮點 02；重新產生：`backend/scripts/compare_recommendations.py`）
 
 ## 其他
 

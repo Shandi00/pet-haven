@@ -50,7 +50,8 @@ def _unknown_good_with(pet: dict, user: dict) -> list[str]:
 
 
 def _filled(user: dict, key: str) -> bool:
-    return any(v is not None for k, v in (user.get(key) or {}).items() if k != "lastUpdated")
+    # 註冊時的預設值是空陣列，不算使用者填過
+    return any(v is not None and v != [] and v != {} for k, v in (user.get(key) or {}).items() if k != "lastUpdated")
 
 
 def _unfilled_claims(user: dict) -> set[str]:
