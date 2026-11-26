@@ -10,6 +10,7 @@
 - [資料庫結構](architecture/資料庫結構.md)：每個 collection 的欄位、型別、可用值、索引，含本期新增欄位（T03、T08）
 - [新增 API 契約](api/新增API契約.md)：本期新增 API 的格式、權限、錯誤碼與 AI 規則（T04、T06，定稿 v1）
 - [API 清單](api/API清單.md)：全部 API 的方法、路徑與權限，以及 Socket.IO 事件（T04）
+- [配對遊戲題目對照表](features/配對遊戲題目對照表.md)：8 題題目、選項寫入的配對欄位、毛孩類型計分與同分規則（T05）
 - [架構圖與使用案例圖](architecture/diagrams/)：PlantUML 原始檔與輸出的 SVG
 - 實作計畫：[後端組員任務](superpowers/plans/2026-11-25-後端組員任務-T07-T08-T12.md)、[前端組員任務](superpowers/plans/2026-11-25-前端組員任務-T09-T10-T11-T15.md)
 
