@@ -81,12 +81,11 @@ test.describe.serial('認養流程：申請 → 審核通過 → 完成 → 認�
     await uiLogin(adopter, ADOPTER);
     await adopter.goto(`/adopt/${pet._id}`);
     await expect(adopter.getByRole('heading', { name: '認養申請' })).toBeVisible();
-    // 已知問題：此頁 select 用 response.data，沒取 .pet，寵物名稱顯示空白，所以不檢查名稱
+    await expect(adopter.getByText(`您正在申請認養：${pet.name}`)).toBeVisible();
 
     // 個資欄位一律用明顯的假資料
     await fieldAfter(adopter, '姓名').fill('E2E 測試');
-    // 已知問題：backend/app/models/adoption.py 的 emergencyContact.email 正規式只接受 2-3 碼頂級網域，
-    // 且有災難性回溯（.test 會讓後端卡住約一分鐘後回 400），所以表單 Email 用 .com
+    // emergencyContact.email 沿用舊版規則，只接受 2–3 碼的網域結尾，.test 會被拒絕，所以表單 Email 用 .com
     await fieldAfter(adopter, '電子郵件').fill(`e2e${stamp}@example.com`);
     await fieldAfter(adopter, '聯絡電話').fill('0900000000');
     await fieldAfter(adopter, '年齡').fill('30');
@@ -156,10 +155,7 @@ test.describe.serial('認養流程：申請 → 審核通過 → 完成 → 認�
   });
 
   // 4. 完成後認養者在 /my-applications 看到「已完成」（UI）。
-  // 已知問題：MyApplicationsPage.js 的 getStatusBadge 沒有 completed，會退回顯示「待審核」。
-  // 標成 test.fail()；修好後這個測試會變紅，屆時移除 test.fail() 即可。
   test('認養者在我的認養申請看到「已完成」', async ({ page }) => {
-    test.fail(true, 'MyApplicationsPage getStatusBadge 缺少 completed 狀態');
     await uiLogin(page, ADOPTER);
     await page.goto('/my-applications');
     const card = adopterCard(page, pet.name);

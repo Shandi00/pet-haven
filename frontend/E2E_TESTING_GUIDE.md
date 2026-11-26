@@ -82,7 +82,8 @@ npm run test:e2e:headed
 -  查看寵物管理
 
 ### 認養流程測試 (adoption-flow.spec.js，T17)
--  認養者填寫申請表送出 → 收容所在「收到的認養申請」按通過 → 認養者看到「已通過」
+-  認養者填寫申請表送出 → 收容所在「收到的認養申請」按通過 → 認養者看到「已通過」→ 完成後看到「已完成」
+-  本機第一次執行前要先下載瀏覽器：在 `frontend/` 執行 `npx playwright install chromium ffmpeg`
 -  完成認養目前沒有畫面，改用 API（`POST /api/adoptions/:id/complete`）
 -  需要先 `npm run seed`（收容所帳號 shelter@example.com）；每次會建立一個新的 `e2e<時間戳>` 認養者帳號與一筆已完成的申請
 -  結束時把用到的動物改回「待認養」；若中途被中斷導致動物停在「審核中」或「已認養」，用 shelter 帳號把它改回 available，或執行 `npm run seed -- --clear`（會刪除所有寵物後重建）

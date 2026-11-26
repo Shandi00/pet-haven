@@ -75,7 +75,9 @@ const MyPetsApplicationsPage = () => {
   const getStatusBadge = (status) => {
     const badges = {
       pending: { text: '待審核', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
+      'under-review': { text: '審核中', color: 'bg-blue-100 text-blue-800', icon: Clock },
       approved: { text: '已通過', color: 'bg-green-100 text-green-800', icon: CheckCircle },
+      completed: { text: '已完成', color: 'bg-indigo-100 text-indigo-800', icon: CheckCircle },
       rejected: { text: '已拒絕', color: 'bg-red-100 text-red-800', icon: XCircle },
       cancelled: { text: '已取消', color: 'bg-gray-100 text-gray-800', icon: XCircle }
     };
