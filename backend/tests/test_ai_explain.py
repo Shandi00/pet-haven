@@ -35,6 +35,25 @@ def test_rule_reason_ignores_unfilled_preferences():
     assert not any("基本偏好" in c for c in r["cautions"])
 
 
+def test_rule_reason_skips_claims_about_unfilled_profiles():
+    # 沒填的檔案用的是預設分數，不能說成使用者的實際狀況
+    r = ai_explain.rule_reason(PET, {"lifestyleProfile": {}, "environmentProfile": {}})
+    said = r["highlights"] + r["cautions"] + [r["summary"]]
+    for claim in ("家庭環境理想", "生活方式", "您的經驗適合"):
+        assert not any(claim in s for s in said), claim
+
+
+def test_rule_reason_keeps_claims_about_filled_profiles():
+    user = {"environmentProfile": {"hasChildren": False, "hasOtherPets": False},
+            "lifestyleProfile": {"activityLevel": "low", "availableTime": "minimal", "housingType": "apartment"},
+            "experienceProfile": {"petOwnershipExperience": "experienced"}}
+    pet = {**PET, "size": "large", "careRequirements": {"exerciseNeeds": "high", "timeCommitment": "high",
+                                                        "careLevel": "high"}}
+    r = ai_explain.rule_reason(pet, user)
+    assert "家庭環境理想" in r["highlights"] and "您的經驗適合照顧這隻寵物" in r["highlights"]
+    assert "生活方式可能需要調整以適應寵物需求" in r["cautions"]
+
+
 def test_summary_truncated_to_80():
     assert len(ai_explain.rule_reason({**PET, "name": "長" * 80}, USER)["summary"]) == 80
 
