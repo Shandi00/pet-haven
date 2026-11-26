@@ -5,7 +5,8 @@ const { test, expect, request: pwRequest } = require('@playwright/test');
 
 const API = 'http://localhost:5000/api/';
 // seed 測試帳號，只用在本機與 CI（見 AGENTS.md / backend/seed.py）
-const SHELTER = { email: 'shelter@example.com', password: 'shelter123' };
+// 展示機會設定 SEED_SHELTER_PASSWORD；沒設定時用 seed 的預設密碼（只在本機與 CI）
+const SHELTER = { email: 'shelter@example.com', password: process.env.SEED_SHELTER_PASSWORD || 'shelter123' };
 
 const stamp = Date.now();
 const ADOPTER = {
