@@ -103,3 +103,9 @@ def ranked(query: str, entries: list[dict]) -> list[tuple[float, dict]]:
 def search(query: str, k: int = TOP_K) -> list[dict]:
     """回傳最相關的前 k 筆 {id, title, content, source}；查無資料回空陣列。"""
     return [{f: e[f] for f in _FIELDS} for _, e in ranked(query, _load())[:k]]
+
+
+def all_entries() -> list[dict]:
+    """整份知識庫的 {id, title, content, source}：關鍵字比對不到時，交給 LLM 依語意挑選（聊天的後備檢索）。
+    shortcut: 知識庫只有幾十則，直接整份放進提示；超過約 200 則時改用向量檢索。"""
+    return [{f: e[f] for f in _FIELDS} for e in _load()]

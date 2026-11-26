@@ -89,3 +89,9 @@ def test_repo_knowledge_base_is_valid():
     if not kb.KB_PATH.exists():
         pytest.skip("knowledge_base.json 尚未交付（T11）")
     assert kb.validate(json.loads(kb.KB_PATH.read_text(encoding="utf-8"))) == []
+
+
+def test_all_entries_returns_every_valid_entry(monkeypatch):
+    monkeypatch.setattr(kb, "_load", lambda: [{"id": "faq-cat-001", "title": "t", "content": "c", "source": "s",
+                                               "tags": ["貓"], "url": "https://example.com"}])
+    assert kb.all_entries() == [{"id": "faq-cat-001", "title": "t", "content": "c", "source": "s"}]

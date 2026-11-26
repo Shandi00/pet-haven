@@ -34,12 +34,33 @@ def test_medical_question_refused_without_llm(monkeypatch, message):
     assert "獸醫" in res["reply"] and not calls
 
 
-def test_no_knowledge_says_unknown_without_llm(monkeypatch):
+def test_empty_knowledge_base_says_unknown_without_llm(monkeypatch):
     monkeypatch.setattr(knowledge_base, "search", lambda q, k=3: [])
+    monkeypatch.setattr(knowledge_base, "all_entries", lambda: [])
     calls = _llm(monkeypatch, {"reply": "亂編的答案", "usedIds": []})
     res = answer("兔子可以吃巧克力嗎")
     assert res["source"] == "rule" and res["sources"] == [] and res["refused"] is False
     assert "不知道" in res["reply"] and not calls
+
+
+def test_keyword_miss_lets_llm_pick_from_whole_knowledge_base(monkeypatch):
+    # 「甜食」字面上對不到條目，改把整份知識庫交給 Gemini 依語意挑選，回答附上它引用的條目
+    whole = FAQ + [{"id": "faq-dog-002", "title": "狗不能吃的食物", "content": "巧克力、含木醣醇的口香糖對狗有害。",
+                    "source": "範例"}]
+    monkeypatch.setattr(knowledge_base, "search", lambda q, k=3: [])
+    monkeypatch.setattr(knowledge_base, "all_entries", lambda: whole)
+    calls = _llm(monkeypatch, {"reply": "巧克力和含木醣醇的口香糖對狗有害，甜食最好不要餵。", "usedIds": ["faq-dog-002"]})
+    res = answer("狗可以吃甜食嗎")
+    assert res["source"] == "ai" and res["sources"] == [{"title": "狗不能吃的食物", "ref": "faq-dog-002"}]
+    assert {e["id"] for e in json.loads(calls[0][1])["knowledge"]} == {"faq-cat-001", "faq-cat-002", "faq-dog-002"}
+
+
+def test_keyword_miss_and_llm_cites_nothing_says_unknown(monkeypatch):
+    monkeypatch.setattr(knowledge_base, "search", lambda q, k=3: [])
+    monkeypatch.setattr(knowledge_base, "all_entries", lambda: FAQ)
+    _llm(monkeypatch, {"reply": "今天台北晴天。", "usedIds": []})
+    res = answer("台北今天天氣如何")
+    assert res["source"] == "rule" and res["sources"] == [] and "不知道" in res["reply"]
 
 
 @pytest.mark.parametrize("reply", [None, {}, {"reply": "", "usedIds": ["faq-cat-001"]},
@@ -75,11 +96,13 @@ def test_ai_answer_without_citation_is_treated_as_unknown(monkeypatch):
 
 
 def test_recommendation_question_guides_to_recommendations(monkeypatch):
+    # 知識庫沒有答案的推薦問題，引導到推薦頁；一般問題回不知道
     monkeypatch.setattr(knowledge_base, "search", lambda q, k=3: [])
-    calls = _llm(monkeypatch, {"reply": "x", "usedIds": []})
+    monkeypatch.setattr(knowledge_base, "all_entries", lambda: FAQ)
+    _llm(monkeypatch, {"reply": "x", "usedIds": []})
     res = answer("哪隻狗比較適合我")
     assert res["actions"][0] == {"label": "看推薦動物", "to": "/recommendations"}
-    assert res["source"] == "rule" and res["sources"] == [] and "推薦" in res["reply"] and not calls
+    assert res["source"] == "rule" and res["sources"] == [] and "推薦" in res["reply"]
     other = answer("怎麼申請認養")
     assert other["actions"][0] == {"label": "去玩配對遊戲", "to": "/match-game"} and "不知道" in other["reply"]
 
@@ -94,7 +117,7 @@ def test_prompt_masks_personal_data_and_keeps_last_history(monkeypatch):
     assert "0912" not in prompt and "example.com" not in prompt
     assert [h["content"] for h in data["history"]] == [f"第{i}句" for i in range(2, 12)]
     assert {e["id"] for e in data["knowledge"]} == {"faq-cat-001", "faq-cat-002"}
-    assert "只能根據" in system
+    assert "只能來自你引用的條目" in system and "不能加入條目沒有的事實" in system
 
 
 # --- API ---
@@ -114,7 +137,8 @@ def test_chat_validation(api, make_user):
 def test_chat_returns_contract_shape(api, make_user, monkeypatch):
     _, h = make_user()
     monkeypatch.setattr(knowledge_base, "search", lambda q, k=3: [])
-    many = [{"role": "assistant" if i % 2 else "user", "content": "嗨"} for i in range(15)]  # 超過 10 則只取最後 10 則
+    monkeypatch.setattr(knowledge_base, "all_entries", lambda: [])
+    many =[{"role": "assistant" if i % 2 else "user", "content": "嗨"} for i in range(15)]  # 超過 10 則只取最後 10 則
     res = api.post("/api/ai/chat", json={"message": " 第一次養貓要準備什麼 ", "history": many}, headers=h)
     assert res.status_code == 200
     data = res.json()["data"]
