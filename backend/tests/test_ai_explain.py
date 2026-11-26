@@ -131,6 +131,66 @@ def test_invalid_ai_output_falls_back_to_rule(monkeypatch, reply):
     assert asyncio.run(ai_explain.explain(PET, USER)) == ai_explain.rule_reason(PET, USER)
 
 
+@pytest.fixture(autouse=True)
+def _clear_cache():
+    ai_explain._cache.clear()
+    yield
+    ai_explain._cache.clear()
+
+
+def _counting(monkeypatch, reply):
+    calls = []
+
+    async def fake(system, prompt):
+        calls.append(prompt)
+        return reply
+    monkeypatch.setattr(llm, "generate_json", fake)
+    return calls
+
+
+GOOD = {"summary": "小黑很適合你。", "highlights": ["活潑"], "cautions": []}
+
+
+def test_same_input_reuses_cached_ai_reason(monkeypatch):
+    calls = _counting(monkeypatch, GOOD)
+    first = asyncio.run(ai_explain.explain(PET, USER))
+    assert asyncio.run(ai_explain.explain(PET, USER)) == first and first["source"] == "ai"
+    assert len(calls) == 1
+
+
+def test_changed_input_calls_llm_again(monkeypatch):
+    calls = _counting(monkeypatch, GOOD)
+    asyncio.run(ai_explain.explain(PET, USER))
+    asyncio.run(ai_explain.explain({**PET, "personality": {**PET["personality"], "traits": ["calm"]}}, USER))
+    asyncio.run(ai_explain.explain(PET, {"environmentProfile": {"hasChildren": False}}))
+    assert len(calls) == 3
+
+
+def test_failed_output_is_not_cached(monkeypatch):
+    calls = _counting(monkeypatch, None)
+    asyncio.run(ai_explain.explain(PET, USER))
+    asyncio.run(ai_explain.explain(PET, USER))
+    assert len(calls) == 2
+
+
+def test_cache_expires(monkeypatch):
+    calls = _counting(monkeypatch, GOOD)
+    now = [1000.0]
+    monkeypatch.setattr(ai_explain.time, "monotonic", lambda: now[0])
+    asyncio.run(ai_explain.explain(PET, USER))
+    now[0] += ai_explain.CACHE_TTL_SECONDS + 1
+    asyncio.run(ai_explain.explain(PET, USER))
+    assert len(calls) == 2
+
+
+def test_cache_size_is_bounded(monkeypatch):
+    _counting(monkeypatch, GOOD)
+    monkeypatch.setattr(ai_explain, "CACHE_MAX", 2)
+    for name in ("甲", "乙", "丙"):
+        asyncio.run(ai_explain.explain({**PET, "name": name}, USER))
+    assert len(ai_explain._cache) == 2
+
+
 def test_explain_endpoint(api, make_user, make_pet, monkeypatch):
     owner, _ = make_user("shelter")
     _, h = make_user()

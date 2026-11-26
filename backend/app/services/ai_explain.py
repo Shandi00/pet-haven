@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 
 SUMMARY_MAX = 80
 LIST_MAX = 3
+CACHE_TTL_SECONDS = 600
+CACHE_MAX = 500
+_cache: dict[str, tuple[float, dict]] = {}
 _UNKNOWN_GOOD_WITH = (("hasChildren", "children", "小孩"), ("hasOtherPets", "otherPets", "其他寵物"))
 # 對應 advanced_matching.generate_analysis 的文字；「需要較多照顧經驗」講的是動物的 careLevel，沒填也保留
 _PROFILE_CLAIMS = (
@@ -103,9 +106,25 @@ def _valid(out: dict | None) -> bool:
             and _valid_list(out.get("highlights")) and _valid_list(out.get("cautions")))
 
 
+async def _cached_generate(prompt: str) -> tuple[dict | None, bool]:
+    # 免費額度每分鐘請求數有限：輸入完全相同就重用上次的 AI 輸出；失敗不快取，下次再試
+    # shortcut: 存在單一程序記憶體，多個 worker 不共用、重啟就清空；要多台部署時改用 Redis
+    now = time.monotonic()
+    hit = _cache.get(prompt)
+    if hit and now - hit[0] < CACHE_TTL_SECONDS:
+        return hit[1], True
+    out = await llm.generate_json(SYSTEM_PROMPT, prompt)
+    if _valid(out):
+        _cache.pop(prompt, None)
+        while len(_cache) >= CACHE_MAX:
+            _cache.pop(next(iter(_cache)))  # 移除最早放入的
+        _cache[prompt] = (now, out)
+    return out, False
+
+
 async def explain(pet: dict, user: dict) -> dict:
     start = time.monotonic()
-    out = await llm.generate_json(SYSTEM_PROMPT, json.dumps(_llm_input(pet, user), ensure_ascii=False))
+    out, cached = await _cached_generate(json.dumps(_llm_input(pet, user), ensure_ascii=False))
     if _valid(out):
         cautions = _unknown_good_with(pet, user)
         cautions += [c for c in out["cautions"] if c not in cautions]
@@ -114,6 +133,6 @@ async def explain(pet: dict, user: dict) -> dict:
     else:
         reason = rule_reason(pet, user)
     # 契約 §0：log 只記 user id、pet id、source、耗時
-    logger.info("explain user=%s pet=%s source=%s elapsed_ms=%d", user.get("_id"), pet.get("_id"),
-                reason["source"], (time.monotonic() - start) * 1000)
+    logger.info("explain user=%s pet=%s source=%s cached=%s elapsed_ms=%d", user.get("_id"), pet.get("_id"),
+                reason["source"], cached, (time.monotonic() - start) * 1000)
     return reason

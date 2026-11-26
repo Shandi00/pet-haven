@@ -30,6 +30,7 @@
 | 呼叫方式 | 後端用已安裝的 `httpx` 呼叫 Gemini REST API，不另外加 SDK |
 | 逾時 | 環境變數 `LLM_TIMEOUT_SECONDS`，預設 **8 秒**；不重試。逾時、錯誤、空回應、回傳格式不對，一律改用備援，HTTP 仍回 200 |
 | 費用上限 | 展示期間使用 Gemini API 免費額度；如果改用付費方案，在 Google Cloud 帳單設定預算警示（建議 NT$300），超過就改回免費額度或只用規則理由。另外由 §0 的速率限制控制呼叫量 |
+| 理由快取 | 送給 LLM 的白名單輸入完全相同時，10 分鐘內重用上次的 AI 理由，不再呼叫 Gemini；失敗的結果不快取。存在後端程序記憶體（最多 500 筆），重啟就清空。目的：免費額度每分鐘請求數有限，重排或重新整理 Top 3 時只需要替新的動物呼叫（2026-11-26 加入） |
 | 速率限制（每位使用者） | `POST /api/ai/chat`：每分鐘 10 次；`GET /top3`、`POST /feedback`、`POST /api/ai/explain`：合計每分鐘 30 次。超過回 429 |
 | 送給 LLM 的欄位（白名單） | 動物：`name`、`species`、`breed`、`ageCategory`、`size`、`personality.traits`、`personality.activityLevel`、`personality.goodWith`、`personality.specialNeeds`。使用者：`lifestyleProfile`、`experienceProfile` 的 `petOwnershipExperience`／`trainingExperience`、`environmentProfile` 的四個布林值、`gameProfile.petType.label`。**白名單以外一律不送**，包括姓名、Email、電話、地址、健康與醫療紀錄 |
 | 紀錄 | log 只記 user id、pet id、`source`、耗時；不記錄訊息內容與 LLM 回覆 |
