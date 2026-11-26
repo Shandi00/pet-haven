@@ -21,19 +21,20 @@ import { motion } from 'framer-motion';
 import ApplicationDetailModal from '../components/ApplicationDetailModal';
 
 const ShelterDashboardPage = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('applications');
   const [dateRange, setDateRange] = useState(30);
   const [selectedApplicationId, setSelectedApplicationId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 權限檢查
+  // 權限檢查：重新整理頁面時登入狀態還在載入，要等載入完再判斷，否則會被導回首頁
   React.useEffect(() => {
+    if (authLoading) return;
     if (!user || (user.role !== 'shelter' && user.role !== 'admin')) {
       navigate('/');
     }
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
   // 取得統計資料
   const { data: stats, isLoading } = useQuery(
@@ -83,35 +84,13 @@ const ShelterDashboardPage = () => {
         return data.applications || [];
       }
 
-      const shelterPetsResponse = await fetch(
-        `http://localhost:5000/api/pets?createdBy=${user._id}&showAll=true&limit=1000`,
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      ).then(res => res.json());
-
-      // 正確解析後端回傳的資料結構
-      const shelterPets = shelterPetsResponse.pets || [];
-      
-      const petIds = shelterPets.map(pet => pet._id);
-      
-      const adoptionsResponse = await fetch(
-        `http://localhost:5000/api/adoptions`,
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      ).then(res => res.json());
-
-      // 確保 adoptions 是陣列
-      const adoptions = Array.isArray(adoptionsResponse)
-        ? adoptionsResponse
-        : (adoptionsResponse.data || adoptionsResponse.adoptions || []);
-
-      return adoptions.filter(app => petIds.includes(app.pet?._id));
+      // 後端沒有 GET /api/adoptions；改用「我的動物收到的申請」，與 MyPetsApplicationsPage 相同
+      const res = await fetch(`http://localhost:5000/api/adoptions/my-pets-applications?limit=100`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      if (!res.ok) throw new Error('Failed to fetch shelter applications');
+      const data = await res.json();
+      return data.data?.applications || [];
     },
     {
       enabled: !!user
@@ -123,7 +102,8 @@ const ShelterDashboardPage = () => {
     ['shelterPets', user?._id],
     async () => {
       const response = await fetch(
-        `http://localhost:5000/api/pets?createdBy=${user._id}&showAll=true&limit=1000`,
+        // 後端 limit 上限 100（超過回 400）
+        `http://localhost:5000/api/pets?createdBy=${user._id}&showAll=true&limit=100`,
         {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
