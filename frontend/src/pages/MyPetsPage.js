@@ -73,8 +73,8 @@ const MyPetsPage = () => {
     const statusConfig = {
       available: { text: '待領養', class: 'bg-green-100 text-green-800' },
       pending: { text: '審核中', class: 'bg-yellow-100 text-yellow-800' },
-      adopted: { text: '已領養', class: 'bg-blue-100 text-blue-800' },
-      pending_review: { text: '待審核', class: 'bg-orange-100 text-orange-800' }
+      adopted: { text: '已領養', class: 'bg-primary-100 text-primary-800' },
+      pending_review: { text: '待審核', class: 'bg-primary-100 text-primary-800' }
     };
 
     const config = statusConfig[status] || statusConfig.available;
@@ -89,7 +89,7 @@ const MyPetsPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">載入中...</p>
         </div>
       </div>
@@ -125,7 +125,7 @@ const MyPetsPage = () => {
           </div>
           <button
             onClick={() => navigate('/pets/create')}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
           >
             ✚ 發布新送養
           </button>
@@ -200,7 +200,7 @@ const MyPetsPage = () => {
                       </button>
                       <button
                         onClick={() => handleEdit(pet._id)}
-                        className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                        className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
                       >
                         編輯
                       </button>

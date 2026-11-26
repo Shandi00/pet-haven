@@ -20,7 +20,7 @@ function ErrorFallback({ error, resetErrorBoundary }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-primary-50 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full bg-white rounded-2xl shadow-2xl p-8 md:p-12">
         {/* 錯誤圖示 */}
         <div className="flex justify-center mb-6">
@@ -77,7 +77,7 @@ function ErrorFallback({ error, resetErrorBoundary }) {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
             onClick={resetErrorBoundary}
-            className="px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors duration-200 shadow-md hover:shadow-lg"
+            className="px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors duration-200 shadow-md hover:shadow-lg"
           >
             <svg
               className="inline-block w-5 h-5 mr-2"
@@ -123,15 +123,15 @@ function ErrorFallback({ error, resetErrorBoundary }) {
           </p>
           <ul className="text-sm text-gray-600 space-y-2 max-w-md mx-auto">
             <li className="flex items-start">
-              <span className="text-orange-500 mr-2">•</span>
+              <span className="text-primary-500 mr-2">•</span>
               <span>重新整理頁面</span>
             </li>
             <li className="flex items-start">
-              <span className="text-orange-500 mr-2">•</span>
+              <span className="text-primary-500 mr-2">•</span>
               <span>清除瀏覽器快取後重試</span>
             </li>
             <li className="flex items-start">
-              <span className="text-orange-500 mr-2">•</span>
+              <span className="text-primary-500 mr-2">•</span>
               <span>如果問題持續,請聯繫我們的支援團隊</span>
             </li>
           </ul>

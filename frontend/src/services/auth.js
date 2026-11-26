@@ -149,7 +149,7 @@ export const AuthProvider = ({ children }) => {
       setUser(newUser);
       setIsAuthenticated(true);
 
-      toast.success('註冊成功！歡迎加入愛心認養平台！');
+      toast.success('註冊成功！歡迎加入寵愛有家！');
       return { success: true };
     } catch (error) {
       console.error('註冊錯誤:', error.response?.data);

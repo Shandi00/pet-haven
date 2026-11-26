@@ -98,7 +98,7 @@ const MyApplicationsPage = () => {
       },
       'under-review': {
         label: '審核中',
-        color: 'bg-blue-100 text-blue-800',
+        color: 'bg-primary-100 text-primary-800',
         icon: <Clock className="w-4 h-4" />
       },
       approved: {
@@ -108,7 +108,7 @@ const MyApplicationsPage = () => {
       },
       completed: {
         label: '已完成',
-        color: 'bg-indigo-100 text-indigo-800',
+        color: 'bg-primary-100 text-primary-800',
         icon: <CheckCircle className="w-4 h-4" />
       },
       rejected: {
@@ -203,7 +203,7 @@ const MyApplicationsPage = () => {
                       <div className="min-w-0">
                         <Link
                           to={`/pets/${application.pet?._id}`}
-                          className="text-xl font-semibold text-gray-900 hover:text-purple-600 transition-colors"
+                          className="text-xl font-semibold text-gray-900 hover:text-primary-600 transition-colors"
                         >
                           {application.pet?.name}
                         </Link>

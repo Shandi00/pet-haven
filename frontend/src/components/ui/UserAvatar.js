@@ -23,7 +23,7 @@ const UserAvatar = ({ user, size = 'md', className = '' }) => {
           className={`${sizeClasses[size]} rounded-full object-cover`}
         />
       ) : (
-        <div className={`${sizeClasses[size]} rounded-full bg-orange-500 text-white flex items-center justify-center font-semibold`}>
+        <div className={`${sizeClasses[size]} rounded-full bg-primary-600 text-white flex items-center justify-center font-semibold`}>
           {getInitials(user?.username)}
         </div>
       )}

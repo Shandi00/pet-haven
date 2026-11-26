@@ -193,7 +193,7 @@ const ConversationPage = () => {
           
           {otherUser && (
             <>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-white font-semibold">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-500 flex items-center justify-center text-white font-semibold">
                 {otherUser.firstName?.[0] || 'U'}
               </div>
               <div className="flex-1">
@@ -233,7 +233,7 @@ const ConversationPage = () => {
                       >
                         {/* 頭像 */}
                         {!isCurrentUser && (
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-500 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
                             {msg.sender.firstName?.[0] || 'U'}
                           </div>
                         )}
@@ -243,7 +243,7 @@ const ConversationPage = () => {
                           <div
                             className={`px-4 py-2 rounded-2xl ${
                               isCurrentUser
-                                ? 'bg-orange-600 text-white rounded-tr-sm'
+                                ? 'bg-primary-600 text-white rounded-tr-sm'
                                 : 'bg-white text-gray-900 rounded-tl-sm shadow-sm'
                             }`}
                           >
@@ -256,7 +256,7 @@ const ConversationPage = () => {
                             {isCurrentUser && (
                               <>
                                 {msg.status === 'read' ? (
-                                  <CheckCheck className="w-3 h-3 text-blue-500" />
+                                  <CheckCheck className="w-3 h-3 text-primary-500" />
                                 ) : (
                                   <Check className="w-3 h-3" />
                                 )}
@@ -289,12 +289,12 @@ const ConversationPage = () => {
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="輸入訊息..."
                 disabled={isSending}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-orange-500 focus:border-transparent disabled:opacity-50"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50"
               />
               <button
                 type="submit"
                 disabled={!message.trim() || isSending}
-                className="w-10 h-10 bg-orange-600 text-white rounded-full flex items-center justify-center hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-10 h-10 bg-primary-600 text-white rounded-full flex items-center justify-center hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <Send className="w-5 h-5" />
               </button>

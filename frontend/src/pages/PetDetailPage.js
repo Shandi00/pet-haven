@@ -380,7 +380,7 @@ const PetDetailPage = () => {
                 {pet.personality.traits.map((trait, index) => (
                   <span
                     key={index}
-                    className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                    className="px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm"
                   >
                     {trait}
                   </span>
@@ -393,9 +393,9 @@ const PetDetailPage = () => {
           <div className="space-y-4">
             {/* 外部連結按鈕 (收容所寵物) */}
             {pet.externalLink && (
-              <div className="border-2 border-blue-200 rounded-lg p-4 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div className="border-2 border-primary-200 rounded-lg p-4 bg-gradient-to-r from-primary-50 to-primary-50">
                 <div className="flex items-center gap-2 mb-3">
-                  <ExternalLink className="w-5 h-5 text-blue-600" />
+                  <ExternalLink className="w-5 h-5 text-primary-600" />
                   <h4 className="text-base font-semibold text-gray-900">收容所外部認養頁面</h4>
                 </div>
                 <p className="text-sm text-gray-600 mb-3">
@@ -405,7 +405,7 @@ const PetDetailPage = () => {
                   href={pet.externalLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full inline-block text-center bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white py-2.5 rounded-lg font-semibold transition-all duration-200 transform hover:scale-[1.02] shadow-md"
+                  className="w-full inline-block text-center bg-gradient-to-r from-primary-500 to-primary-500 hover:from-primary-600 hover:to-primary-600 text-white py-2.5 rounded-lg font-semibold transition-all duration-200 transform hover:scale-[1.02] shadow-md"
                 >
                   前往收容所頁面
                 </a>
@@ -421,15 +421,15 @@ const PetDetailPage = () => {
 
             {/* Story 3.6: 助養按鈕 */}
             {pet.sponsorship?.enabled && pet.sponsorship?.externalLink && (
-              <div className="border-2 border-orange-200 rounded-lg p-4 bg-gradient-to-r from-orange-50 to-yellow-50">
+              <div className="border-2 border-primary-200 rounded-lg p-4 bg-gradient-to-r from-primary-50 to-yellow-50">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-orange-600" />
+                    <DollarSign className="w-5 h-5 text-primary-600" />
                     <h4 className="text-base font-semibold text-gray-900">助養此寵物</h4>
                   </div>
                   {pet.sponsorship.clickCount > 0 && (
                     <span className="text-sm text-gray-600">
-                      已有 <span className="font-bold text-orange-600">{pet.sponsorship.clickCount}</span> 人助養
+                      已有 <span className="font-bold text-primary-600">{pet.sponsorship.clickCount}</span> 人助養
                     </span>
                   )}
                 </div>
@@ -438,7 +438,7 @@ const PetDetailPage = () => {
                 </p>
                 <button
                   onClick={handleSponsorClick}
-                  className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white py-2.5 rounded-lg font-semibold transition-all duration-200 transform hover:scale-[1.02] shadow-md"
+                  className="w-full bg-gradient-to-r from-primary-500 to-yellow-500 hover:from-primary-600 hover:to-yellow-600 text-white py-2.5 rounded-lg font-semibold transition-all duration-200 transform hover:scale-[1.02] shadow-md"
                 >
                   前往助養平台
                 </button>
@@ -496,7 +496,7 @@ const PetDetailPage = () => {
         {/* 適合對象 */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center mb-4">
-            <User className="w-6 h-6 text-blue-600 mr-2" />
+            <User className="w-6 h-6 text-primary-600 mr-2" />
             <h3 className="text-lg font-semibold text-gray-900">適合對象</h3>
           </div>
           <div className="space-y-3">
@@ -534,7 +534,7 @@ const PetDetailPage = () => {
         {/* 收容資訊 */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center mb-4">
-            <Shield className="w-6 h-6 text-purple-600 mr-2" />
+            <Shield className="w-6 h-6 text-primary-600 mr-2" />
             <h3 className="text-lg font-semibold text-gray-900">收容資訊</h3>
           </div>
           <div className="space-y-3">
@@ -572,7 +572,7 @@ const PetDetailPage = () => {
       )}
 
       {/* 聯絡資訊 */}
-      <div className="mt-8 bg-blue-50 rounded-lg p-6">
+      <div className="mt-8 bg-primary-50 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">有興趣認養嗎？</h3>
         <p className="text-gray-700 mb-4">
           如果您對 {pet.name} 有興趣，歡迎提交認養申請或透過私訊功能與送養者聯繫。
@@ -663,7 +663,7 @@ const PetDetailPage = () => {
           <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full my-8">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl flex items-center justify-between">
               <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                <Target className="w-6 h-6 text-purple-600" />
+                <Target className="w-6 h-6 text-primary-600" />
                 與 {pet?.name} 的配對分析
               </h2>
               <button
@@ -677,7 +677,7 @@ const PetDetailPage = () => {
             <div className="p-6">
               {matchLoading ? (
                 <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
                   <p className="text-gray-600">正在分析配對度...</p>
                 </div>
               ) : matchAnalysis ? (

@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from 'react-query';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { Save, X, Send, Clock } from 'lucide-react';
 import useInterval from '../hooks/useInterval';
 import useLocalStorage from '../hooks/useLocalStorage';
@@ -220,16 +220,15 @@ const CreatePostPage = () => {
   };
   
   const typeOptions = [
-    { value: 'general', label: '一般討論', color: 'bg-blue-100 text-blue-800' },
+    { value: 'general', label: '一般討論', color: 'bg-primary-100 text-primary-800' },
     { value: 'lost-pet', label: '尋找走失寵物', color: 'bg-red-100 text-red-800' },
     { value: 'found-pet', label: '發現走失寵物', color: 'bg-green-100 text-green-800' },
-    { value: 'adoption-story', label: '領養故事分享', color: 'bg-purple-100 text-purple-800' }
+    { value: 'adoption-story', label: '領養故事分享', color: 'bg-primary-100 text-primary-800' }
   ];
   
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <Toaster position="top-right" />
-      
+
       <div className="max-w-4xl mx-auto px-4">
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center mb-6">
@@ -254,8 +253,8 @@ const CreatePostPage = () => {
                     key={option.value}
                     className={`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-colors ${
                       formData.type === option.value
-                        ? 'border-purple-600 bg-purple-50'
-                        : 'border-gray-200 hover:border-purple-300'
+                        ? 'border-primary-600 bg-primary-50'
+                        : 'border-gray-200 hover:border-primary-300'
                     }`}
                   >
                     <input
@@ -286,7 +285,7 @@ const CreatePostPage = () => {
                   required: '標題為必填項目',
                   maxLength: { value: 100, message: '標題不能超過 100 個字元' }
                 })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                 placeholder="請輸入標題（最多 100 字元）"
               />
               <div className="flex justify-between mt-1">
@@ -311,7 +310,7 @@ const CreatePostPage = () => {
                   maxLength: { value: 5000, message: '內容不能超過 5000 個字元' }
                 })}
                 rows="10"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                 placeholder="請輸入內容（至少 10 個字，最多 5000 字）"
               />
               <div className="flex justify-between mt-1">
@@ -540,7 +539,7 @@ const CreatePostPage = () => {
               <button
                 type="submit"
                 disabled={createPostMutation.isLoading}
-                className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center disabled:opacity-50"
+                className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center disabled:opacity-50"
               >
                 <Send className="w-4 h-4 mr-2" />
                 {createPostMutation.isLoading ? '發布中...' : '發布'}
@@ -583,7 +582,7 @@ const CreatePostPage = () => {
               </button>
               <button
                 onClick={restoreDraft}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
               >
                 恢復草稿
               </button>

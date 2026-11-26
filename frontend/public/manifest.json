@@ -1,6 +1,6 @@
 ﻿{
-  "short_name": "愛心認養",
-  "name": "愛心動物認養平台",
+  "short_name": "寵愛有家",
+  "name": "寵愛有家-愛心認養平台",
   "icons": [
     {
       "src": "placeholder-pet.jpg",
@@ -10,6 +10,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#e8702a",
   "background_color": "#ffffff"
 }

@@ -174,7 +174,7 @@ const NotificationsPage = () => {
             onClick={() => setFilter('all')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               filter === 'all'
-                ? 'bg-orange-600 text-white'
+                ? 'bg-primary-600 text-white'
                 : 'bg-white text-gray-600 hover:bg-gray-50'
             }`}
           >
@@ -184,7 +184,7 @@ const NotificationsPage = () => {
             onClick={() => setFilter('unread')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               filter === 'unread'
-                ? 'bg-orange-600 text-white'
+                ? 'bg-primary-600 text-white'
                 : 'bg-white text-gray-600 hover:bg-gray-50'
             }`}
           >
@@ -222,7 +222,7 @@ const NotificationsPage = () => {
                     }
                   }}
                   className={`p-6 hover:bg-gray-50 cursor-pointer transition-colors ${
-                    !notification.isRead ? 'bg-blue-50' : ''
+                    !notification.isRead ? 'bg-primary-50' : ''
                   }`}
                 >
                   <div className="flex gap-4">
@@ -240,7 +240,7 @@ const NotificationsPage = () => {
                           {notification.title}
                         </h3>
                         {!notification.isRead && (
-                          <div className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-2"></div>
+                          <div className="w-2 h-2 bg-primary-600 rounded-full flex-shrink-0 mt-2"></div>
                         )}
                       </div>
                       <p className="text-gray-600 text-sm mb-2">

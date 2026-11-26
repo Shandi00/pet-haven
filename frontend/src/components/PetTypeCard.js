@@ -23,8 +23,8 @@ const PetTypeCard = ({ petType, children, className = '' }) => {
 
   return (
     <div className={`flex flex-col items-center text-center ${className}`}>
-      <div className="w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center mb-4">
-        <Icon className="w-10 h-10 text-orange-500" aria-hidden="true" />
+      <div className="w-20 h-20 rounded-full bg-primary-100 flex items-center justify-center mb-4">
+        <Icon className="w-10 h-10 text-primary-500" aria-hidden="true" />
       </div>
       <Badge variant="primary">你的毛孩類型</Badge>
       <h2 className="mt-3 text-2xl font-bold text-gray-900">{label}</h2>

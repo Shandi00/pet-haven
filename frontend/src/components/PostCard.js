@@ -18,10 +18,10 @@ const PostCard = ({ post, index = 0 }) => {
 
   const getTypeBadgeClass = (type) => {
     const classes = {
-      'general': 'bg-blue-100 text-blue-700',
+      'general': 'bg-primary-100 text-primary-700',
       'lost-pet': 'bg-red-100 text-red-700',
       'found-pet': 'bg-green-100 text-green-700',
-      'adoption-story': 'bg-purple-100 text-purple-700'
+      'adoption-story': 'bg-primary-100 text-primary-700'
     };
     return classes[type] || 'bg-gray-100 text-gray-700';
   };
@@ -55,8 +55,8 @@ const PostCard = ({ post, index = 0 }) => {
         <div className="p-5 flex-grow flex flex-col">
           {/* 作者資訊 */}
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-              <User className="w-4 h-4 text-purple-600" />
+            <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
+              <User className="w-4 h-4 text-primary-600" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">
@@ -70,7 +70,7 @@ const PostCard = ({ post, index = 0 }) => {
           </div>
 
           {/* 標題 */}
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 hover:text-purple-600 transition-colors">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 hover:text-primary-600 transition-colors">
             {post.title}
           </h3>
 

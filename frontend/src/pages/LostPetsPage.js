@@ -69,7 +69,7 @@ const LostPetsPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero 區域 */}
-      <div className="bg-gradient-to-r from-red-600 to-orange-500 text-white py-12">
+      <div className="bg-gradient-to-r from-red-600 to-primary-500 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center mb-4">
             <AlertCircle className="w-12 h-12 mr-4" />
@@ -103,7 +103,7 @@ const LostPetsPage = () => {
           {isAuthenticated && (
             <Link
               to="/community/create"
-              className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium"
+              className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
             >
               發布協尋
             </Link>
@@ -193,7 +193,7 @@ const LostPetsPage = () => {
                         )}
 
                         {post.lostPetInfo.reward && post.type === 'lost-pet' && (
-                          <div className="flex items-center text-orange-600 font-semibold">
+                          <div className="flex items-center text-primary-600 font-semibold">
                             <DollarSign className="w-4 h-4 mr-2" />
                             <span>懸賞金額：NT$ {post.lostPetInfo.reward.toLocaleString()}</span>
                           </div>
@@ -203,8 +203,8 @@ const LostPetsPage = () => {
 
                     {/* 作者 */}
                     <div className="flex items-center text-sm text-gray-600 mb-3">
-                      <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center mr-2">
-                        <User className="w-5 h-5 text-purple-600" />
+                      <div className="w-8 h-8 rounded-full bg-primary-200 flex items-center justify-center mr-2">
+                        <User className="w-5 h-5 text-primary-600" />
                       </div>
                       <span>
                         {post.author?.firstName} {post.author?.lastName}

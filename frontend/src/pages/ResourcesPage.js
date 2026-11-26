@@ -167,7 +167,7 @@ const ResourcesPage = () => {
               {tabs.map((tab) => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                   className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors ${
-                    activeTab === tab.id ? 'border-purple-600 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+                    activeTab === tab.id ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'
                   }`}>
                   {tab.icon} {tab.label}
                 </button>
@@ -183,10 +183,10 @@ const ResourcesPage = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input type="text" placeholder="搜尋名稱..." value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600" />
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600" />
             </div>
             <select value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)}
-              className="pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 appearance-none bg-white"
+              className="pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 appearance-none bg-white"
               style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}>
               {cities.map(city => (<option key={city} value={city}>{city === 'all' ? '所有縣市' : city}</option>))}
             </select>
@@ -198,15 +198,15 @@ const ResourcesPage = () => {
           {activeTab === 'medical' && filterData(medicalResources).map((resource) => (
             <div key={resource.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6 flex flex-col">
               <h3 className="text-xl font-semibold text-gray-900 mb-3">{resource.name}</h3>
-              <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm mb-3">{resource.type}</span>
+              <span className="inline-block px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm mb-3">{resource.type}</span>
               <div className="space-y-2 mb-4 flex-grow">
                 <div className="flex items-center text-sm text-gray-600"><MapPin className="w-4 h-4 mr-2" />{resource.address}</div>
                 <div className="flex items-center text-sm text-gray-600"><Phone className="w-4 h-4 mr-2" />{resource.phone && resource.phone.trim() ? resource.phone : '—'}</div>
                 <div className="flex items-center text-sm text-gray-600"><Info className="w-4 h-4 mr-2" />開放時間：{resource.openHours && resource.openHours.trim() ? resource.openHours : '—'}</div>
               </div>
               {resource.discount && (
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
-                  <p className="text-sm text-orange-800 font-medium"> {resource.discount}</p>
+                <div className="bg-primary-50 border border-primary-200 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-primary-800 font-medium"> {resource.discount}</p>
                 </div>
               )}
               <div className="mb-4">
@@ -219,7 +219,7 @@ const ResourcesPage = () => {
               </div>
               <div className="mt-auto">
                 {getMapLink(resource.address) ? (
-                  <a href={getMapLink(resource.address)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all">
+                  <a href={getMapLink(resource.address)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full bg-primary-600 text-white py-2 rounded-lg font-semibold hover:bg-primary-700 transition-all">
                     快速導航
                   </a>
                 ) : (
@@ -240,7 +240,7 @@ const ResourcesPage = () => {
                 <div className="flex items-center text-sm text-gray-600">
                   <ExternalLink className="w-4 h-4 mr-2" />
                   {place.website && place.website.trim() ? (
-                    <a href={place.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{place.website}</a>
+                    <a href={place.website} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">{place.website}</a>
                   ) : (
                     '—'
                   )}
@@ -256,7 +256,7 @@ const ResourcesPage = () => {
               </div>
               <div className="mt-auto">
                 {getMapLink(place.address) ? (
-                  <a href={getMapLink(place.address)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all">
+                  <a href={getMapLink(place.address)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full bg-primary-600 text-white py-2 rounded-lg font-semibold hover:bg-primary-700 transition-all">
                     快速導航
                   </a>
                 ) : (
@@ -269,7 +269,7 @@ const ResourcesPage = () => {
           {activeTab === 'sponsors' && filterData(sponsorOrganizations).map((org) => (
             <div key={org.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6 flex flex-col">
               <h3 className="text-xl font-semibold text-gray-900 mb-3">{org.name}</h3>
-              <span className="inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm mb-3">{org.type}</span>
+              <span className="inline-block px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm mb-3">{org.type}</span>
               <p className="text-gray-600 text-sm mb-4">{org.description}</p>
               <div className="space-y-2 mb-4 flex-grow">
                 <div className="flex items-center text-sm text-gray-600"><MapPin className="w-4 h-4 mr-2" />{org.address && org.address.trim() ? org.address : '—'}</div>
@@ -278,7 +278,7 @@ const ResourcesPage = () => {
                 <div className="flex items-center text-sm text-gray-600">
                   <ExternalLink className="w-4 h-4 mr-2" />
                   {org.website && org.website.trim() ? (
-                    <a href={org.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{org.website}</a>
+                    <a href={org.website} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">{org.website}</a>
                   ) : (
                     '—'
                   )}

@@ -16,8 +16,8 @@ const SWITCH_LOCK_MS = 400;
 
 // 選項按鈕：平常灰色外框、深灰字，滑鼠移上去變橘色外框；已選時是實心橘色
 const OPTION_BASE = 'flex items-center gap-3 text-left border-2';
-const OPTION_IDLE = `${OPTION_BASE} border-gray-300 hover:border-orange-500`;
-const OPTION_SELECTED = `${OPTION_BASE} border-orange-500`;
+const OPTION_IDLE = `${OPTION_BASE} border-gray-300 hover:border-primary-500`;
+const OPTION_SELECTED = `${OPTION_BASE} border-primary-500`;
 
 const MatchGamePage = () => {
   const navigate = useNavigate();

@@ -102,7 +102,7 @@ const PostDetailPage = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">找不到貼文</h2>
           <button
             onClick={() => navigate('/community')}
-            className="text-orange-600 hover:text-orange-700"
+            className="text-primary-600 hover:text-primary-700"
           >
             返回社群
           </button>
@@ -119,10 +119,10 @@ const PostDetailPage = () => {
   };
 
   const typeBadgeColors = {
-    'general': 'bg-blue-100 text-blue-800',
+    'general': 'bg-primary-100 text-primary-800',
     'lost-pet': 'bg-red-100 text-red-800',
     'found-pet': 'bg-green-100 text-green-800',
-    'adoption-story': 'bg-purple-100 text-purple-800'
+    'adoption-story': 'bg-primary-100 text-primary-800'
   };
 
   return (
@@ -153,7 +153,7 @@ const PostDetailPage = () => {
           {/* 作者資訊與操作按鈕 */}
           <div className="px-6 pb-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-white font-semibold">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-500 flex items-center justify-center text-white font-semibold">
                 {post.author?.firstName?.[0] || 'U'}
               </div>
               <div>
@@ -243,7 +243,7 @@ const PostDetailPage = () => {
                   <span>最後日期：{new Date(post.lostPetInfo.lastSeenDate).toLocaleDateString('zh-TW')}</span>
                 </div>
                 {post.type === 'lost-pet' && post.lostPetInfo.reward && (
-                  <div className="flex items-center gap-2 text-orange-600 font-medium">
+                  <div className="flex items-center gap-2 text-primary-600 font-medium">
                     <DollarSign className="w-4 h-4" />
                     <span>酬謝金：NT$ {post.lostPetInfo.reward.toLocaleString()}</span>
                   </div>

@@ -115,12 +115,13 @@ function App() {
             </div>
             
             {/* Toast 通知系統 */}
+            {/* 全站唯一的提示容器；頁面不要再自己放 <Toaster>，否則提示會重複顯示 */}
             <Toaster
               position="top-right"
               toastOptions={{
                 duration: 4000,
                 style: {
-                  background: '#363636',
+                  background: '#2e2622', // 簡報的深咖啡色（tailwind gray-900）
                   color: '#fff',
                   borderRadius: '12px',
                   padding: '16px',
@@ -129,12 +130,14 @@ function App() {
                   boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
                 },
                 success: {
+                  duration: 3000,
                   iconTheme: {
                     primary: '#10b981',
                     secondary: '#fff',
                   },
                 },
                 error: {
+                  duration: 5000,
                   iconTheme: {
                     primary: '#ef4444',
                     secondary: '#fff',
@@ -142,7 +145,7 @@ function App() {
                 },
                 loading: {
                   iconTheme: {
-                    primary: '#3b82f6',
+                    primary: '#e8702a',
                     secondary: '#fff',
                   },
                 },

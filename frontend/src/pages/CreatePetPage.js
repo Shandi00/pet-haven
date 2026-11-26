@@ -183,7 +183,7 @@ const CreatePetPage = () => {
                 </div>
               ))}
               {photos.length < 5 && (
-                <label className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-purple-500">
+                <label className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-primary-500">
                   <input type="file" multiple accept="image/*" onChange={handlePhotoChange} className="hidden" />
                   <Upload className="w-6 h-6 text-gray-400" />
                 </label>

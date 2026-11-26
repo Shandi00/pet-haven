@@ -9,7 +9,7 @@ test.describe('首頁瀏覽測試', () => {
     
     // 檢查標題（等待時間更長）
     await page.waitForTimeout(2000); // 給 React 時間渲染
-    await expect(page).toHaveTitle(/愛心動物認養平台/, { timeout: 15000 });
+    await expect(page).toHaveTitle(/寵愛有家/, { timeout: 15000 });
     
     // 檢查主要元素存在 - 使用 getByRole 避免 strict mode violation
     const mainHeading = page.getByRole('heading', { name: /給每個毛孩/ });

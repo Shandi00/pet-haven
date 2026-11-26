@@ -418,7 +418,7 @@ const ApplicationDetailModal = ({ isOpen, onClose, applicationId }) => {
             ) : application ? (
               <>
                 {/* Header */}
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+                <div className="bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <FileText className="w-6 h-6 text-white mr-3" />
@@ -426,7 +426,7 @@ const ApplicationDetailModal = ({ isOpen, onClose, applicationId }) => {
                         <h3 className="text-xl font-bold text-white">
                           認養申請詳情
                         </h3>
-                        <p className="text-blue-100 text-sm">
+                        <p className="text-primary-100 text-sm">
                           申請編號: {application.applicationId}
                         </p>
                       </div>
@@ -459,7 +459,7 @@ const ApplicationDetailModal = ({ isOpen, onClose, applicationId }) => {
                   {/* 申請人資訊 */}
                   <section className="mb-6">
                     <h4 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-                      <User className="w-5 h-5 mr-2 text-blue-600" />
+                      <User className="w-5 h-5 mr-2 text-primary-600" />
                       申請人資訊
                     </h4>
                     <div className="bg-gray-50 rounded-lg p-4 grid grid-cols-2 gap-4">
@@ -554,7 +554,7 @@ const ApplicationDetailModal = ({ isOpen, onClose, applicationId }) => {
                   {/* 養寵經驗 */}
                   <section className="mb-6">
                     <h4 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-                      <FileText className="w-5 h-5 mr-2 text-indigo-600" />
+                      <FileText className="w-5 h-5 mr-2 text-primary-600" />
                       養寵經驗
                     </h4>
                     <div className="bg-gray-50 rounded-lg p-4">
@@ -655,7 +655,7 @@ const ApplicationDetailModal = ({ isOpen, onClose, applicationId }) => {
                   {/* 審核備註 */}
                   <section className="mb-6">
                     <h4 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-                      <MessageSquare className="w-5 h-5 mr-2 text-purple-600" />
+                      <MessageSquare className="w-5 h-5 mr-2 text-primary-600" />
                       審核備註 ({application.reviewNotes?.length || 0})
                     </h4>
                     
@@ -666,8 +666,8 @@ const ApplicationDetailModal = ({ isOpen, onClose, applicationId }) => {
                           <div key={index} className="bg-gray-50 rounded-lg p-4">
                             <div className="flex items-start justify-between mb-2">
                               <div className="flex items-center">
-                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
-                                  <User className="w-4 h-4 text-blue-600" />
+                                <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center mr-2">
+                                  <User className="w-4 h-4 text-primary-600" />
                                 </div>
                                 <div>
                                   <p className="text-sm font-medium text-gray-900">
@@ -689,18 +689,18 @@ const ApplicationDetailModal = ({ isOpen, onClose, applicationId }) => {
 
                     {/* 新增備註 */}
                     {['pending', 'under-review'].includes(application.status) && canAddNoteRobust && (
-                      <div className="bg-blue-50 rounded-lg p-4">
+                      <div className="bg-primary-50 rounded-lg p-4">
                         <textarea
                           value={newNote}
                           onChange={(e) => setNewNote(e.target.value)}
                           placeholder="輸入審核備註..."
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
                           rows="3"
                         />
                         <button
                           onClick={handleAddNote}
                           disabled={!newNote.trim() || addNoteMutation.isLoading}
-                          className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                          className="mt-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                         >
                           {addNoteMutation.isLoading ? '新增中...' : '新增備註'}
                         </button>
@@ -741,7 +741,7 @@ const ApplicationDetailModal = ({ isOpen, onClose, applicationId }) => {
                         value={reviewReason}
                         onChange={(e) => setReviewReason(e.target.value)}
                         placeholder={reviewDecision === 'approved' ? '輸入核准原因...' : '請說明拒絕原因...'}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
                         rows="3"
                       />
                       <div className="mt-3 flex gap-3">
@@ -842,7 +842,7 @@ const StatusBadge = ({ status, large = false }) => {
     'under-review': { label: '審核中', color: 'bg-blue-100 text-blue-800 border-blue-200' },
     approved: { label: '已核准', color: 'bg-green-100 text-green-800 border-green-200' },
     rejected: { label: '已拒絕', color: 'bg-red-100 text-red-800 border-red-200' },
-    completed: { label: '已完成', color: 'bg-purple-100 text-purple-800 border-purple-200' },
+    completed: { label: '已完成', color: 'bg-primary-100 text-primary-800 border-primary-200' },
     cancelled: { label: '已取消', color: 'bg-gray-100 text-gray-800 border-gray-200' }
   };
 

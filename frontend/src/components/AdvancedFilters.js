@@ -133,8 +133,8 @@ const AdvancedFilters = ({ filters, onFilterChange, onClearFilters, resultCount,
           </div>
 
           {resultCount !== undefined && (
-            <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded">
-              顯示 <span className="font-semibold text-blue-600">{resultCount}</span> / {totalCount} 隻待認養寵物
+            <div className="text-sm text-gray-600 bg-primary-50 p-3 rounded">
+              顯示 <span className="font-semibold text-primary-600">{resultCount}</span> / {totalCount} 隻待認養寵物
             </div>
           )}
 

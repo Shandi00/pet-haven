@@ -210,7 +210,7 @@ const NotificationBell = () => {
                       setShowDropdown(false);
                     }}
                     className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
-                      !notification.isRead ? 'bg-blue-50' : ''
+                      !notification.isRead ? 'bg-primary-50' : ''
                     }`}
                   >
                     <div className="flex gap-3">
@@ -229,7 +229,7 @@ const NotificationBell = () => {
                         </p>
                       </div>
                       {!notification.isRead && (
-                        <div className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-1"></div>
+                        <div className="w-2 h-2 bg-primary-600 rounded-full flex-shrink-0 mt-1"></div>
                       )}
                     </div>
                   </div>
@@ -242,7 +242,7 @@ const NotificationBell = () => {
                       navigate('/notifications');
                       setShowDropdown(false);
                     }}
-                    className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+                    className="text-sm text-primary-600 hover:text-primary-700 font-medium"
                   >
                     查看全部通知
                   </button>

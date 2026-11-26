@@ -72,8 +72,8 @@ const UserDashboardPage = () => {
       title: '瀏覽寵物',
       value: stats?.petsViewed || 0,
       icon: <Eye className="w-6 h-6" />,
-      color: 'bg-blue-500',
-      textColor: 'text-blue-600'
+      color: 'bg-primary-500',
+      textColor: 'text-primary-600'
     },
     {
       title: '我的收藏',
@@ -93,8 +93,8 @@ const UserDashboardPage = () => {
       title: '社群貢獻',
       value: stats?.postsCount || 0,
       icon: <MessageSquare className="w-6 h-6" />,
-      color: 'bg-purple-500',
-      textColor: 'text-purple-600'
+      color: 'bg-primary-500',
+      textColor: 'text-primary-600'
     }
   ];
 
@@ -104,7 +104,7 @@ const UserDashboardPage = () => {
         {/* 頁面標題 */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <Target className="w-8 h-8 text-purple-600" />
+            <Target className="w-8 h-8 text-primary-600" />
             我的儀表板
           </h1>
           <p className="mt-2 text-gray-600">歡迎回來，{user?.username}！</p>
@@ -167,7 +167,7 @@ const UserDashboardPage = () => {
           >
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                <Award className="w-6 h-6 text-purple-600" />
+                <Award className="w-6 h-6 text-primary-600" />
                 配對檔案完成度
               </h2>
               <span className={`text-2xl font-bold ${
@@ -193,7 +193,7 @@ const UserDashboardPage = () => {
             {stats.matchingProfileComplete < 100 && (
               <p className="mt-3 text-sm text-gray-600">
                 完善您的配對檔案，獲得更精準的寵物推薦！
-                <a href="/profile?tab=matching-profile" className="text-purple-600 hover:text-purple-700 ml-2">
+                <a href="/profile?tab=matching-profile" className="text-primary-600 hover:text-primary-700 ml-2">
                   立即完善 
                 </a>
               </p>
@@ -209,7 +209,7 @@ const UserDashboardPage = () => {
           className="bg-white rounded-xl shadow-sm p-6"
         >
           <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-            <Calendar className="w-6 h-6 text-purple-600" />
+            <Calendar className="w-6 h-6 text-primary-600" />
             最近活動
           </h2>
 
@@ -263,11 +263,11 @@ const ActivityItem = ({ activity }) => {
 
   const getActivityColor = (type) => {
     const colors = {
-      pet_view: 'bg-blue-100 text-blue-600',
+      pet_view: 'bg-primary-100 text-primary-600',
       favorite: 'bg-red-100 text-red-600',
       application: 'bg-green-100 text-green-600',
-      post: 'bg-purple-100 text-purple-600',
-      comment: 'bg-purple-100 text-purple-600'
+      post: 'bg-primary-100 text-primary-600',
+      comment: 'bg-primary-100 text-primary-600'
     };
     return colors[type] || 'bg-gray-100 text-gray-600';
   };

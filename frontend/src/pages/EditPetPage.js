@@ -180,7 +180,7 @@ const EditPetPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">載入中...</p>
         </div>
       </div>
@@ -239,7 +239,7 @@ const EditPetPage = () => {
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
               <Upload className="w-12 h-12 text-gray-400 mx-auto mb-2" />
               <label className="cursor-pointer">
-                <span className="text-blue-600 hover:text-blue-700">點擊上傳新照片</span>
+                <span className="text-primary-600 hover:text-primary-700">點擊上傳新照片</span>
                 <input
                   type="file"
                   multiple
@@ -284,7 +284,7 @@ const EditPetPage = () => {
                 type="text"
                 value={formData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 required
               />
             </div>
@@ -296,7 +296,7 @@ const EditPetPage = () => {
               <select
                 value={formData.species}
                 onChange={(e) => handleChange('species', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 required
               >
                 <option value="dog">狗</option>
@@ -316,7 +316,7 @@ const EditPetPage = () => {
                 type="text"
                 value={formData.breed}
                 onChange={(e) => handleChange('breed', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               />
             </div>
 
@@ -327,7 +327,7 @@ const EditPetPage = () => {
               <select
                 value={formData.gender}
                 onChange={(e) => handleChange('gender', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 required
               >
                 <option value="male">公</option>
@@ -343,7 +343,7 @@ const EditPetPage = () => {
               <select
                 value={formData.size}
                 onChange={(e) => handleChange('size', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 required
               >
                 <option value="small">小型</option>
@@ -361,7 +361,7 @@ const EditPetPage = () => {
                 type="text"
                 value={formData.color}
                 onChange={(e) => handleChange('color', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 placeholder="例如: 黑色、棕色"
               />
             </div>
@@ -376,7 +376,7 @@ const EditPetPage = () => {
               <select
                 value={String(formData.age.value)}
                 onChange={(e) => handleChange('age', { ...formData.age, value: parseInt(e.target.value) })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 min-w-0"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 min-w-0"
                 style={{ minWidth: '5rem' }}
               >
                 {Array.from({ length: 50 }, (_, i) => i + 1).map((n) => (
@@ -391,7 +391,7 @@ const EditPetPage = () => {
               <select
                 value={formData.age.unit}
                 onChange={(e) => handleChange('age', { ...formData.age, unit: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               >
                 <option value="months">月</option>
                 <option value="years">歲</option>
@@ -409,7 +409,7 @@ const EditPetPage = () => {
                 type="text"
                 value={formData.location.city}
                 onChange={(e) => handleChange('location', { ...formData.location, city: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 placeholder="例如: 台北市"
               />
             </div>
@@ -421,7 +421,7 @@ const EditPetPage = () => {
                 type="text"
                 value={formData.location.district}
                 onChange={(e) => handleChange('location', { ...formData.location, district: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 placeholder="例如: 大安區"
               />
             </div>
@@ -436,7 +436,7 @@ const EditPetPage = () => {
               value={formData.description}
               onChange={(e) => handleChange('description', e.target.value)}
               rows="4"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               placeholder="描述寵物的個性、習慣、特殊需求等..."
             ></textarea>
           </div>
@@ -452,7 +452,7 @@ const EditPetPage = () => {
                   type="checkbox"
                   checked={formData.healthStatus.vaccinated}
                   onChange={(e) => handleChange('healthStatus', { ...formData.healthStatus, vaccinated: e.target.checked })}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
                 />
                 <span className="ml-2 text-gray-700">已施打疫苗</span>
               </label>
@@ -461,7 +461,7 @@ const EditPetPage = () => {
                   type="checkbox"
                   checked={formData.healthStatus.spayed}
                   onChange={(e) => handleChange('healthStatus', { ...formData.healthStatus, spayed: e.target.checked })}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
                 />
                 <span className="ml-2 text-gray-700">已絕育</span>
               </label>
@@ -470,7 +470,7 @@ const EditPetPage = () => {
                   type="checkbox"
                   checked={formData.healthStatus.microchipped}
                   onChange={(e) => handleChange('healthStatus', { ...formData.healthStatus, microchipped: e.target.checked })}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
                 />
                 <span className="ml-2 text-gray-700">已植入晶片</span>
               </label>
@@ -485,7 +485,7 @@ const EditPetPage = () => {
             <select
               value={formData.personality.activityLevel}
               onChange={(e) => handleChange('personality', { ...formData.personality, activityLevel: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
             >
               <option value="low">低 - 喜歡安靜</option>
               <option value="moderate">中等 - 平衡活動與休息</option>
@@ -502,7 +502,7 @@ const EditPetPage = () => {
               type="text"
               value={formData.shelterInfo.location}
               onChange={(e) => handleChange('shelterInfo', { ...formData.shelterInfo, location: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               placeholder="例如: 台北市大安區"
             />
           </div>
@@ -512,7 +512,7 @@ const EditPetPage = () => {
             <button
               type="submit"
               disabled={updatePetMutation.isLoading}
-              className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium transition-colors"
+              className="flex-1 bg-primary-600 text-white py-3 rounded-lg hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium transition-colors"
             >
               {updatePetMutation.isLoading ? '更新中...' : '儲存變更'}
             </button>

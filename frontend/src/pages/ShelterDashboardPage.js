@@ -147,7 +147,7 @@ const ShelterDashboardPage = () => {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center mb-2">
-          <LayoutDashboard className="w-8 h-8 text-blue-600 mr-3" />
+          <LayoutDashboard className="w-8 h-8 text-primary-600 mr-3" />
           <h1 className="text-3xl font-bold text-gray-900">收容所儀表板</h1>
         </div>
         <p className="text-gray-600">管理您的寵物與認養申請</p>
@@ -165,7 +165,7 @@ const ShelterDashboardPage = () => {
                 className={`
                   flex items-center py-4 px-1 border-b-2 font-medium text-sm
                   ${activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
+                    ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }
                 `}
@@ -249,8 +249,8 @@ const ApplicationManagementTab = ({ overview, applications, navigate, onViewDeta
       title: '本月申請數',
       value: monthApplications,
       icon: TrendingUp,
-      color: 'bg-blue-500',
-      textColor: 'text-blue-600',
+      color: 'bg-primary-500',
+      textColor: 'text-primary-600',
       clickable: true,
       onClick: () => navigate('/my-pets-applications?filter=all')
     },
@@ -305,7 +305,7 @@ const ApplicationManagementTab = ({ overview, applications, navigate, onViewDeta
                 placeholder="搜尋寵物或申請人..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -314,7 +314,7 @@ const ApplicationManagementTab = ({ overview, applications, navigate, onViewDeta
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
               <option value="all">全部狀態</option>
               <option value="pending">待審核</option>
@@ -379,7 +379,7 @@ const ApplicationManagementTab = ({ overview, applications, navigate, onViewDeta
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                     <button 
                       onClick={() => onViewDetails(app._id)}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="text-primary-600 hover:text-primary-900"
                     >
                       查看詳情
                     </button>
@@ -405,7 +405,7 @@ const MyPetsTab = ({ pets, overview }) => {
         <StatCard
           title="總寵物數"
           value={overview.totalPets || 0}
-          color="bg-blue-500"
+          color="bg-primary-500"
         />
         <StatCard
           title="待認養"
@@ -415,7 +415,7 @@ const MyPetsTab = ({ pets, overview }) => {
         <StatCard
           title="已認養"
           value={overview.adoptedPets || 0}
-          color="bg-purple-500"
+          color="bg-primary-500"
         />
         <StatCard
           title="申請中"
@@ -428,7 +428,7 @@ const MyPetsTab = ({ pets, overview }) => {
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-gray-900">寵物列表</h3>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <button className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
             + 新增寵物
           </button>
         </div>
@@ -491,7 +491,7 @@ const MyPetsTab = ({ pets, overview }) => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                       <button 
                         onClick={() => navigate(`/shelter/pets/${pet._id}/edit`)}
-                        className="text-blue-600 hover:text-blue-900"
+                        className="text-primary-600 hover:text-primary-900"
                       >
                         編輯
                       </button>
@@ -541,7 +541,7 @@ const StatisticsTab = ({ stats, dateRange, setDateRange }) => {
           <select
             value={dateRange}
             onChange={(e) => setDateRange(Number(e.target.value))}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
           >
             <option value={7}>最近 7 天</option>
             <option value={30}>最近 30 天</option>
@@ -560,8 +560,8 @@ const StatisticsTab = ({ stats, dateRange, setDateRange }) => {
 
       {/* 關鍵指標 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="總寵物數" value={overview.totalPets || 0} color="bg-blue-500" />
-        <StatCard title="總申請數" value={overview.totalApplications || 0} color="bg-purple-500" />
+        <StatCard title="總寵物數" value={overview.totalPets || 0} color="bg-primary-500" />
+        <StatCard title="總申請數" value={overview.totalApplications || 0} color="bg-primary-500" />
         <StatCard title="成功認養數" value={overview.successfulAdoptions || 0} color="bg-green-500" />
         <StatCard title="平均認養天數" value={`${overview.averageAdoptionDays || 0} 天`} color="bg-yellow-500" />
       </div>
@@ -586,7 +586,7 @@ const StatisticsTab = ({ stats, dateRange, setDateRange }) => {
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
-                      className="bg-blue-600 h-2 rounded-full"
+                      className="bg-primary-600 h-2 rounded-full"
                       style={{ width: `${percentage}%` }}
                     ></div>
                   </div>
@@ -599,21 +599,21 @@ const StatisticsTab = ({ stats, dateRange, setDateRange }) => {
 
       {/* Story 3.6: 助養統計 */}
       {overview.sponsorshipEnabled > 0 && (
-        <div className="bg-gradient-to-br from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-lg shadow p-6">
+        <div className="bg-gradient-to-br from-primary-50 to-yellow-50 border-2 border-primary-200 rounded-lg shadow p-6">
           <div className="flex items-center gap-2 mb-4">
-            <DollarSign className="w-6 h-6 text-orange-600" />
+            <DollarSign className="w-6 h-6 text-primary-600" />
             <h3 className="text-lg font-semibold text-gray-900">助養系統統計</h3>
           </div>
           
           <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="bg-white rounded-lg p-4 border border-orange-200">
+            <div className="bg-white rounded-lg p-4 border border-primary-200">
               <div className="text-sm text-gray-600 mb-1">已啟用助養</div>
-              <div className="text-2xl font-bold text-orange-600">{overview.sponsorshipEnabled}</div>
+              <div className="text-2xl font-bold text-primary-600">{overview.sponsorshipEnabled}</div>
               <div className="text-xs text-gray-500">隻寵物</div>
             </div>
-            <div className="bg-white rounded-lg p-4 border border-orange-200">
+            <div className="bg-white rounded-lg p-4 border border-primary-200">
               <div className="text-sm text-gray-600 mb-1">總點擊次數</div>
-              <div className="text-2xl font-bold text-orange-600">{overview.totalSponsorshipClicks}</div>
+              <div className="text-2xl font-bold text-primary-600">{overview.totalSponsorshipClicks}</div>
               <div className="text-xs text-gray-500">次</div>
             </div>
           </div>
@@ -624,9 +624,9 @@ const StatisticsTab = ({ stats, dateRange, setDateRange }) => {
               <h4 className="text-sm font-semibold text-gray-700 mb-3">🔥 熱門助養寵物</h4>
               <div className="space-y-2">
                 {stats.topSponsoredPets.map((pet, index) => (
-                  <div key={pet._id} className="flex items-center gap-3 bg-white rounded-lg p-3 border border-orange-100">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-                      <span className="text-sm font-bold text-orange-600">#{index + 1}</span>
+                  <div key={pet._id} className="flex items-center gap-3 bg-white rounded-lg p-3 border border-primary-100">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
+                      <span className="text-sm font-bold text-primary-600">#{index + 1}</span>
                     </div>
                     {pet.photos && pet.photos[0] && (
                       <img 
@@ -640,7 +640,7 @@ const StatisticsTab = ({ stats, dateRange, setDateRange }) => {
                       <div className="text-xs text-gray-500">{pet.species === 'dog' ? '狗' : pet.species === 'cat' ? '貓' : '其他'}</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-orange-600">{pet.sponsorship.clickCount}</div>
+                      <div className="text-lg font-bold text-primary-600">{pet.sponsorship.clickCount}</div>
                       <div className="text-xs text-gray-500">次點擊</div>
                     </div>
                   </div>
@@ -670,7 +670,7 @@ const StatusBadge = ({ status }) => {
     approved: { label: '已核准', color: 'bg-green-100 text-green-800' },
     rejected: { label: '已拒絕', color: 'bg-red-100 text-red-800' },
     available: { label: '待認養', color: 'bg-green-100 text-green-800' },
-    adopted: { label: '已認養', color: 'bg-purple-100 text-purple-800' },
+    adopted: { label: '已認養', color: 'bg-primary-100 text-primary-800' },
     completed: { label: '已完成', color: 'bg-gray-100 text-gray-800' }
   };
 
