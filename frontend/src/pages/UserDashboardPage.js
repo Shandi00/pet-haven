@@ -19,7 +19,7 @@ const UserDashboardPage = () => {
   const navigate = useNavigate();
 
   // 取得使用者統計資料
-  const { data: stats, isLoading } = useQuery(
+  const { data: stats, isLoading, isError } = useQuery(
     'userStats',
     async () => {
       const response = await fetch('http://localhost:5000/api/users/me/stats', {
@@ -36,7 +36,7 @@ const UserDashboardPage = () => {
   );
 
   // 取得活動時間軸
-  const { data: activities, isLoading: activitiesLoading } = useQuery(
+  const { data: activities, isLoading: activitiesLoading, isError: activitiesError } = useQuery(
     'userActivities',
     async () => {
       const response = await fetch('http://localhost:5000/api/users/me/activities?limit=20', {
@@ -57,7 +57,7 @@ const UserDashboardPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="animate-pulse space-y-6">
           <div className="h-8 bg-gray-300 rounded w-1/4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="h-32 bg-gray-300 rounded"></div>
             ))}
@@ -110,8 +110,14 @@ const UserDashboardPage = () => {
           <p className="mt-2 text-gray-600">歡迎回來，{user?.username}！</p>
         </div>
 
+        {isError && (
+          <div role="alert" className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-4 mb-6">
+            統計資料載入失敗，請稍後再試
+          </div>
+        )}
+
         {/* 統計卡片 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
           {statCards.map((stat, index) => {
             // 決定卡片對應的路由
             const routeMap = {
@@ -130,7 +136,7 @@ const UserDashboardPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className={`bg-white rounded-xl shadow-sm p-6 ${isClickable ? 'cursor-pointer hover:shadow-md' : ''}`}
+                className={`bg-white rounded-xl shadow-sm p-4 sm:p-6 ${isClickable ? 'cursor-pointer hover:shadow-md' : ''}`}
                 onClick={() => {
                   if (isClickable) navigate(route);
                 }}
@@ -219,6 +225,8 @@ const UserDashboardPage = () => {
                 </div>
               ))}
             </div>
+          ) : activitiesError ? (
+            <p role="alert" className="text-center py-12 text-red-600">活動記錄載入失敗，請稍後再試</p>
           ) : activities && activities.length > 0 ? (
             <div className="space-y-6">
               {activities.map((activity, index) => (

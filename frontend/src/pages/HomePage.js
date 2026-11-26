@@ -668,8 +668,7 @@ const HomePage = () => {
             <button
               onClick={goPrevTestimonial}
               aria-label="上一則故事"
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white shadow-md hover:bg-gray-100"
-              style={{ transform: 'translate(-50%, -50%)' }}
+              className="absolute left-2 lg:left-0 lg:-translate-x-1/2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white shadow-md hover:bg-gray-100"
             >
               <ChevronLeft className="w-6 h-6 text-gray-700" />
             </button>
@@ -677,8 +676,7 @@ const HomePage = () => {
             <button
               onClick={goNextTestimonial}
               aria-label="下一則故事"
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white shadow-md hover:bg-gray-100"
-              style={{ transform: 'translate(50%, -50%)' }}
+              className="absolute right-2 lg:right-0 lg:translate-x-1/2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white shadow-md hover:bg-gray-100"
             >
               <ChevronRight className="w-6 h-6 text-gray-700" />
             </button>

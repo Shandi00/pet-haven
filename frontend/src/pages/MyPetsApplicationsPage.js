@@ -25,7 +25,7 @@ const MyPetsApplicationsPage = () => {
   const apiEndpoint = '/api/adoptions/my-pets-applications';
 
   // 獲取收到的申請列表
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, isError } = useQuery(
     ['myPetsApplications', filter, user?._id],
     async () => {
       const token = localStorage.getItem('token');
@@ -101,7 +101,7 @@ const MyPetsApplicationsPage = () => {
     const badge = badges[status] || badges.pending;
     const Icon = badge.icon;
     return (
-      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${badge.color}`}>
+      <span className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap px-3 py-1 rounded-full text-sm font-medium ${badge.color}`}>
         <Icon className="w-4 h-4" />
         {badge.text}
       </span>
@@ -151,7 +151,7 @@ const MyPetsApplicationsPage = () => {
 
         {/* 篩選器 */}
         <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {['all', 'pending', 'approved', 'rejected'].map((status) => (
               <button
                 key={status}
@@ -172,11 +172,15 @@ const MyPetsApplicationsPage = () => {
         </div>
 
         {/* 申請列表 */}
-        {applications.length > 0 ? (
+        {isError ? (
+          <div role="alert" className="bg-red-50 border border-red-200 rounded-lg p-6 text-center text-red-600">
+            載入失敗，請稍後再試
+          </div>
+        ) : applications.length > 0 ? (
           <div className="grid gap-6">
             {applications.map((app) => (
-              <div key={app._id} className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex gap-6">
+              <div key={app._id} className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                   {/* 寵物照片 */}
                     <div className="flex-shrink-0">
                     <img
@@ -193,21 +197,21 @@ const MyPetsApplicationsPage = () => {
                         return '/placeholder-pet.jpg';
                       })()}
                       alt={app.pet?.name}
-                      className="w-32 h-32 object-cover rounded-lg"
+                      className="w-full h-48 sm:w-32 sm:h-32 object-cover rounded-lg"
                     />
                   </div>
 
                   {/* 申請資訊 */}
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-3 mb-4">
+                      <div className="min-w-0">
                         <h3 className="text-xl font-bold text-gray-900">{app.pet?.name}</h3>
-                        <p className="text-gray-600">申請者: {app.applicant?.username}</p>
+                        <p className="text-gray-600 break-all">申請者: {app.applicant?.username}</p>
                       </div>
                       {getStatusBadge(app.status)}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-sm mb-4">
                       <div>
                         <span className="text-gray-500">申請日期:</span>
                         <span className="ml-2 text-gray-900">{(() => {
@@ -257,7 +261,7 @@ const MyPetsApplicationsPage = () => {
                     </div>
 
                     {/* 操作按鈕 */}
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-3">
                       {app.status === 'pending' && (
                         <>
                           <button

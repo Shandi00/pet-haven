@@ -394,7 +394,7 @@ const PetsPage = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="btn-secondary inline-flex items-center"
+              className="btn-secondary inline-flex items-center shrink-0 whitespace-nowrap"
             >
               <Filter className="w-4 h-4 mr-2" />
               篩選

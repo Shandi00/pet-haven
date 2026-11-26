@@ -360,7 +360,7 @@ const AdoptionApplicationPage = () => {
           <img
             src={pet.photos?.[0]?.url || pet.photos?.[0] || '/placeholder-pet.jpg'}
             alt={pet.name}
-            className="w-24 h-24 object-cover rounded-lg"
+            className="w-24 h-24 flex-shrink-0 object-cover rounded-lg"
           />
           <div>
             <h3 className="text-lg font-semibold text-gray-900">{pet.name}</h3>
@@ -424,7 +424,7 @@ const AdoptionApplicationPage = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     電子郵件 <span className="text-red-500">*</span>
@@ -453,7 +453,7 @@ const AdoptionApplicationPage = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     年齡 <span className="text-red-500">*</span>
@@ -802,7 +802,7 @@ const AdoptionApplicationPage = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     緊急聯絡人 <span className="text-red-500">*</span>
