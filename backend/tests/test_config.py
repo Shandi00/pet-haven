@@ -23,6 +23,15 @@ def test_cors_origin_list_strips_spaces(monkeypatch):
     assert Settings(_env_file=None).cors_origin_list() == ["http://a:3000", "http://b:3000"]
 
 
+def test_settings_repr_hides_secrets(monkeypatch):
+    # 錯誤訊息或 log 印出設定時，不能露出資料庫連線字串（含密碼）與各種密鑰
+    for k, v in {"MONGODB_URI": "mongodb://u:dbpass@h", "JWT_SECRET": "jwtsecret",
+                 "GOOGLE_CLIENT_SECRET": "gsecret"}.items():
+        monkeypatch.setenv(k, v)
+    text = repr(Settings(_env_file=None)) + str(Settings(_env_file=None))
+    assert not any(s in text for s in ("dbpass", "jwtsecret", "gsecret"))
+
+
 def test_settings_reject_empty_mongodb_uri(monkeypatch):
     # .env.example 複製過來後 MONGODB_URI= 留空，要在讀設定時就報錯
     monkeypatch.setenv("MONGODB_URI", "")
