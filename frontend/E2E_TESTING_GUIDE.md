@@ -150,8 +150,13 @@ npx playwright test --update-snapshots
 - 基礎 URL: http://localhost:3000
 
 ### 測試資料
-- 管理員帳號: admin@petadoption.com
-- 管理員密碼: Admin123456
+- 管理員帳密**不寫進 repo**（repo 是公開的）。管理員相關測試（`auth.spec.js` 的管理員登入、`dashboard.spec.js`）從環境變數讀取，沒設定時會略過：
+  1. 在 `backend/` 執行 `.venv/Scripts/python -m scripts.create_admin --email <email>` 建立本機管理員（沒給 `--password` 會產生隨機密碼）
+  2. 執行測試前設定環境變數（PowerShell）：
+     ```powershell
+     $env:E2E_ADMIN_EMAIL = "<email>"; $env:E2E_ADMIN_PASSWORD = "<密碼>"
+     ```
+- 這組帳密只用在本機與 CI，不可用在任何對外環境
 
 ## 參考資源
 
