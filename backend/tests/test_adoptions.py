@@ -128,3 +128,14 @@ def test_legacy_create_endpoint(api, make_user, make_pet):
     r = api.post("/api/adoptions", json=body, headers=ah)
     assert r.status_code == 201, r.text
     assert api.post("/api/adoptions", json={"reason": "短"}, headers=ah).status_code == 400
+
+
+def test_owner_cannot_apply_for_own_pet(api, make_user, make_pet, sync_db):
+    owner, oh, _, _, _, pet = setup_flow(make_user, make_pet)
+    r = apply(api, pet, oh)
+    assert r.status_code == 400 and r.json()["message"] == "不能申請認養自己刊登的動物"
+    legacy = {"petId": str(pet["_id"]), "reason": "我很喜歡這隻狗狗想要照顧牠",
+              "emergencyContact": {"name": "王", "phone": "0912345678"}}
+    r = api.post("/api/adoptions", json=legacy, headers=oh)
+    assert r.status_code == 400 and r.json()["error"] == "不能申請認養自己刊登的動物"
+    assert sync_db.adoptions.count_documents({}) == 0

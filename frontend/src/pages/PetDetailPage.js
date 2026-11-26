@@ -24,7 +24,7 @@ import {
 const PetDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [showMatchAnalysis, setShowMatchAnalysis] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const queryClient = useQueryClient();
@@ -247,6 +247,10 @@ const PetDetailPage = () => {
     );
   }
 
+  // 刊登者看自己的動物時，不顯示認養與私訊（不能申請或私訊自己），改顯示管理入口
+  const ownerId = pet.createdBy?._id || pet.createdBy?.id || (typeof pet.createdBy === 'string' ? pet.createdBy : null);
+  const isOwner = Boolean(user?._id && ownerId && user._id === ownerId);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* 返回按鈕 */}
@@ -412,12 +416,22 @@ const PetDetailPage = () => {
               </div>
             )}
             
-            <button
-              onClick={handleAdoptClick}
-              className="w-full btn-primary py-3 text-lg font-semibold"
-            >
-              我想認養 {pet.name}
-            </button>
+            {isOwner ? (
+              <div className="rounded-lg border border-primary-200 bg-primary-50 p-4 text-sm text-gray-700">
+                這是你刊登的動物。可以到
+                <Link to="/my-pets-applications" className="mx-1 font-semibold text-primary-700 underline">收到的申請</Link>
+                審核認養申請，或到
+                <Link to="/my-pets" className="mx-1 font-semibold text-primary-700 underline">我的送養</Link>
+                修改資料。
+              </div>
+            ) : (
+              <button
+                onClick={handleAdoptClick}
+                className="w-full btn-primary py-3 text-lg font-semibold"
+              >
+                我想認養 {pet.name}
+              </button>
+            )}
 
             {/* Story 3.6: 助養按鈕 */}
             {pet.sponsorship?.enabled && pet.sponsorship?.externalLink && (
@@ -571,91 +585,39 @@ const PetDetailPage = () => {
         </div>
       )}
 
-      {/* 聯絡資訊 */}
-      <div className="mt-8 bg-primary-50 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">有興趣認養嗎？</h3>
-        <p className="text-gray-700 mb-4">
-          如果您對 {pet.name} 有興趣，歡迎提交認養申請或透過私訊功能與送養者聯繫。
-          我們會仔細評估每個申請，確保為 {pet.name} 找到最適合的家庭。
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <button
-            onClick={handleAdoptClick}
-            className="btn-primary flex-1"
-          >
-            提交認養申請
-          </button>
-          {pet.createdBy && (pet.createdBy._id || pet.createdBy.id) && (() => {
-            const creatorId = pet.createdBy._id || pet.createdBy.id;
-            const token = localStorage.getItem('token');
-            
-            console.log('私訊按鈕調試:', {
-              petName: pet.name,
-              creatorId,
-              hasToken: !!token,
-              createdBy: pet.createdBy
-            });
-            
-            if (!token) {
-              // 未登入時也顯示按鈕，點擊時再提示登入
-              return (
-                <button
-                  onClick={() => {
-                    toast.error('請先登入');
-                    navigate('/login');
-                  }}
-                  className="btn-secondary flex-1 flex items-center justify-center gap-2"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  私訊送養者
-                </button>
-              );
-            }
-            
-            let currentUserId = null;
-            let userRole = null;
-            
-            try {
-              const payload = JSON.parse(atob(token.split('.')[1]));
-              currentUserId = payload.userId || payload._id || payload.id;
-              userRole = payload.role;
-              
-              console.log('🔍 Token解析結果:', {
-                currentUserId,
-                userRole,
-                creatorId,
-                isMatch: currentUserId === creatorId,
-                payload,
-                warning: !userRole ? '⚠️ Token沒有role,請重新登入' : '✅ Token正常'
-              });
-            } catch (e) {
-              console.error('解析token失敗:', e);
-            }
-            
-            // 只有一般用戶且是自己的寵物才隱藏按鈕
-            const isShelterOrAdmin = userRole === 'shelter' || userRole === 'admin';
-            const shouldHide = currentUserId && creatorId === currentUserId && !isShelterOrAdmin;
-            
-            console.log('按鈕顯示邏輯:', { shouldHide, currentUserId, creatorId, isShelterOrAdmin });
-            
-            if (shouldHide) {
-              console.log('❌ 隱藏按鈕');
-              return null;
-            }
-            
-            console.log('✅ 顯示按鈕');
-            return (
+      {/* 聯絡資訊：刊登者自己看時不顯示（不能申請或私訊自己） */}
+      {!isOwner && (
+        <div className="mt-8 bg-primary-50 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">有興趣認養嗎？</h3>
+          <p className="text-gray-700 mb-4">
+            如果您對 {pet.name} 有興趣，歡迎提交認養申請或透過私訊功能與送養者聯繫。
+            我們會仔細評估每個申請，確保為 {pet.name} 找到最適合的家庭。
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <button
+              onClick={handleAdoptClick}
+              className="btn-primary flex-1"
+            >
+              提交認養申請
+            </button>
+            {ownerId && (
               <button
-                onClick={() => navigate(`/messages/${creatorId}`)}
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    navigate(`/login?redirect=/messages/${ownerId}`);
+                    return;
+                  }
+                  navigate(`/messages/${ownerId}`);
+                }}
                 className="btn-secondary flex-1 flex items-center justify-center gap-2"
               >
                 <MessageCircle className="w-5 h-5" />
                 私訊送養者
               </button>
-            );
-          })()}
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Story 3.2: 配對分析 Modal */}
       {showMatchAnalysis && (

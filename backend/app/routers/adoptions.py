@@ -230,6 +230,8 @@ async def create_adoption(body: dict | None = None, user: dict = Depends(token_u
     pet = await get_db().pets.find_one({"_id": pet_id})
     if not pet or not pet.get("isActive", True) or pet.get("adoptionStatus") != "available":
         raise _err(400, "此寵物目前無法申請認養")
+    if same_id(pet.get("createdBy"), user["_id"]):
+        raise _err(400, "不能申請認養自己刊登的動物")
     if await _existing(pet_id, user["_id"]):
         raise _err(400, "您已經為此寵物提交過認養申請")
     ad = a.get("applicantDetails") or {}
@@ -295,6 +297,8 @@ async def apply(pet_id: str, request: Request, user: dict = Depends(token_user_z
         raise RawError(400, {"success": False, "message": "此寵物不存在或已下架"})
     if pet.get("adoptionStatus") != "available":
         raise RawError(400, {"success": False, "message": "此寵物目前無法申請認養"})
+    if same_id(pet.get("createdBy"), user["_id"]):
+        raise RawError(400, {"success": False, "message": "不能申請認養自己刊登的動物"})
     if await _existing(pid, user["_id"]):
         raise RawError(400, {"success": False, "message": "您已經為此寵物提交過認養申請，請勿重複申請"})
 

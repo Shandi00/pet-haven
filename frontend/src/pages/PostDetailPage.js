@@ -82,7 +82,7 @@ const PostDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20 px-4">
+      <div className="min-h-screen bg-gray-50 pt-8 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
@@ -97,7 +97,7 @@ const PostDetailPage = () => {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-20 px-4">
+      <div className="min-h-screen bg-gray-50 pt-8 px-4">
         <div className="max-w-4xl mx-auto text-center py-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">找不到貼文</h2>
           <button
@@ -126,7 +126,7 @@ const PostDetailPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 px-4 pb-12">
+    <div className="min-h-screen bg-gray-50 pt-8 px-4 pb-12">
       <div className="max-w-4xl mx-auto">
         {/* 返回按鈕 */}
         <button

@@ -152,7 +152,7 @@ const MyPetsApplicationsPage = () => {
         {/* 篩選器 */}
         <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
           <div className="flex flex-wrap gap-2">
-            {['all', 'pending', 'approved', 'rejected'].map((status) => (
+            {['all', 'pending', 'approved', 'completed', 'rejected'].map((status) => (
               <button
                 key={status}
                 onClick={() => setFilter(status)}
@@ -165,6 +165,7 @@ const MyPetsApplicationsPage = () => {
                 {status === 'all' && '全部'}
                 {status === 'pending' && '待審核'}
                 {status === 'approved' && '已通過'}
+                {status === 'completed' && '已完成'}
                 {status === 'rejected' && '已拒絕'}
               </button>
             ))}

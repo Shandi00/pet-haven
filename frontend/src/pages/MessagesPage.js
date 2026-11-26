@@ -3,6 +3,7 @@ import { useQuery } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import { MessageCircle, Search, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { displayName } from '../utils/displayName';
 
 const MessagesPage = () => {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ const MessagesPage = () => {
 
   // 篩選對話
   const filteredConversations = conversations?.filter(conv => {
-    const otherUserName = `${conv.otherUser.firstName} ${conv.otherUser.lastName}`.toLowerCase();
+    const otherUserName = displayName(conv.otherUser).toLowerCase();
     return otherUserName.includes(searchQuery.toLowerCase());
   }) || [];
 
@@ -52,7 +53,7 @@ const MessagesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 px-4 pb-12">
+    <div className="min-h-screen bg-gray-50 pt-8 px-4 pb-12">
       <div className="max-w-6xl mx-auto">
         {/* 頁面標題 */}
         <div className="mb-6">
@@ -105,7 +106,7 @@ const MessagesPage = () => {
                     {/* 頭像 */}
                     <div className="relative flex-shrink-0">
                       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-500 flex items-center justify-center text-white font-semibold text-lg">
-                        {conversation.otherUser.firstName?.[0] || 'U'}
+                        {displayName(conversation.otherUser)[0]}
                       </div>
                       {conversation.unreadCount > 0 && (
                         <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-semibold">
@@ -120,7 +121,7 @@ const MessagesPage = () => {
                         <h3 className={`font-medium truncate ${
                           conversation.unreadCount > 0 ? 'text-gray-900 font-semibold' : 'text-gray-900'
                         }`}>
-                          {conversation.otherUser.firstName} {conversation.otherUser.lastName}
+                          {displayName(conversation.otherUser)}
                         </h3>
                         <div className="flex items-center gap-1 text-xs text-gray-500">
                           <Clock className="w-3 h-3" />
