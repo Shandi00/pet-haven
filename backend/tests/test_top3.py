@@ -5,6 +5,11 @@ from bson import ObjectId
 from app.services import top3
 
 
+# 有填偏好的使用者：分數不會超過 100，才看得到回饋扣分
+PROFILED = {"recommendationProfile": {"species": ["dog", "cat"], "sizes": ["small"], "ageCategories": ["senior"],
+                                      "personality": ["calm"]}}
+
+
 def pet(**kw):
     base = {"_id": ObjectId(), "name": "小白", "species": "dog", "size": "medium", "ageCategory": "adult",
             "personality": {"activityLevel": "high", "traits": [], "goodWith": {}},
@@ -52,11 +57,21 @@ def test_rank_tie_breaks_by_newer_and_limits_to_3():
 def test_rank_applies_penalty_and_missing_created_at_sorts_last():
     disliked = pet(name="阿福")
     similar, other = pet(name="相似"), pet(name="不同", createdAt=None)
-    base = {r["pet"]["name"]: r["score"] for r in top3.rank([similar, other], {}, [])}
-    after = {r["pet"]["name"]: r for r in top3.rank([similar, other], {}, [disliked])}
+    base = {r["pet"]["name"]: r["score"] for r in top3.rank([similar, other], PROFILED, [])}
+    after = {r["pet"]["name"]: r for r in top3.rank([similar, other], PROFILED, [disliked])}
+    assert base["相似"] < 100
     assert after["相似"]["score"] == base["相似"] - 5
     assert after["相似"]["matchLevel"] in ("perfect", "excellent", "good", "fair", "poor")
     assert [r["pet"]["name"] for r in top3.rank([other, similar], {}, [])] == ["相似", "不同"]
+
+
+def test_rank_clamps_score_to_100_but_keeps_order():
+    # 既有 calculate_compatibility 在使用者沒填偏好時會超過 100（舊版 JS 的行為），契約要求 0–100
+    disliked = pet(name="阿福")
+    similar, other = pet(name="相似"), pet(name="不同", species="cat", createdAt=datetime(2026, 1, 1, tzinfo=timezone.utc))
+    ranked = top3.rank([similar, other], {}, [disliked])
+    assert all(0 <= r["score"] <= 100 for r in ranked)
+    assert [r["pet"]["name"] for r in ranked] == ["不同", "相似"]
 
 
 def test_pet_summary_photo_and_avoided_note():
