@@ -22,7 +22,8 @@ async def _post(url: str, key: str, body: dict, timeout: float) -> dict:
 
 async def generate_json(system: str, prompt: str) -> dict | None:
     s = get_settings()
-    if not s.gemini_api_key:
+    key = s.gemini_api_key.get_secret_value()
+    if not key:
         return None
     body = {
         "systemInstruction": {"parts": [{"text": system}]},
@@ -33,7 +34,7 @@ async def generate_json(system: str, prompt: str) -> dict | None:
     try:
         # httpx 的 timeout 是每個階段各自計算；外層 wait_for 才是契約 §0 的整體期限
         data = await asyncio.wait_for(
-            _post(f"{API_BASE}/models/{s.gemini_model}:generateContent", s.gemini_api_key, body,
+            _post(f"{API_BASE}/models/{s.gemini_model}:generateContent", key, body,
                   s.llm_timeout_seconds),
             s.llm_timeout_seconds)
         result = json.loads(data["candidates"][0]["content"]["parts"][0]["text"])

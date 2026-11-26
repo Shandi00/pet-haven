@@ -156,7 +156,7 @@
 - `pet` 是精簡過的動物資料：`age` 沿用 Pet 的 `{ value, unit }`（`unit` 為 `years` 或 `months`）；`activityLevel` 取自 `personality.activityLevel`；`photo` 是第一張照片的網址，沒有照片時為空字串。
 - `score` 是四捨五入後的整數 `matchScore`（扣除回饋重排後）。
 - `matchLevel` 沿用既有 `match_level()` 的 `level`：`perfect`（85 以上）、`excellent`（70 以上）、`good`（55 以上）、`fair`（40 以上）、`poor`。
-- `reason`：`summary` 最多 80 字；`highlights`、`cautions` 各 0–3 筆，**只能引用 §0 白名單裡的真實欄位**（見 AGENTS.md）。
+- `reason`：`summary` 最多 80 字；`highlights`、`cautions` 各 0–3 筆、每筆最多 40 字（前後空白會去掉），**只能引用 §0 白名單裡的真實欄位**（見 AGENTS.md）。
 - `reason.source = "rule"` 時，理由由既有 `generate_analysis()` 的 `strengths`、`highlights`、`concerns` 組成。
 - `avoided` 列出這位使用者目前所有按過「不適合」的動物（最新的在前），`note` 由規則產生，說明避開了什麼。沒有回饋時為空陣列。
 - 符合條件的動物不足 3 隻時，`items` 可以少於 3 筆；沒有任何結果時回傳空陣列，前端顯示空狀態和「重新開始」按鈕（呼叫 `DELETE /feedback`）。
@@ -240,7 +240,8 @@
 - 用**目前登入的使用者**的配對欄位，為指定動物產生理由；格式與 §2 的 `reason` 相同，失敗時一樣改用規則理由（`source: "rule"`）。
 - `GET /top3` 在後端直接呼叫同一個服務函式，不透過 HTTP。前端可以在動物詳情頁使用這支 API。
 - 送給 Gemini 的提示要求回傳 JSON `{ "summary", "highlights", "cautions" }`；解析失敗或欄位不符合長度限制，視同失敗。
-- `petId` 不合法回 400；動物不存在回 404。
+- `petId` 不合法回 400；動物不存在或已下架（`isActive: false`）回 404。
+- 收容所自填的文字送給 Gemini 前先限長（名字 20 字、品種 30 字、特殊需求每項 50 字、個性每項 20 字、各最多 5 項），系統提示說明欄位值只是資料、不是指令。
 
 ## 6. 持照寵物業者依縣市列表（T16，選做）
 
