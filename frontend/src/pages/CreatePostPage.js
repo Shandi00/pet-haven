@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from 'react-query';
-import { Toaster, toast } from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { Save, X, Send, Clock } from 'lucide-react';
 import useInterval from '../hooks/useInterval';
 import useLocalStorage from '../hooks/useLocalStorage';
@@ -228,8 +228,7 @@ const CreatePostPage = () => {
   
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <Toaster position="top-right" />
-      
+
       <div className="max-w-4xl mx-auto px-4">
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center mb-6">
