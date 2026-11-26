@@ -2,7 +2,9 @@ import json
 import math
 from pathlib import Path
 
-from app.services.advanced_matching import calculate_match
+import pytest
+
+from app.services.advanced_matching import calculate_compatibility, calculate_compatibility_normalized, calculate_match
 
 GOLDEN = json.loads((Path(__file__).parent / "fixtures" / "matching_golden.json").read_text(encoding="utf-8"))
 
@@ -27,6 +29,27 @@ def test_matches_legacy_js_on_200_golden_cases():
     for i, case in enumerate(GOLDEN):
         diffs += same(calculate_match(case["pet"], case["user"]), case["expected"], f"case{i}")
     assert not diffs, diffs[:10]
+
+
+NORM_PET = {"species": "dog", "size": "medium", "ageCategory": "adult", "personality": {"traits": ["friendly"]}}
+
+
+def test_normalized_compatibility_uses_only_filled_preferences():
+    # 舊版在偏好沒填時把 max_score 重設，分數會超過 100；normalized 只用有填的偏好計算
+    assert calculate_compatibility(NORM_PET, {}) > 100
+    assert calculate_compatibility_normalized(NORM_PET, {}) == 75
+    full = {"recommendationProfile": {"species": ["dog"], "sizes": ["medium"], "ageCategories": ["adult"],
+                                      "personality": ["friendly"]}}
+    assert calculate_compatibility_normalized(NORM_PET, full) == 100
+    assert calculate_compatibility_normalized(NORM_PET, {"recommendationProfile": {"species": ["dog"]}}) == 100
+    assert calculate_compatibility_normalized(
+        NORM_PET, {"recommendationProfile": {"species": ["cat"]}}) == pytest.approx(100 / 3)
+    adjacent = {"recommendationProfile": {"sizes": ["small"], "personality": ["calm", "friendly"]}}
+    assert calculate_compatibility_normalized(NORM_PET, adjacent) == pytest.approx((10 + 17.5) / 55 * 100)
+    assert calculate_compatibility_normalized({"species": "dog"}, {"recommendationProfile": {
+        "personality": ["calm"]}}) == 75
+    match = calculate_match(NORM_PET, {}, normalized=True)
+    assert match["breakdown"]["compatibility"] == 75 and match["matchScore"] <= 100
 
 
 def test_profile_endpoints_and_analysis(api, make_user, make_pet):

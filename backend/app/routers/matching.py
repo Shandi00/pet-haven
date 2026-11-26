@@ -5,11 +5,13 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.core.ids import oid
+from app.core.ratelimit import matching_limiter
 from app.core.schema import Arr, F, cast, validate as schema_validate
 from app.core.serialize import to_json
 from app.db import get_db
 from app.deps import current_user
 from app.services.advanced_matching import batch_calculate_matches, calculate_match, find_best_matches
+from app.services.top3 import build_top3
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/matching", tags=["Matching"])
@@ -140,3 +142,37 @@ async def get_profile(user: dict = Depends(current_user)):
         raise HTTPException(404, "找不到使用者")
     return {"success": True, "data": to_json({k: full.get(k) or {} for k in (
         "recommendationProfile", "lifestyleProfile", "experienceProfile", "environmentProfile")})}
+
+
+@router.get("/top3", summary="Top 3 推薦與理由")
+async def top3(user: dict = Depends(current_user)):
+    matching_limiter.check(user["_id"])
+    return {"success": True, "data": await build_top3(await _full_user(user))}
+
+
+@router.post("/feedback", summary="適合／不適合回饋；不適合時回傳重排後的 Top 3")
+async def feedback(body: dict | None = None, user: dict = Depends(current_user)):
+    matching_limiter.check(user["_id"])
+    b = body or {}
+    verdict, pet_id = b.get("verdict"), b.get("petId")
+    pid = oid(pet_id) if isinstance(pet_id, str) else None
+    if verdict not in ("like", "dislike") or not pid:
+        raise HTTPException(400, "參數錯誤")
+    if not await get_db().pets.find_one({"_id": pid}, {"_id": 1}):
+        raise HTTPException(404, "找不到指定的寵物")
+    full = await _full_user(user)
+    # 同一隻動物只保留最新一筆
+    entries = [f for f in (full.get("matchFeedback") or []) if f.get("pet") != pid]
+    entries.append({"pet": pid, "verdict": verdict, "createdAt": datetime.now(timezone.utc)})
+    await get_db().users.update_one({"_id": user["_id"]}, {"$set": {"matchFeedback": entries}})
+    logger.info("matching feedback user=%s pet=%s verdict=%s", user["_id"], pid, verdict)
+    if verdict == "like":
+        return {"success": True, "data": {"recorded": True}}
+    return {"success": True, "data": await build_top3({**full, "matchFeedback": entries})}
+
+
+@router.delete("/feedback", summary="清除自己的回饋紀錄")
+async def clear_feedback(user: dict = Depends(current_user)):
+    full = await _full_user(user)
+    await get_db().users.update_one({"_id": user["_id"]}, {"$set": {"matchFeedback": []}})
+    return {"success": True, "data": {"cleared": len(full.get("matchFeedback") or [])}}

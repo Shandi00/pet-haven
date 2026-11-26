@@ -25,11 +25,12 @@
 | 項目 | 決定 |
 |---|---|
 | LLM 供應商 | **Google Gemini**（Gemini API，非 Vertex AI） |
-| 模型 | 環境變數 `GEMINI_MODEL`，預設 `gemini-3.8-flash`（2026-11 時的最新穩定版 Flash）。換模型只改環境變數，不改程式 |
+| 模型 | 環境變數 `GEMINI_MODEL`，預設 `gemini-3.1-flash-lite`（穩定版 Flash-Lite）。2026-11-26 由 `gemini-3.8-flash` 改：實測 3.8 一直回 503（模型忙碌）／429，3.1-flash-lite 可正常產生理由。換模型只改環境變數，不改程式 |
 | 金鑰 | `GEMINI_API_KEY`，只放在 `backend/.env`；前端拿不到，也不直接呼叫 LLM |
 | 呼叫方式 | 後端用已安裝的 `httpx` 呼叫 Gemini REST API，不另外加 SDK |
 | 逾時 | 環境變數 `LLM_TIMEOUT_SECONDS`，預設 **8 秒**；不重試。逾時、錯誤、空回應、回傳格式不對，一律改用備援，HTTP 仍回 200 |
 | 費用上限 | 展示期間使用 Gemini API 免費額度；如果改用付費方案，在 Google Cloud 帳單設定預算警示（建議 NT$300），超過就改回免費額度或只用規則理由。另外由 §0 的速率限制控制呼叫量 |
+| 理由快取 | 送給 LLM 的白名單輸入完全相同時，10 分鐘內重用上次的 AI 理由，不再呼叫 Gemini；失敗的結果不快取。存在後端程序記憶體（最多 500 筆），重啟就清空。目的：免費額度每分鐘請求數有限，重排或重新整理 Top 3 時只需要替新的動物呼叫（2026-11-26 加入） |
 | 速率限制（每位使用者） | `POST /api/ai/chat`：每分鐘 10 次；`GET /top3`、`POST /feedback`、`POST /api/ai/explain`：合計每分鐘 30 次。超過回 429 |
 | 送給 LLM 的欄位（白名單） | 動物：`name`、`species`、`breed`、`ageCategory`、`size`、`personality.traits`、`personality.activityLevel`、`personality.goodWith`、`personality.specialNeeds`。使用者：`lifestyleProfile`、`experienceProfile` 的 `petOwnershipExperience`／`trainingExperience`、`environmentProfile` 的四個布林值、`gameProfile.petType.label`。**白名單以外一律不送**，包括姓名、Email、電話、地址、健康與醫療紀錄 |
 | 紀錄 | log 只記 user id、pet id、`source`、耗時；不記錄訊息內容與 LLM 回覆 |
@@ -49,7 +50,7 @@
 
 ### 排序與回饋重排
 
-1. 用既有規則配對 `app/services/advanced_matching.py` 的 `calculate_match` 計分（`matchScore`，0–100）。
+1. 用既有規則配對 `app/services/advanced_matching.py` 的 `calculate_match(pet, user, normalized=True)` 計分（`matchScore`，0–100）。`normalized=True` 時，相容度只用使用者**有填的** `recommendationProfile` 偏好計算，完全沒填時給中性分 75。原因是既有相容度在偏好沒填時會把分母重設，分數超過 100（實測 150–190），只玩小遊戲的使用者每隻都會顯示 100。既有 API（`/analyze`、`/best-matches`）維持舊算法不變。顯示分數另外夾在 0–100。推薦理由（§5）也用同一個算法。（2026-11-26 調整）
 2. **回饋重排**：使用者每按一次「不適合」，其他「物種與 `personality.activityLevel` 都和那隻相同」的動物扣 5 分，同一隻最多扣 15 分。
 3. 分數相同時，較新上架（`createdAt` 較晚）的排前面；取前 3 名。
 

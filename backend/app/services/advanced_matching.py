@@ -67,6 +67,45 @@ def calculate_compatibility(pet: dict, user: dict) -> float:
     return (score / max_score) * 100 if max_score > 0 else 50
 
 
+NEUTRAL_COMPATIBILITY = 75  # 介於 60 與 80：generate_analysis 不加優點也不加注意事項
+
+
+def calculate_compatibility_normalized(pet: dict, user: dict) -> float:
+    """與 calculate_compatibility 同樣的給分，但只用有填的偏好計算，分數維持 0–100（Top 3 用）。
+
+    舊版在偏好沒填時把 max_score 重設，分數會超過 100；既有 API 與 golden 測試依賴舊行為，所以另寫一份。
+    """
+    profile = user.get("recommendationProfile") or {}
+    score = max_score = 0.0
+    species = _list(profile.get("species"))
+    if species:
+        max_score += 30
+        score += 30 if pet.get("species") in species else 10
+    sizes = _list(profile.get("sizes"))
+    if sizes:
+        max_score += 20
+        if pet.get("size") in sizes:
+            score += 20
+        else:
+            idx = SIZE_ORDER.index(pet["size"]) if pet.get("size") in SIZE_ORDER else -1
+            if any(abs((SIZE_ORDER.index(s) if s in SIZE_ORDER else -1) - idx) == 1 for s in sizes):
+                score += 10
+    ages = _list(profile.get("ageCategories"))
+    if ages:
+        max_score += 15
+        score += 15 if pet.get("ageCategory") in ages else 5
+    wanted = _list(profile.get("personality"))
+    traits = (pet.get("personality") or {}).get("traits")
+    if wanted and pet.get("personality") and traits is not None:
+        ratio = len([t for t in wanted if t in _list(traits)]) / len(wanted)
+        max_score += 35
+        score += ratio * 35
+        if ratio == 1:
+            score += 5
+            max_score += 5
+    return (score / max_score) * 100 if max_score > 0 else NEUTRAL_COMPATIBILITY
+
+
 ACTIVITY_MATCH = {"low-low": 40, "low-medium": 20, "low-high": 0, "medium-low": 20, "medium-medium": 40,
                   "medium-high": 30, "high-low": 10, "high-medium": 30, "high-high": 40}
 TIME_MATCH = {"minimal-low": 30, "minimal-medium": 15, "minimal-high": 5, "moderate-low": 25, "moderate-medium": 30,
@@ -237,9 +276,10 @@ def match_level(score: float) -> dict:
     return {"level": "poor", "label": "配對度低", "color": "red"}
 
 
-def calculate_match(pet: dict, user: dict) -> dict:
+def calculate_match(pet: dict, user: dict, normalized: bool = False) -> dict:
+    """normalized=True 用 calculate_compatibility_normalized（Top 3 用）；預設維持舊版行為。"""
     breakdown = {
-        "compatibility": calculate_compatibility(pet, user),
+        "compatibility": (calculate_compatibility_normalized if normalized else calculate_compatibility)(pet, user),
         "lifestyle": calculate_lifestyle_match(pet, user),
         "experience": calculate_experience_match(pet, user),
         "environment": calculate_environment_match(pet, user),
