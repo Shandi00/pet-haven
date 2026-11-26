@@ -1,6 +1,6 @@
 # UI 元件庫
 
-這是寵物認養平台的可重用 UI 元件庫，包含 20 個精心設計的元件。
+這是寵物認養平台的可重用 UI 元件庫，包含 21 個精心設計的元件。
 
 ## 📦 安裝與使用
 
@@ -12,7 +12,7 @@ import { Button, Input, Card } from './components/ui';
 import Button from './components/ui/Button';
 ```
 
-## 🎨 基礎元件 (14 個)
+## 🎨 基礎元件 (17 個)
 
 ### Button - 按鈕
 
@@ -281,7 +281,20 @@ import Button from './components/ui/Button';
 - `width`: string
 - `height`: string
 
-## 🏢 業務元件 (6 個)
+### ProgressBar - 進度條
+
+顯示目前進度，例如配對小遊戲的第幾題。顏色與 Button 的 primary 相同，並帶有 `role="progressbar"`，螢幕閱讀器和 Playwright 都能讀到進度。
+
+```javascript
+<ProgressBar value={3} max={8} label="第 3 題，共 8 題" />
+```
+
+**Props:**
+- `value`: number - 目前進度（必填，超出 0 到 `max` 的範圍會自動截斷）
+- `max`: number - 預設 100
+- `label`: string - 給螢幕閱讀器的說明（`aria-label`）
+
+## 🏢 業務元件 (4 個)
 
 ### PetCard - 寵物卡片
 

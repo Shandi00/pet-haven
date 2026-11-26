@@ -88,6 +88,11 @@ npm run test:e2e:headed
 -  需要先 `npm run seed`（收容所帳號 shelter@example.com）；每次會建立一個新的 `e2e<時間戳>` 認養者帳號與一筆已完成的申請
 -  結束時把用到的動物改回「待認養」；若中途被中斷導致動物停在「審核中」或「已認養」，用 shelter 帳號把它改回 available，或執行 `npm run seed -- --clear`（會刪除所有寵物後重建）
 
+### 配對小遊戲測試 (match-game.spec.js)
+-  登入後答完 8 題，看到毛孩類型與「看推薦」按鈕
+-  需要一般使用者帳號：執行前設定環境變數 `E2E_USER_EMAIL`、`E2E_USER_PASSWORD`（見 `frontend/.env.example`），沒設定時會跳過
+-  後端完成 `PUT /api/matching/profile/game` 前，測試會打開假資料開關保存遊戲結果
+
 ## 測試狀態
 
 | 測試類型 | 通過 | 總數 | 成功率 |
