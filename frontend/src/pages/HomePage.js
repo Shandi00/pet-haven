@@ -352,7 +352,7 @@ const HomePage = () => {
                 
                 <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
                   給每個毛孩
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-primary-600">
+                  <span className="text-primary-600">
                     溫暖的家
                   </span>
                 </h1>
