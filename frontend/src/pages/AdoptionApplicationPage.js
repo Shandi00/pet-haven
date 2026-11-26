@@ -351,7 +351,7 @@ const AdoptionApplicationPage = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">認養申請</h1>
           <p className="text-gray-600">
-            您正在申請認養：<span className="font-semibold text-purple-600">{pet.name}</span>
+            您正在申請認養：<span className="font-semibold text-primary-600">{pet.name}</span>
           </p>
         </div>
 
@@ -385,7 +385,7 @@ const AdoptionApplicationPage = () => {
                   <div
                     className={`w-12 h-12 rounded-full flex items-center justify-center ${
                       step >= s.num
-                        ? 'bg-purple-600 text-white'
+                        ? 'bg-primary-600 text-white'
                         : 'bg-gray-200 text-gray-500'
                     }`}
                   >
@@ -396,7 +396,7 @@ const AdoptionApplicationPage = () => {
                 {idx < 3 && (
                   <div
                     className={`flex-1 h-1 ${
-                      step > s.num ? 'bg-purple-600' : 'bg-gray-200'
+                      step > s.num ? 'bg-primary-600' : 'bg-gray-200'
                     }`}
                   ></div>
                 )}
@@ -541,7 +541,7 @@ const AdoptionApplicationPage = () => {
                   type="checkbox"
                   checked={formData.hasYard}
                   onChange={(e) => handleChange('hasYard', e.target.checked)}
-                  className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
                 <label className="ml-3 text-sm text-gray-700">有庭院或戶外空間</label>
               </div>
@@ -580,7 +580,7 @@ const AdoptionApplicationPage = () => {
                   type="checkbox"
                   checked={formData.hasChildren}
                   onChange={(e) => handleChange('hasChildren', e.target.checked)}
-                  className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
                 <label className="ml-3 text-sm text-gray-700">家中有小孩</label>
               </div>
@@ -605,7 +605,7 @@ const AdoptionApplicationPage = () => {
                   type="checkbox"
                   checked={formData.allMembersAgree}
                   onChange={(e) => handleChange('allMembersAgree', e.target.checked)}
-                  className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
                 <label className="ml-3 text-sm text-gray-700">所有家庭成員同意認養</label>
               </div>
@@ -626,7 +626,7 @@ const AdoptionApplicationPage = () => {
                     type="checkbox"
                     checked={formData.previousPetExperience}
                     onChange={(e) => handleChange('previousPetExperience', e.target.checked)}
-                    className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                    className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                   />
                   <label className="ml-3 text-sm text-gray-700">曾經飼養過寵物</label>
                 </div>
@@ -650,7 +650,7 @@ const AdoptionApplicationPage = () => {
                     type="checkbox"
                     checked={formData.noPetExperience}
                     onChange={(e) => handleChange('noPetExperience', e.target.checked)}
-                    className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                    className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                   />
                   <label className="ml-3 text-sm text-gray-700">無養寵物經驗</label>
                 </div>
@@ -663,7 +663,7 @@ const AdoptionApplicationPage = () => {
                   type="checkbox"
                   checked={formData.currentPets}
                   onChange={(e) => handleChange('currentPets', e.target.checked)}
-                  className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
                 <label className="ml-3 text-sm text-gray-700">目前家中有其他寵物</label>
               </div>

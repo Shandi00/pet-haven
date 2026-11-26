@@ -20,7 +20,7 @@ const MatchAnalysisPanel = ({ matchData, pet }) => {
   const getLevelColor = (level) => {
     const colors = {
       green: 'bg-green-500',
-      blue: 'bg-blue-500',
+      blue: 'bg-primary-500',
       teal: 'bg-teal-500',
       yellow: 'bg-yellow-500',
       red: 'bg-red-500'
@@ -31,7 +31,7 @@ const MatchAnalysisPanel = ({ matchData, pet }) => {
   // 取得分數顏色類別
   const getScoreColor = (score) => {
     if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-blue-600';
+    if (score >= 60) return 'text-primary-600';
     if (score >= 40) return 'text-yellow-600';
     return 'text-red-600';
   };
@@ -39,7 +39,7 @@ const MatchAnalysisPanel = ({ matchData, pet }) => {
   // 取得分數背景顏色
   const getScoreBgColor = (score) => {
     if (score >= 80) return 'bg-green-100';
-    if (score >= 60) return 'bg-blue-100';
+    if (score >= 60) return 'bg-primary-100';
     if (score >= 40) return 'bg-yellow-100';
     return 'bg-red-100';
   };
@@ -50,7 +50,7 @@ const MatchAnalysisPanel = ({ matchData, pet }) => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 text-center"
+        className="bg-gradient-to-br from-primary-50 to-primary-50 rounded-2xl p-8 text-center"
       >
         <div className="flex items-center justify-center mb-4">
           <div className={`${getLevelColor(matchLevel.color)} w-16 h-16 rounded-full flex items-center justify-center`}>
@@ -87,7 +87,7 @@ const MatchAnalysisPanel = ({ matchData, pet }) => {
         className="bg-white rounded-xl shadow-sm p-6"
       >
         <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-purple-600" />
+          <TrendingUp className="w-5 h-5 text-primary-600" />
           詳細分析
         </h3>
 
@@ -155,16 +155,16 @@ const MatchAnalysisPanel = ({ matchData, pet }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
-          className="bg-blue-50 rounded-xl p-6"
+          className="bg-primary-50 rounded-xl p-6"
         >
-          <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-primary-900 mb-3 flex items-center gap-2">
             <Info className="w-5 h-5" />
             特色亮點
           </h3>
           <ul className="space-y-2">
             {analysis.highlights.map((highlight, index) => (
-              <li key={index} className="flex items-start gap-2 text-blue-800">
-                <span className="text-blue-600 mt-0.5"></span>
+              <li key={index} className="flex items-start gap-2 text-primary-800">
+                <span className="text-primary-600 mt-0.5"></span>
                 <span>{highlight}</span>
               </li>
             ))}
@@ -221,7 +221,7 @@ const MatchAnalysisPanel = ({ matchData, pet }) => {
 const ScoreBar = ({ label, score, icon, description }) => {
   const getScoreColor = (score) => {
     if (score >= 80) return 'bg-green-500';
-    if (score >= 60) return 'bg-blue-500';
+    if (score >= 60) return 'bg-primary-500';
     if (score >= 40) return 'bg-yellow-500';
     return 'bg-red-500';
   };
@@ -230,7 +230,7 @@ const ScoreBar = ({ label, score, icon, description }) => {
     <div>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <div className="text-purple-600">{icon}</div>
+          <div className="text-primary-600">{icon}</div>
           <span className="font-medium text-gray-900">{label}</span>
         </div>
         <span className="font-semibold text-gray-900">{Math.round(score)}</span>
@@ -255,9 +255,9 @@ const RecommendationCard = ({ recommendation }) => {
   const getTypeColor = (type) => {
     const colors = {
       positive: 'border-green-200 bg-green-50',
-      neutral: 'border-blue-200 bg-blue-50',
+      neutral: 'border-primary-200 bg-primary-50',
       caution: 'border-yellow-200 bg-yellow-50',
-      tip: 'border-purple-200 bg-purple-50'
+      tip: 'border-primary-200 bg-primary-50'
     };
     return colors[type] || 'border-gray-200 bg-gray-50';
   };

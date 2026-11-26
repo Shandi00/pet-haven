@@ -269,7 +269,7 @@ const DataImportPage = () => {
                 onClick={() => setActiveTab('animals')}
                 className={`px-6 py-4 font-medium ${
                   activeTab === 'animals'
-                    ? 'border-b-2 border-purple-600 text-purple-600'
+                    ? 'border-b-2 border-primary-600 text-primary-600'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -280,7 +280,7 @@ const DataImportPage = () => {
                 onClick={() => setActiveTab('shops')}
                 className={`px-6 py-4 font-medium ${
                   activeTab === 'shops'
-                    ? 'border-b-2 border-purple-600 text-purple-600'
+                    ? 'border-b-2 border-primary-600 text-primary-600'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -357,7 +357,7 @@ const AnimalImportTab = ({
           <select
             value={filters.county}
             onChange={(e) => setFilters({ ...filters, county: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
           >
             <option value="">全部縣市</option>
             {counties.map(county => (
@@ -373,7 +373,7 @@ const AnimalImportTab = ({
           <select
             value={filters.status}
             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
           >
             <option value="">全部狀態</option>
             <option value="開放認養">開放認養</option>
@@ -389,7 +389,7 @@ const AnimalImportTab = ({
           <select
             value={filters.skip}
             onChange={(e) => setFilters({ ...filters, skip: parseInt(e.target.value) })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
           >
             <option value="0">第 1-100 筆</option>
             <option value="100">第 101-200 筆</option>
@@ -406,7 +406,7 @@ const AnimalImportTab = ({
           <select
             value={filters.limit}
             onChange={(e) => setFilters({ ...filters, limit: parseInt(e.target.value) })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
           >
             <option value="50">50 筆</option>
             <option value="100">100 筆</option>
@@ -513,7 +513,7 @@ const AnimalCard = ({ animal, isSelected, onToggle }) => {
   const getStatusColor = (status) => {
     if (!status) return 'bg-gray-100 text-gray-800';
     if (status.includes('開放')) return 'bg-green-100 text-green-800';
-    if (status.includes('已認養')) return 'bg-blue-100 text-blue-800';
+    if (status.includes('已認養')) return 'bg-primary-100 text-primary-800';
     return 'bg-gray-100 text-gray-800';
   };
 
@@ -522,7 +522,7 @@ const AnimalCard = ({ animal, isSelected, onToggle }) => {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       className={`bg-white rounded-lg border-2 overflow-hidden cursor-pointer transition-all ${
-        isSelected ? 'border-purple-600 shadow-lg' : 'border-gray-200 hover:border-purple-300'
+        isSelected ? 'border-primary-600 shadow-lg' : 'border-gray-200 hover:border-primary-300'
       }`}
       onClick={onToggle}
     >
@@ -542,7 +542,7 @@ const AnimalCard = ({ animal, isSelected, onToggle }) => {
         
         {/* 選擇指示器 */}
         {isSelected && (
-          <div className="absolute top-2 right-2 bg-purple-600 text-white rounded-full p-2">
+          <div className="absolute top-2 right-2 bg-primary-600 text-white rounded-full p-2">
             <CheckCircle className="w-5 h-5" />
           </div>
         )}
@@ -587,7 +587,7 @@ const PetShopTab = ({ petShops, filters, setFilters, counties, loading, onFetch 
           <select
             value={filters.county}
             onChange={(e) => setFilters({ ...filters, county: e.target.value, page: 1 })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
           >
             <option value="">全部縣市</option>
             {counties.map(county => (
@@ -603,7 +603,7 @@ const PetShopTab = ({ petShops, filters, setFilters, counties, loading, onFetch 
           <select
             value={filters.limit}
             onChange={(e) => setFilters({ ...filters, limit: parseInt(e.target.value), page: 1 })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
           >
             <option value="20">20 筆</option>
             <option value="50">50 筆</option>

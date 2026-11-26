@@ -249,7 +249,7 @@ const PetEditPage = () => {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">載入中...</p>
         </div>
       </div>
@@ -289,7 +289,7 @@ const PetEditPage = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 ${
                   errors.name ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
@@ -310,7 +310,7 @@ const PetEditPage = () => {
                 name="species"
                 value={formData.species}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               >
                 <option value="dog">狗</option>
                 <option value="cat">貓</option>
@@ -332,7 +332,7 @@ const PetEditPage = () => {
                 name="breed"
                 value={formData.breed}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 ${
                   errors.breed ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
@@ -350,7 +350,7 @@ const PetEditPage = () => {
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               >
                 <option value="male">公</option>
                 <option value="female">母</option>
@@ -370,13 +370,13 @@ const PetEditPage = () => {
                   value={formData.age.value}
                   onChange={handleChange}
                   min="0"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 />
                 <select
                   name="age.unit"
                   value={formData.age.unit}
                   onChange={handleChange}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="years">歲</option>
                   <option value="months">個月</option>
@@ -393,7 +393,7 @@ const PetEditPage = () => {
                 name="size"
                 value={formData.size}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               >
                 <option value="small">小型</option>
                 <option value="medium">中型</option>
@@ -412,7 +412,7 @@ const PetEditPage = () => {
                 name="color"
                 value={formData.color}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 placeholder="例如: 黑色、黃色、花色"
               />
             </div>
@@ -426,7 +426,7 @@ const PetEditPage = () => {
                 name="ageCategory"
                 value={formData.ageCategory}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               >
                 <option value="young">幼年</option>
                 <option value="adult">成年</option>
@@ -445,7 +445,7 @@ const PetEditPage = () => {
                 value={formData.adoptionFee}
                 onChange={handleChange}
                 min="0"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               />
             </div>
 
@@ -458,7 +458,7 @@ const PetEditPage = () => {
                 name="adoptionStatus"
                 value={formData.adoptionStatus}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               >
                 <option value="available">可認養</option>
                 <option value="pending">審核中</option>
@@ -476,7 +476,7 @@ const PetEditPage = () => {
                   name="featured"
                   checked={formData.featured}
                   onChange={handleChange}
-                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
                 <span className="text-sm font-medium text-gray-700">
                   設為特色寵物（首頁顯示）
@@ -499,7 +499,7 @@ const PetEditPage = () => {
                 name="healthStatus.vaccinated"
                 checked={formData.healthStatus.vaccinated}
                 onChange={handleChange}
-                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
               />
               <span className="text-sm font-medium text-gray-700">已接種疫苗</span>
             </label>
@@ -509,7 +509,7 @@ const PetEditPage = () => {
                 name="healthStatus.spayed"
                 checked={formData.healthStatus.spayed}
                 onChange={handleChange}
-                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
               />
               <span className="text-sm font-medium text-gray-700">已結紮</span>
             </label>
@@ -519,7 +519,7 @@ const PetEditPage = () => {
                 name="healthStatus.microchipped"
                 checked={formData.healthStatus.microchipped}
                 onChange={handleChange}
-                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
               />
               <span className="text-sm font-medium text-gray-700">已植入晶片</span>
             </label>
@@ -529,7 +529,7 @@ const PetEditPage = () => {
         {/* 個性特質 */}
         <div className="border-b pb-6">
           <div className="flex items-center gap-2 mb-4">
-            <Users className="w-5 h-5 text-purple-500" />
+            <Users className="w-5 h-5 text-primary-500" />
             <h2 className="text-xl font-semibold text-gray-900">個性特質</h2>
           </div>
           
@@ -542,7 +542,7 @@ const PetEditPage = () => {
               name="personality.activityLevel"
               value={formData.personality.activityLevel}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
             >
               <option value="low">低</option>
               <option value="moderate">中等</option>
@@ -565,7 +565,7 @@ const PetEditPage = () => {
                   onClick={() => handleToggleTrait(trait)}
                   className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                     formData.personality.traits.includes(trait)
-                      ? 'bg-purple-600 text-white'
+                      ? 'bg-primary-600 text-white'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   }`}
                 >
@@ -768,7 +768,7 @@ const PetEditPage = () => {
         {/* 標籤 */}
         <div className="border-b pb-6">
           <div className="flex items-center gap-2 mb-4">
-            <Activity className="w-5 h-5 text-blue-500" />
+            <Activity className="w-5 h-5 text-primary-500" />
             <h2 className="text-xl font-semibold text-gray-900">標籤</h2>
           </div>
           <div className="mb-3">
@@ -779,12 +779,12 @@ const PetEditPage = () => {
                 onChange={(e) => setNewTag(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
                 placeholder="輸入標籤 (例如: 待認養, 親人, 已結紮)"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               />
               <button
                 type="button"
                 onClick={handleAddTag}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 flex items-center gap-2"
               >
                 <Plus className="w-5 h-5" />
                 添加
@@ -795,13 +795,13 @@ const PetEditPage = () => {
             {formData.tags.map((tag, index) => (
               <span
                 key={index}
-                className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+                className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm font-medium"
               >
                 {tag}
                 <button
                   type="button"
                   onClick={() => handleRemoveTag(tag)}
-                  className="hover:bg-blue-200 rounded-full p-0.5"
+                  className="hover:bg-primary-200 rounded-full p-0.5"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -821,7 +821,7 @@ const PetEditPage = () => {
             value={formData.description}
             onChange={handleChange}
             rows={5}
-            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 ${
               errors.description ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="請描述寵物的個性、習慣、健康狀況等..."
@@ -837,9 +837,9 @@ const PetEditPage = () => {
         </div>
 
         {/* Story 3.6: 助養系統設定 */}
-        <div className="border-2 border-orange-200 rounded-lg p-6 bg-gradient-to-r from-orange-50 to-yellow-50">
+        <div className="border-2 border-primary-200 rounded-lg p-6 bg-gradient-to-r from-primary-50 to-yellow-50">
           <div className="flex items-center gap-2 mb-4">
-            <DollarSign className="w-6 h-6 text-orange-600" />
+            <DollarSign className="w-6 h-6 text-primary-600" />
             <h2 className="text-xl font-semibold text-gray-900">助養系統設定</h2>
           </div>
           <p className="text-sm text-gray-600 mb-4">
@@ -856,7 +856,7 @@ const PetEditPage = () => {
                 onChange={handleChange}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
             </label>
             <span className="text-sm font-medium text-gray-900">
               {formData.sponsorship.enabled ? '已啟用' : '未啟用'}
@@ -874,7 +874,7 @@ const PetEditPage = () => {
                 name="sponsorship.externalLink"
                 value={formData.sponsorship.externalLink}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 ${
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 ${
                   errors['sponsorship.externalLink'] ? 'border-red-500' : 'border-gray-300'
                 }`}
                 placeholder="https://example.com/donate"
@@ -904,7 +904,7 @@ const PetEditPage = () => {
           <button
             type="submit"
             disabled={updateMutation.isLoading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 flex items-center gap-2"
           >
             <Save className="w-5 h-5" />
             {updateMutation.isLoading ? '儲存中...' : '儲存變更'}

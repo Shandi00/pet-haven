@@ -400,9 +400,12 @@ import Button from './components/ui/Button';
 ### 樣式規範
 
 - 使用 Tailwind CSS utility classes
-- 主色調: orange-500
+- 配色取自期末專題提案簡報，定義在 `tailwind.config.js`：
+  - 品牌色一律用 `primary-*`（暖橘），不要直接寫 `blue`／`purple`／`orange`
+  - 白字按鈕用 `primary-600` 以上（對白色對比 ≥ 4.5）；`primary-500` 是簡報主橘，用於圖示、外框、大色塊
+  - `gray-*` 已改成暖灰咖啡色階；狀態色沿用綠（成功）、紅（錯誤）、黃（待處理）、藍（資訊、審核中）
 - 統一使用 transition-colors 或 transition-all
-- Focus 狀態: focus:ring-2 focus:ring-orange-500
+- Focus 狀態: focus:ring-2 focus:ring-primary-500
 - Hover 效果: hover:opacity-75 或 hover:bg-xxx
 
 ### PropTypes 範例

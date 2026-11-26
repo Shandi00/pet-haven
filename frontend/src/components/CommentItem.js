@@ -195,7 +195,7 @@ const CommentItem = ({ comment, postId, isReply = false }) => {
     <div className={`bg-white rounded-lg shadow-sm p-6 ${isReply ? 'ml-12' : ''}`}>
       <div className="flex gap-3">
         {/* 頭像 */}
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
           {comment.author?.firstName?.[0] || 'U'}
         </div>
 
@@ -260,13 +260,13 @@ const CommentItem = ({ comment, postId, isReply = false }) => {
                 onChange={(e) => setEditContent(e.target.value)}
                 rows={3}
                 maxLength={1000}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
               />
               <div className="flex gap-2">
                 <button
                   type="submit"
                   disabled={editMutation.isLoading || !editContent.trim()}
-                  className="px-4 py-1 bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50 text-sm"
+                  className="px-4 py-1 bg-primary-600 text-white rounded hover:bg-primary-700 disabled:opacity-50 text-sm"
                 >
                   儲存
                 </button>
@@ -308,7 +308,7 @@ const CommentItem = ({ comment, postId, isReply = false }) => {
               {!isReply && isAuthenticated && (
                 <button
                   onClick={() => setShowReplyForm(!showReplyForm)}
-                  className="flex items-center gap-1 text-sm text-gray-600 hover:text-orange-600 transition-colors"
+                  className="flex items-center gap-1 text-sm text-gray-600 hover:text-primary-600 transition-colors"
                 >
                   <CornerDownRight className="w-4 h-4" />
                   回覆
@@ -318,7 +318,7 @@ const CommentItem = ({ comment, postId, isReply = false }) => {
               {!isReply && replyCount > 0 && (
                 <button
                   onClick={() => setShowReplies(!showReplies)}
-                  className="text-sm text-orange-600 hover:text-orange-700"
+                  className="text-sm text-primary-600 hover:text-primary-700"
                 >
                   {showReplies ? '隱藏' : '查看'} {replyCount} 則回覆
                 </button>

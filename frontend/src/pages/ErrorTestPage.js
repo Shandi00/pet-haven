@@ -61,11 +61,11 @@ function ErrorTestPage() {
               </ul>
             </div>
 
-            <div className="bg-blue-50 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-blue-900 mb-2">
+            <div className="bg-primary-50 rounded-lg p-4">
+              <h3 className="text-sm font-semibold text-primary-900 mb-2">
                 開發提示:
               </h3>
-              <p className="text-sm text-blue-800">
+              <p className="text-sm text-primary-800">
                 生產環境中應該移除或隱藏此測試頁面。
                 可以透過環境變數來控制此頁面的可見性。
               </p>

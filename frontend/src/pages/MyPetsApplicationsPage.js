@@ -94,7 +94,7 @@ const MyPetsApplicationsPage = () => {
       pending: { text: '待審核', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
       'under-review': { text: '審核中', color: 'bg-blue-100 text-blue-800', icon: Clock },
       approved: { text: '已通過', color: 'bg-green-100 text-green-800', icon: CheckCircle },
-      completed: { text: '已完成', color: 'bg-indigo-100 text-indigo-800', icon: CheckCircle },
+      completed: { text: '已完成', color: 'bg-primary-100 text-primary-800', icon: CheckCircle },
       rejected: { text: '已拒絕', color: 'bg-red-100 text-red-800', icon: XCircle },
       cancelled: { text: '已取消', color: 'bg-gray-100 text-gray-800', icon: XCircle }
     };
@@ -132,7 +132,7 @@ const MyPetsApplicationsPage = () => {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto"></div>
             <p className="mt-4 text-gray-600">載入中...</p>
           </div>
         </div>
@@ -158,7 +158,7 @@ const MyPetsApplicationsPage = () => {
                 onClick={() => setFilter(status)}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   filter === status
-                    ? 'bg-orange-500 text-white'
+                    ? 'bg-primary-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -284,7 +284,7 @@ const MyPetsApplicationsPage = () => {
                         <button
                           onClick={() => handleComplete(app._id)}
                           disabled={completeMutation.isLoading}
-                          className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors flex items-center gap-2 disabled:opacity-50"
+                          className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2 disabled:opacity-50"
                         >
                           <Home className="w-4 h-4" />
                           完成認養

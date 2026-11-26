@@ -20,8 +20,8 @@ const SWITCH_LOCK_MS = 400;
 
 // 選項按鈕：平常灰色外框、深灰字，滑鼠移上去變橘色外框；已選時是實心橘色
 const OPTION_BASE = 'flex items-center gap-3 text-left border-2';
-const OPTION_IDLE = `${OPTION_BASE} border-gray-300 hover:border-orange-500`;
-const OPTION_SELECTED = `${OPTION_BASE} border-orange-500`;
+const OPTION_IDLE = `${OPTION_BASE} border-gray-300 hover:border-primary-500`;
+const OPTION_SELECTED = `${OPTION_BASE} border-primary-500`;
 
 const MatchGamePage = () => {
   const navigate = useNavigate();
@@ -165,8 +165,8 @@ const MatchGamePage = () => {
         {status === 'done' && petType && (
           <Card>
             <div className="animate-fade-in flex flex-col items-center text-center py-4">
-              <div className="w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center mb-4">
-                {TypeIcon && <TypeIcon className="w-10 h-10 text-orange-500" aria-hidden="true" />}
+              <div className="w-20 h-20 rounded-full bg-primary-100 flex items-center justify-center mb-4">
+                {TypeIcon && <TypeIcon className="w-10 h-10 text-primary-500" aria-hidden="true" />}
               </div>
               <Badge variant="primary">你的毛孩類型</Badge>
               <h2 className="mt-3 text-2xl font-bold text-gray-900">{petType.label}</h2>

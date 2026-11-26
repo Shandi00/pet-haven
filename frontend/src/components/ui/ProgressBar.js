@@ -19,7 +19,7 @@ const ProgressBar = ({ value, max = 100, label, className = '' }) => {
       className={`w-full h-2 bg-gray-200 rounded-full overflow-hidden ${className}`}
     >
       <div
-        className="h-full bg-orange-500 rounded-full transition-all duration-300"
+        className="h-full bg-primary-500 rounded-full transition-all duration-300"
         style={{ width: `${percent}%` }}
       />
     </div>

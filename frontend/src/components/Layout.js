@@ -77,8 +77,9 @@ const Layout = ({ children }) => {
             <div className="flex items-center min-w-0">
               <Link to="/" className="flex items-center space-x-2 shrink-0">
                 <Heart className="h-8 w-8 text-primary-600" />
+                {/* 手機寬度放不下全名，只顯示「寵愛有家」 */}
                 <span className="font-bold text-lg sm:text-xl text-gray-900 whitespace-nowrap">
-                  愛心認養平台
+                  寵愛有家<span className="hidden sm:inline">-愛心認養平台</span>
                 </span>
               </Link>
 
@@ -257,14 +258,14 @@ const Layout = ({ children }) => {
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
                 <Heart className="h-8 w-8 text-primary-400" />
-                <span className="font-bold text-xl">愛心認養平台</span>
+                <span className="font-bold text-xl">寵愛有家-愛心認養平台</span>
               </div>
               <p className="text-gray-300 mb-4">
                 我們致力於為無家可歸的毛小孩找到溫暖的家，
                 讓每一個生命都能被愛與關懷。
               </p>
               <p className="text-gray-400 text-sm">
-                © 2024 愛心動物認養平台. 保留所有權利.
+                © 2026 寵愛有家-愛心認養平台. 保留所有權利.
               </p>
             </div>
 

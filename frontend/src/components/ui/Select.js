@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const Select = ({ label, error, helperText, fullWidth = false, options = [], className = '', ...props }) => {
-  const baseStyles = 'px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors bg-white';
+  const baseStyles = 'px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors bg-white';
   const errorStyles = error ? 'border-red-500' : 'border-gray-300';
   const widthClass = fullWidth ? 'w-full' : '';
 

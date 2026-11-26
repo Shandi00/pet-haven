@@ -10,10 +10,10 @@ const LoadingSpinner = ({ size = 'md', color = 'orange', className = '' }) => {
   };
 
   const colorClasses = {
-    orange: 'text-orange-500',
+    orange: 'text-primary-500',
     gray: 'text-gray-500',
     white: 'text-white',
-    blue: 'text-blue-500',
+    blue: 'text-primary-500',
   };
 
   return (

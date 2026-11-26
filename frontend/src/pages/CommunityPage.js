@@ -86,7 +86,7 @@ const CommunityPage = () => {
           {isAuthenticated && (
             <Link
               to="/community/create"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
             >
               <Plus className="w-5 h-5" />
               發布貼文
@@ -105,7 +105,7 @@ const CommunityPage = () => {
                   onClick={() => handleTypeChange(type.value)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     activeType === type.value
-                      ? 'bg-purple-600 text-white'
+                      ? 'bg-primary-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >

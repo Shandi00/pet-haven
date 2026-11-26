@@ -59,7 +59,7 @@ const RegisterPage = () => {
         <div className="flex justify-center">
           <Link to="/" className="flex items-center space-x-2">
             <Heart className="h-10 w-10 text-primary-600" />
-            <span className="font-bold text-2xl text-gray-900">愛心認養平台</span>
+            <span className="font-bold text-xl sm:text-2xl text-gray-900">寵愛有家-愛心認養平台</span>
           </Link>
         </div>
         
@@ -454,9 +454,9 @@ const RegisterPage = () => {
           </div>
 
           {/* 註冊好處 */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <h3 className="text-sm font-medium text-blue-900 mb-2">註冊會員的好處：</h3>
-            <ul className="text-sm text-blue-700 space-y-1">
+          <div className="mt-6 p-4 bg-primary-50 rounded-lg">
+            <h3 className="text-sm font-medium text-primary-900 mb-2">註冊會員的好處：</h3>
+            <ul className="text-sm text-primary-700 space-y-1">
               <li>• 提交動物認養申請</li>
               <li>• 追蹤申請進度</li>
               <li>• 收藏心儀的毛小孩</li>

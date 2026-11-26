@@ -54,7 +54,7 @@ const LoginPage = () => {
         <div className="flex justify-center">
           <Link to="/" className="flex items-center space-x-2">
             <Heart className="h-10 w-10 text-primary-600" />
-            <span className="font-bold text-2xl text-gray-900">愛心認養平台</span>
+            <span className="font-bold text-xl sm:text-2xl text-gray-900">寵愛有家-愛心認養平台</span>
           </Link>
         </div>
         

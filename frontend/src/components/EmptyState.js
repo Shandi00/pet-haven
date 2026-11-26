@@ -27,7 +27,7 @@ const EmptyState = ({
       {showAction && actionLink && (
         <Link
           to={actionLink}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
           {actionText}
         </Link>

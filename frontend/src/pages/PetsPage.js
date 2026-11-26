@@ -352,7 +352,7 @@ const PetsPage = () => {
                 <Filter className="w-4 h-4 mr-2" />
                 進階篩選
                 {petsData?.pagination?.totalItems && (
-                  <span className="ml-2 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                  <span className="ml-2 text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded-full">
                     {petsData.pagination.totalItems} 個結果
                   </span>
                 )}
@@ -621,7 +621,7 @@ const PetsPage = () => {
                   </div>
                   <div className="absolute top-4 right-4 flex gap-2">
                     {/* 品種標籤 */}
-                    <span className="bg-purple-600 bg-opacity-90 text-white text-xs px-2 py-1 rounded-full">
+                    <span className="bg-primary-600 bg-opacity-90 text-white text-xs px-2 py-1 rounded-full">
                       {pet.breed}
                     </span>
                     {/* 性別標籤 */}
@@ -642,7 +642,7 @@ const PetsPage = () => {
                           className={`text-xs px-2 py-1 rounded-full font-semibold ${
                             tag.includes('已認養') ? 'bg-green-500 text-white' :
                             tag.includes('審核中') ? 'bg-yellow-500 text-white' :
-                            tag.includes('待認養') ? 'bg-blue-500 text-white' :
+                            tag.includes('待認養') ? 'bg-primary-600 text-white' :
                             'bg-gray-600 bg-opacity-80 text-white'
                           }`}
                         >
@@ -758,7 +758,7 @@ const PetsPage = () => {
           <div className="text-center mt-4">
             <button
               onClick={clearFilters}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
             >
               清除所有篩選
             </button>

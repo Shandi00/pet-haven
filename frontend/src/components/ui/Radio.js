@@ -8,7 +8,7 @@ const Radio = ({ label, error, helperText, className = '', ...props }) => {
         <div className="flex items-center h-5">
           <input
             type="radio"
-            className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500 focus:ring-2 transition-colors cursor-pointer"
+            className="w-4 h-4 text-primary-500 border-gray-300 focus:ring-primary-500 focus:ring-2 transition-colors cursor-pointer"
             {...props}
           />
         </div>

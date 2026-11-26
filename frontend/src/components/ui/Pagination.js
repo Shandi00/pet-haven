@@ -40,7 +40,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, className = '' }) =
           disabled={page === '...'}
           className={`px-4 py-2 rounded-lg border transition-colors ${
             page === currentPage
-              ? 'bg-orange-500 text-white border-orange-500'
+              ? 'bg-primary-600 text-white border-primary-500'
               : 'border-gray-300 text-gray-700 hover:bg-gray-50 disabled:cursor-default'
           }`}
         >

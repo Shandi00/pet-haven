@@ -8,7 +8,7 @@ import { Skeleton } from './ui';
 const RecommendationSection = ({ recommendations = [], isLoading, hasPreferences, onRefresh, isRefreshing }) => {
   if (isLoading) {
     return (
-      <section className="py-20 bg-gradient-to-br from-purple-50 to-pink-50">
+      <section className="py-20 bg-gradient-to-br from-primary-50 to-primary-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <Skeleton className="h-10 w-64 mx-auto mb-4" />
@@ -31,25 +31,25 @@ const RecommendationSection = ({ recommendations = [], isLoading, hasPreferences
   }
 
   return (
-    <section className="py-20 bg-gradient-to-br from-purple-50 to-pink-50">
+    <section className="py-20 bg-gradient-to-br from-primary-50 to-primary-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-4 mb-4">
             <h2 className="text-4xl font-bold text-gray-900">為你推薦</h2>
             <button onClick={onRefresh} disabled={isRefreshing} className={isRefreshing ? 'p-2 rounded-full bg-white shadow-md animate-spin' : 'p-2 rounded-full bg-white shadow-md hover:shadow-lg hover:rotate-180 transition-all'} title="重新整理推薦">
-              <RefreshCw className="w-5 h-5 text-purple-600" />
+              <RefreshCw className="w-5 h-5 text-primary-600" />
             </button>
           </div>
           <p className="text-xl text-gray-600">根據你的偏好，為你精選最適合的毛孩</p>
         </div>
 
         {!hasPreferences && (
-          <div className="max-w-2xl mx-auto mb-8 p-6 bg-white rounded-2xl shadow-lg border-2 border-dashed border-purple-300">
+          <div className="max-w-2xl mx-auto mb-8 p-6 bg-white rounded-2xl shadow-lg border-2 border-dashed border-primary-300">
             <div className="text-center">
-              <Settings className="w-12 h-12 text-purple-600 mx-auto mb-4" />
+              <Settings className="w-12 h-12 text-primary-600 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-900 mb-2">尚未設定偏好</h3>
               <p className="text-gray-600 mb-4">設定你的認養偏好，我們將為你提供更精準的推薦</p>
-              <Link to="/profile?tab=preferences" className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all">
+              <Link to="/profile?tab=preferences" className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all">
                 <Settings className="w-5 h-5 mr-2" />設定偏好
               </Link>
             </div>
