@@ -102,8 +102,8 @@ const RegisterPage = () => {
                       message: '使用者名稱不能超過 30 個字元',
                     },
                     pattern: {
-                      value: /^[a-zA-Z0-9_]+$/,
-                      message: '使用者名稱只能包含英文字母、數字和底線',
+                      value: /^[a-zA-Z0-9]+$/,
+                      message: '使用者名稱只能包含英文字母和數字',
                     },
                   })}
                 />
@@ -304,6 +304,11 @@ const RegisterPage = () => {
                       value: 6,
                       message: '密碼至少需要 6 個字元',
                     },
+                    // 與後端 REGISTER_SCHEMA 相同
+                    pattern: {
+                      value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+                      message: '密碼必須包含大小寫字母和數字',
+                    },
                   })}
                 />
                 <button
@@ -317,8 +322,10 @@ const RegisterPage = () => {
                     <Eye className="h-5 w-5 text-gray-400" />
                   )}
                 </button>
-                {errors.password && (
+                {errors.password ? (
                   <p className="form-error">{errors.password.message}</p>
+                ) : (
+                  <p className="mt-1 text-xs text-gray-500">至少 6 個字元，需包含大寫、小寫字母和數字</p>
                 )}
               </div>
             </div>
