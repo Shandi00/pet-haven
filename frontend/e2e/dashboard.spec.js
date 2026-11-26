@@ -1,5 +1,8 @@
 ﻿const { test, expect } = require('@playwright/test');
 
+// repo 是公開的，管理員帳密只從環境變數讀取；用 backend/scripts/create_admin 建立
+const { E2E_ADMIN_EMAIL, E2E_ADMIN_PASSWORD } = process.env;
+
 // 管理員登入輔助函式
 async function loginAsAdmin(page) {
   await page.goto('/login', { waitUntil: 'networkidle' });
@@ -7,8 +10,8 @@ async function loginAsAdmin(page) {
   
   // 等待並填寫表單
   await page.waitForSelector('input#email', { state: 'visible', timeout: 15000 });
-  await page.fill('input#email', 'admin@petadoption.com', { timeout: 10000 });
-  await page.fill('input#password', 'Admin123456', { timeout: 10000 });
+  await page.fill('input#email', E2E_ADMIN_EMAIL, { timeout: 10000 });
+  await page.fill('input#password', E2E_ADMIN_PASSWORD, { timeout: 10000 });
   
   // 點擊登入
   const loginButton = page.locator('button[type="submit"]').filter({ hasText: '登入' });
@@ -20,6 +23,8 @@ async function loginAsAdmin(page) {
 }
 
 test.describe('管理員儀表板測試', () => {
+  test.skip(!E2E_ADMIN_EMAIL || !E2E_ADMIN_PASSWORD, '未設定 E2E_ADMIN_EMAIL／E2E_ADMIN_PASSWORD');
+
   test('應該能夠存取管理員儀表板', async ({ page }) => {
     await loginAsAdmin(page);
     

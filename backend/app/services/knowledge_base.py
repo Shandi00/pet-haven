@@ -93,9 +93,13 @@ def _load() -> list[dict]:
     return valid
 
 
+def ranked(query: str, entries: list[dict]) -> list[tuple[float, dict]]:
+    """所有達到門檻的 (分數, 條目)，分數高的在前；檢查工具也用這個顯示分數。"""
+    qb = bigrams(query) - STOP_BIGRAMS
+    scored = [(score(qb, e), e) for e in entries]
+    return sorted((se for se in scored if se[0] >= MIN_SCORE), key=lambda se: (-se[0], se[1]["id"]))
+
+
 def search(query: str, k: int = TOP_K) -> list[dict]:
     """回傳最相關的前 k 筆 {id, title, content, source}；查無資料回空陣列。"""
-    qb = bigrams(query) - STOP_BIGRAMS
-    scored = [(score(qb, e), e) for e in _load()]
-    hits = sorted((se for se in scored if se[0] >= MIN_SCORE), key=lambda se: (-se[0], se[1]["id"]))
-    return [{f: e[f] for f in _FIELDS} for _, e in hits[:k]]
+    return [{f: e[f] for f in _FIELDS} for _, e in ranked(query, _load())[:k]]

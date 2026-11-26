@@ -17,7 +17,8 @@ const AdoptionApplicationPage = () => {
     ['pet', petId],
     () => petAPI.getPet(petId),
     {
-      select: (response) => response.data,
+      // 後端回傳 { pet }，與 PetDetailPage 相同的取法
+      select: (response) => response.data?.pet || response.pet,
     }
   );
 

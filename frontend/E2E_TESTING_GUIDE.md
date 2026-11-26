@@ -81,6 +81,13 @@ npm run test:e2e:headed
 -  點擊統計卡片導航
 -  查看寵物管理
 
+### 認養流程測試 (adoption-flow.spec.js，T17)
+-  認養者填寫申請表送出 → 收容所在「收到的認養申請」按通過 → 認養者看到「已通過」→ 完成後看到「已完成」
+-  本機第一次執行前要先下載瀏覽器：在 `frontend/` 執行 `npx playwright install chromium ffmpeg`
+-  完成認養目前沒有畫面，改用 API（`POST /api/adoptions/:id/complete`）
+-  需要先 `npm run seed`（收容所帳號 shelter@example.com）；每次會建立一個新的 `e2e<時間戳>` 認養者帳號與一筆已完成的申請
+-  結束時把用到的動物改回「待認養」；若中途被中斷導致動物停在「審核中」或「已認養」，用 shelter 帳號把它改回 available，或執行 `npm run seed -- --clear`（會刪除所有寵物後重建）
+
 ### 配對小遊戲測試 (match-game.spec.js)
 -  登入後答完 8 題，看到毛孩類型與「看推薦」按鈕
 -  需要一般使用者帳號：執行前設定環境變數 `E2E_USER_EMAIL`、`E2E_USER_PASSWORD`（見 `frontend/.env.example`），沒設定時會跳過
@@ -155,8 +162,13 @@ npx playwright test --update-snapshots
 - 基礎 URL: http://localhost:3000
 
 ### 測試資料
-- 管理員帳號: admin@petadoption.com
-- 管理員密碼: Admin123456
+- 管理員帳密**不寫進 repo**（repo 是公開的）。管理員相關測試（`auth.spec.js` 的管理員登入、`dashboard.spec.js`）從環境變數讀取，沒設定時會略過：
+  1. 在 `backend/` 執行 `.venv/Scripts/python -m scripts.create_admin --email <email>` 建立本機管理員（沒給 `--password` 會產生隨機密碼）
+  2. 執行測試前設定環境變數（PowerShell）：
+     ```powershell
+     $env:E2E_ADMIN_EMAIL = "<email>"; $env:E2E_ADMIN_PASSWORD = "<密碼>"
+     ```
+- 這組帳密只用在本機與 CI，不可用在任何對外環境
 
 ## 參考資源
 

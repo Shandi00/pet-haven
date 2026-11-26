@@ -43,6 +43,14 @@ def test_rule_reason_skips_claims_about_unfilled_profiles():
         assert not any(claim in s for s in said), claim
 
 
+def test_rule_reason_treats_new_user_defaults_as_unfilled():
+    # 註冊時 new_user_doc 給的預設值（空陣列＋lastUpdated）不是使用者填的
+    from app.models.user import new_user_doc
+    user = new_user_doc(username="u", email="u@example.test", password="x", firstName="a", lastName="b")
+    r = ai_explain.rule_reason(PET, user)
+    assert not any("家庭環境" in s or "生活方式" in s for s in r["highlights"] + r["cautions"] + [r["summary"]])
+
+
 def test_rule_reason_keeps_claims_about_filled_profiles():
     user = {"environmentProfile": {"hasChildren": False, "hasOtherPets": False},
             "lifestyleProfile": {"activityLevel": "low", "availableTime": "minimal", "housingType": "apartment"},
