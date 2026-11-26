@@ -61,3 +61,18 @@ def test_feedback_validation(api, make_user, make_pet):
         assert r.status_code == 400 and r.json()["success"] is False, body
     assert api.post("/api/matching/feedback", json={"petId": "6b06a40e4382ba73f6fb0000", "verdict": "like"},
                     headers=h).status_code == 404
+
+
+def test_top3_and_feedback_are_rate_limited(api, make_user, make_pet, monkeypatch):
+    from app.core.ratelimit import UserRateLimiter
+    from app.routers import matching
+
+    owner, _ = make_user("shelter")
+    _, h = make_user()
+    pid = str(make_pet(owner)["_id"])
+    monkeypatch.setattr(matching, "matching_limiter", UserRateLimiter(2, 60, enabled=True))
+    assert api.get("/api/matching/top3", headers=h).status_code == 200
+    assert api.post("/api/matching/feedback", json={"petId": pid, "verdict": "like"}, headers=h).status_code == 200
+    r = api.get("/api/matching/top3", headers=h)
+    assert r.status_code == 429 and r.json()["message"] == "呼叫太頻繁，請稍後再試"
+    assert api.post("/api/matching/feedback", json={"petId": pid, "verdict": "like"}, headers=h).status_code == 429

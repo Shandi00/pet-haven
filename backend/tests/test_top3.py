@@ -99,3 +99,21 @@ def test_pet_summary_photo_and_avoided_note():
     assert top3.pet_summary(pet(photos=[{"url": "/a.jpg"}]))["photo"] == "/a.jpg"
     assert top3.avoided_note(pet(name="阿福"))["note"] == "已避開：阿福（狗，活動量高），並降低相似動物的排序"
     assert top3.avoided_note(pet(name="咪", species="cat", personality={}))["note"] == "已避開：咪（貓），並降低相似動物的排序"
+
+
+def test_explain_within_timeout_falls_back_to_rule(monkeypatch):
+    import asyncio
+
+    from app.services import ai_explain
+
+    async def slow(p, u):
+        await asyncio.sleep(1)
+        return {"source": "ai"}
+    monkeypatch.setattr(top3, "explain", slow)
+    p = pet()
+    assert asyncio.run(top3._explain_within(p, {}, 0.05)) == ai_explain.rule_reason(p, {})
+
+    async def fast(p, u):
+        return {"source": "ai"}
+    monkeypatch.setattr(top3, "explain", fast)
+    assert asyncio.run(top3._explain_within(p, {}, 0.05)) == {"source": "ai"}

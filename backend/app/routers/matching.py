@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.core.ids import oid
+from app.core.ratelimit import matching_limiter
 from app.core.schema import Arr, F, cast, validate as schema_validate
 from app.core.serialize import to_json
 from app.db import get_db
@@ -145,11 +146,13 @@ async def get_profile(user: dict = Depends(current_user)):
 
 @router.get("/top3", summary="Top 3 推薦與理由")
 async def top3(user: dict = Depends(current_user)):
+    matching_limiter.check(user["_id"])
     return {"success": True, "data": await build_top3(await _full_user(user))}
 
 
 @router.post("/feedback", summary="適合／不適合回饋；不適合時回傳重排後的 Top 3")
 async def feedback(body: dict | None = None, user: dict = Depends(current_user)):
+    matching_limiter.check(user["_id"])
     b = body or {}
     verdict, pet_id = b.get("verdict"), b.get("petId")
     pid = oid(pet_id) if isinstance(pet_id, str) else None

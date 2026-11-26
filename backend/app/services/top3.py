@@ -6,7 +6,8 @@ from datetime import datetime, timezone
 from app.core.serialize import to_json
 from app.db import get_db
 from app.services.advanced_matching import calculate_match, match_level
-from app.services.ai_explain import explain
+from app.config import get_settings
+from app.services.ai_explain import explain, rule_reason
 
 TOP_N = 3
 PENALTY_STEP = 5
@@ -93,6 +94,14 @@ def avoided_note(pet: dict) -> dict:
     return {"petId": str(pet["_id"]), "name": name, "note": f"已避開：{name}（{'，'.join(parts)}），並降低相似動物的排序"}
 
 
+async def _explain_within(pet: dict, user: dict, timeout: float) -> dict:
+    # 契約 §2：3 隻並行產生，整體不超過 LLM_TIMEOUT_SECONDS；逾時的那隻改用規則理由
+    try:
+        return await asyncio.wait_for(explain(pet, user), timeout)
+    except asyncio.TimeoutError:
+        return rule_reason(pet, user)
+
+
 async def build_top3(user: dict) -> dict:
     db = get_db()
     dislikes = sorted((f for f in (user.get("matchFeedback") or []) if f.get("verdict") == "dislike"),
@@ -102,7 +111,8 @@ async def build_top3(user: dict) -> dict:
     candidates = await db.pets.find({"adoptionStatus": "available", "isActive": True}).to_list(None)
     candidates = [p for p in candidates if passes_hard_rules(p, user, set(disliked_ids))]
     top = rank(candidates, user, disliked_pets)
-    reasons = await asyncio.gather(*(explain(r["pet"], user) for r in top))
+    timeout = get_settings().llm_timeout_seconds
+    reasons = await asyncio.gather(*(_explain_within(r["pet"], user, timeout) for r in top))
     by_id = {p["_id"]: p for p in disliked_pets}
     return to_json({
         "items": [{"pet": pet_summary(r["pet"]), "score": r["score"], "matchLevel": r["matchLevel"], "reason": reason}
