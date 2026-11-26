@@ -33,6 +33,7 @@ import MyPetsApplicationsPage from './pages/MyPetsApplicationsPage'; // 送養�
 import MyPetsPage from './pages/MyPetsPage'; // 我的送養動物列表頁面
 import EditPetPage from './pages/EditPetPage'; // 編輯送養動物頁面
 import MatchGamePage from './pages/MatchGamePage'; // 配對小遊戲（T10）
+import RecommendationsPage from './pages/RecommendationsPage'; // Top 3 推薦與回饋（T15）
 
 // 導入布局組件
 import Layout from './components/Layout';
@@ -108,6 +109,7 @@ function App() {
                 <Route path="/my-pets" element={<Layout><MyPetsPage /></Layout>} /> {/* 我的送養列表 */}
                 <Route path="/pets/:id/edit" element={<Layout><EditPetPage /></Layout>} /> {/* 編輯送養動物 */}
                 <Route path="/match-game" element={<ProtectedRoute><Layout><MatchGamePage /></Layout></ProtectedRoute>} /> {/* 配對小遊戲（T10） */}
+                <Route path="/recommendations" element={<ProtectedRoute><Layout><RecommendationsPage /></Layout></ProtectedRoute>} /> {/* Top 3 推薦（T15） */}
                 
                 {/* 重定向根路徑到首頁 */}
                 <Route path="*" element={<Navigate to="/" replace />} />

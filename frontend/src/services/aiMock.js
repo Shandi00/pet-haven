@@ -77,7 +77,11 @@ export const aiMock = {
       return ok({
         reply: '這可能和健康狀況有關，建議盡快帶牠去看獸醫。',
         sources: [],
-        actions: [{ label: '看推薦動物', to: '/recommendations' }],
+        // 契約 §4：actions 每次都提供兩個
+        actions: [
+          { label: '去玩配對遊戲', to: '/match-game' },
+          { label: '看推薦動物', to: '/recommendations' },
+        ],
         refused: true,
         source: 'rule',
       });

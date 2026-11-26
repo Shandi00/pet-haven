@@ -10,10 +10,6 @@ test.describe('配對小遊戲', () => {
 
   test('答完 8 題後看到毛孩類型與「看推薦」按鈕', async ({ page }) => {
     await page.goto('/login?redirect=/match-game', { waitUntil: 'networkidle' });
-    // 後端還沒有 PUT /api/matching/profile/game（後端計畫 Task 4），先用假資料開關保存遊戲結果；
-    // 三支既有的配對檔案 API 仍然打真的後端
-    await page.evaluate(() => window.localStorage.setItem('useMockData', 'true'));
-
     await page.fill('input#email', email);
     await page.fill('input#password', password);
     await page.locator('button[type="submit"]').filter({ hasText: '登入' }).click();
@@ -26,7 +22,12 @@ test.describe('配對小遊戲', () => {
 
     // 每題都選第一個選項，結果是戶外冒險型（見 docs/features/配對遊戲題目對照表.md 的計分範例）
     await expect(page.getByRole('heading', { name: '戶外冒險型' })).toBeVisible({ timeout: 15000 });
-    await expect(page.getByRole('button', { name: '看推薦' })).toBeVisible();
-    // 推薦頁 /recommendations 由 Task 4 新增；完成後在這裡補上「點看推薦 → 網址變成 /recommendations」
+    await page.getByRole('button', { name: '看推薦' }).click();
+    await expect(page).toHaveURL(/\/recommendations$/);
+
+    // 遊戲結果存在後端：配對檔案分頁顯示毛孩類型與「再玩一次」
+    await page.goto('/profile?tab=matching');
+    await expect(page.getByRole('heading', { name: '戶外冒險型' })).toBeVisible();
+    await expect(page.getByRole('button', { name: '再玩一次' })).toBeVisible();
   });
 });

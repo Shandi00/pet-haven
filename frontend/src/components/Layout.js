@@ -15,9 +15,11 @@ import {
   MessageCircle,
   Heart as HeartIcon,
   Database,
-  Mail
+  Mail,
+  Sparkles
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
+import ChatWidget from './ChatWidget';
 
 const Layout = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -34,7 +36,9 @@ const Layout = ({ children }) => {
   const navigation = [
     { name: '首頁', href: '/', icon: Home },
     { name: '尋找毛小孩', href: '/pets', icon: Search },
-    { name: '發布送養', href: '/pets/create', icon: HeartIcon }, 
+    // Top 3 推薦要登入才能用（T15）
+    ...(isAuthenticated ? [{ name: '為你推薦', href: '/recommendations', icon: Sparkles }] : []),
+    { name: '發布送養', href: '/pets/create', icon: HeartIcon },
     { name: '社群留言板', href: '/community', icon: MessageCircle },
     { name: '資源整合', href: '/resources', icon: HeartIcon },
   ];
@@ -249,6 +253,9 @@ const Layout = ({ children }) => {
       <main className="flex-1">
         {children}
       </main>
+
+      {/* AI 小幫手（T15）：登入後在右下角顯示；私訊對話頁不顯示，避免蓋住送出按鈕 */}
+      {isAuthenticated && !location.pathname.startsWith('/messages/') && <ChatWidget />}
 
       {/* 頁腳 */}
       <footer className="bg-gray-800 text-white">
