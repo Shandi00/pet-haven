@@ -84,3 +84,16 @@ def test_failure_log_has_status_but_no_prompt(monkeypatch, caplog):
     with caplog.at_level("WARNING", logger="app.services.llm"):
         asyncio.run(llm.generate_json("sys", "秘密提示"))
     assert "status=404" in caplog.text and "秘密提示" not in caplog.text and "test-key" not in caplog.text
+
+
+def test_generate_json_enforces_total_deadline(monkeypatch, caplog):
+    # httpx 的 timeout 是每個階段各自計算，不是整體期限；契約 §0 要整體不超過 LLM_TIMEOUT_SECONDS
+    monkeypatch.setattr(llm, "get_settings", lambda: SimpleNamespace(**{**vars(SETTINGS), "llm_timeout_seconds": 0.05}))
+
+    async def slow(url, key, body, timeout):
+        await asyncio.sleep(1)
+        return _reply("{}")
+    monkeypatch.setattr(llm, "_post", slow)
+    with caplog.at_level("WARNING", logger="app.services.llm"):
+        assert asyncio.run(llm.generate_json("sys", "prompt")) is None
+    assert "type=TimeoutError" in caplog.text

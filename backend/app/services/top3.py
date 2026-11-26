@@ -63,11 +63,11 @@ def rank(pets: list[dict], user: dict, disliked_pets: list[dict]) -> list[dict]:
     for p in pets:
         # 四捨五入用 floor(x + 0.5)；round() 是銀行家捨入，扣 5 分後可能差 1
         rounded = math.floor(calculate_match(p, user, normalized=True)["matchScore"] - penalty(p, disliked_pets) + 0.5)
-        # environment 最高 110，加權後仍可能略超過 100；顯示夾在 0–100，排序用未夾的整數
+        # environment 最高 110，加權後仍可能略超過 100；顯示夾在 0–100，同分（畫面上的分數）較新的排前面
         score = min(100, max(0, rounded))
-        scored.append({"pet": p, "rounded": rounded, "score": score, "matchLevel": match_level(score)["level"]})
-    scored.sort(key=lambda r: (r["rounded"], _created_at(r["pet"])), reverse=True)
-    return [{k: r[k] for k in ("pet", "score", "matchLevel")} for r in scored[:TOP_N]]
+        scored.append({"pet": p, "score": score, "matchLevel": match_level(score)["level"]})
+    scored.sort(key=lambda r: (r["score"], _created_at(r["pet"])), reverse=True)
+    return scored[:TOP_N]
 
 
 def pet_summary(pet: dict) -> dict:
@@ -111,7 +111,8 @@ async def build_top3(user: dict) -> dict:
     candidates = await db.pets.find({"adoptionStatus": "available", "isActive": True}).to_list(None)
     candidates = [p for p in candidates if passes_hard_rules(p, user, set(disliked_ids))]
     top = rank(candidates, user, disliked_pets)
-    timeout = get_settings().llm_timeout_seconds
+    # 多留 0.5 秒：讓 llm 內層的期限先到，失敗才會記錄；外層只是保險
+    timeout = get_settings().llm_timeout_seconds + 0.5
     reasons = await asyncio.gather(*(_explain_within(r["pet"], user, timeout) for r in top))
     by_id = {p["_id"]: p for p in disliked_pets}
     return to_json({

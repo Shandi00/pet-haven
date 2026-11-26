@@ -117,3 +117,13 @@ def test_explain_within_timeout_falls_back_to_rule(monkeypatch):
         return {"source": "ai"}
     monkeypatch.setattr(top3, "explain", fast)
     assert asyncio.run(top3._explain_within(p, {}, 0.05)) == {"source": "ai"}
+
+
+def test_rank_tie_on_displayed_100_prefers_newer(monkeypatch):
+    # 原始分數略超過 100 時顯示都是 100；契約：畫面上同分，較新上架的排前面
+    raw = {"舊": 101.6, "新": 100.2}
+    monkeypatch.setattr(top3, "calculate_match", lambda p, u, **_: {"matchScore": raw[p["name"]]})
+    older = pet(name="舊", createdAt=datetime(2026, 1, 1, tzinfo=timezone.utc))
+    newer = pet(name="新", createdAt=datetime(2026, 11, 1, tzinfo=timezone.utc))
+    ranked = top3.rank([older, newer], {}, [])
+    assert [r["score"] for r in ranked] == [100, 100] and [r["pet"]["name"] for r in ranked] == ["新", "舊"]

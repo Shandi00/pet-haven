@@ -1,4 +1,5 @@
 """Gemini 呼叫層（T12）：只負責送出請求與解析 JSON；任何失敗都回 None，由呼叫端改用備援。"""
+import asyncio
 import json
 import logging
 import time
@@ -30,8 +31,11 @@ async def generate_json(system: str, prompt: str) -> dict | None:
     }
     start = time.monotonic()
     try:
-        data = await _post(f"{API_BASE}/models/{s.gemini_model}:generateContent", s.gemini_api_key, body,
-                           s.llm_timeout_seconds)
+        # httpx 的 timeout 是每個階段各自計算；外層 wait_for 才是契約 §0 的整體期限
+        data = await asyncio.wait_for(
+            _post(f"{API_BASE}/models/{s.gemini_model}:generateContent", s.gemini_api_key, body,
+                  s.llm_timeout_seconds),
+            s.llm_timeout_seconds)
         result = json.loads(data["candidates"][0]["content"]["parts"][0]["text"])
         if not isinstance(result, dict):
             raise ValueError("not a JSON object")
