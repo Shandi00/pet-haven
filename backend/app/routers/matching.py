@@ -8,8 +8,10 @@ from app.core.ids import oid
 from app.core.ratelimit import matching_limiter
 from app.core.schema import Arr, F, cast, validate as schema_validate
 from app.core.serialize import to_json
+from app.core.validation import A, O, S, validate
 from app.db import get_db
 from app.deps import current_user
+from app.responses import RawError
 from app.services.advanced_matching import batch_calculate_matches, calculate_match, find_best_matches
 from app.services.top3 import build_top3
 
@@ -34,6 +36,14 @@ ENVIRONMENT = {
     "noiseSensitive": F("bool"),
     "hasAllergies": F("bool"),
 }
+# 契約 §1：8 題各一筆、題號不重複（另外檢查）、選項 A–D
+GAME = O({
+    "answers": A(O({"questionId": S(required=True, valid=tuple(f"q{i}" for i in range(1, 9))),
+                    "optionId": S(required=True, valid=("A", "B", "C", "D"))}), required=True, min=8, max=8),
+    "petType": O({"code": S(required=True, pattern=r"^[A-Za-z0-9-]{1,50}$"),
+                  "label": S(required=True, max=20),
+                  "description": S(max=100, allow=("",))}, required=True),
+})
 
 
 def _int(value, default: int) -> int:
@@ -134,14 +144,34 @@ async def update_environment(body: dict | None = None, user: dict = Depends(curr
     }, "環境檔案更新成功")
 
 
-@router.get("/profile", summary="取得配對檔案")
+@router.put("/profile/game", summary="儲存配對小遊戲結果（8 題答案與毛孩類型，再玩一次整筆覆蓋）")
+async def save_game_profile(body: dict | None = None, user: dict = Depends(current_user)):
+    try:
+        data = validate(GAME, body)
+    except RawError:
+        raise HTTPException(400, "參數錯誤")
+    if len({a["questionId"] for a in data["answers"]}) != 8:
+        raise HTTPException(400, "參數錯誤")
+    # 只保存結果；配對欄位由前端先呼叫 lifestyle／experience／environment 三支 API 寫入
+    game = {**data, "completedAt": datetime.now(timezone.utc)}
+    result = await get_db().users.update_one({"_id": user["_id"]}, {"$set": {
+        "gameProfile": game, "updatedAt": datetime.now(timezone.utc)}})
+    if result.matched_count == 0:
+        raise HTTPException(404, "找不到使用者")
+    return {"success": True, "data": {"gameProfile": to_json(game)}}
+
+
+@router.get("/profile", summary="取得配對檔案（含遊戲結果 gameProfile，沒玩過為 null）")
 async def get_profile(user: dict = Depends(current_user)):
     full = await get_db().users.find_one({"_id": user["_id"]}, {
-        "recommendationProfile": 1, "lifestyleProfile": 1, "experienceProfile": 1, "environmentProfile": 1})
+        "recommendationProfile": 1, "lifestyleProfile": 1, "experienceProfile": 1, "environmentProfile": 1,
+        "gameProfile": 1})
     if not full:
         raise HTTPException(404, "找不到使用者")
-    return {"success": True, "data": to_json({k: full.get(k) or {} for k in (
-        "recommendationProfile", "lifestyleProfile", "experienceProfile", "environmentProfile")})}
+    return {"success": True, "data": to_json({
+        **{k: full.get(k) or {} for k in (
+            "recommendationProfile", "lifestyleProfile", "experienceProfile", "environmentProfile")},
+        "gameProfile": full.get("gameProfile")})}
 
 
 @router.get("/top3", summary="Top 3 推薦與理由")

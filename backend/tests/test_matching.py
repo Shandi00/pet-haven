@@ -75,3 +75,49 @@ def test_profile_endpoints_and_analysis(api, make_user, make_pet):
     assert batch["data"]["count"] == 1
     assert api.post("/api/matching/batch-analyze", json={}, headers=h).status_code == 400
     assert api.get("/api/matching/analyze/abc", headers=h).status_code == 404
+
+
+GAME = {
+    "answers": [{"questionId": f"q{i}", "optionId": "A"} for i in range(1, 9)],
+    "petType": {"code": "outdoor-buddy", "label": "戶外冒險型", "description": "適合活動量高的毛孩"},
+}
+
+
+def test_save_game_profile(api, make_user):
+    _, h = make_user()
+    assert api.get("/api/matching/profile", headers=h).json()["data"]["gameProfile"] is None  # 沒玩過
+    res = api.put("/api/matching/profile/game", json=GAME, headers=h)
+    assert res.status_code == 200
+    saved = res.json()["data"]["gameProfile"]
+    assert saved["petType"] == GAME["petType"] and saved["answers"] == GAME["answers"] and saved["completedAt"]
+    prof = api.get("/api/matching/profile", headers=h).json()["data"]
+    assert prof["gameProfile"]["answers"] == GAME["answers"]
+    assert prof["gameProfile"]["petType"]["label"] == "戶外冒險型"
+    # 再玩一次整筆覆蓋；不會改動配對欄位
+    again = {**GAME, "petType": {"code": "couch-buddy", "label": "居家宅宅型"}}
+    assert api.put("/api/matching/profile/game", json=again, headers=h).status_code == 200
+    prof = api.get("/api/matching/profile", headers=h).json()["data"]
+    assert prof["gameProfile"]["petType"] == {"code": "couch-buddy", "label": "居家宅宅型"}
+    assert prof["lifestyleProfile"] == {}
+
+
+@pytest.mark.parametrize("bad", [
+    {**GAME, "answers": GAME["answers"][:7]},                                                   # 只有 7 題
+    {**GAME, "answers": GAME["answers"][:7] + [{"questionId": "q1", "optionId": "B"}]},         # 題號重複
+    {**GAME, "answers": GAME["answers"][:7] + [{"questionId": "q9", "optionId": "A"}]},         # 題號超出範圍
+    {**GAME, "answers": GAME["answers"][:7] + [{"questionId": "q8", "optionId": "E"}]},         # 選項不是 A-D
+    {**GAME, "petType": {**GAME["petType"], "code": "outdoor buddy!"}},                         # code 有空白與符號
+    {**GAME, "petType": {**GAME["petType"], "label": "字" * 21}},                               # label 超過 20 字
+    {**GAME, "petType": {**GAME["petType"], "description": "字" * 101}},                        # 說明超過 100 字
+    {"answers": GAME["answers"]},                                                               # 沒有 petType
+    {"answers": "q1", "petType": GAME["petType"]},
+])
+def test_game_profile_validation(api, make_user, bad):
+    _, h = make_user()
+    res = api.put("/api/matching/profile/game", json=bad, headers=h)
+    assert res.status_code == 400 and res.json() == {"success": False, "message": "參數錯誤"}
+    assert api.get("/api/matching/profile", headers=h).json()["data"]["gameProfile"] is None  # 不寫入任何資料
+
+
+def test_game_profile_requires_login(client):
+    assert client.put("/api/matching/profile/game", json=GAME).status_code == 401

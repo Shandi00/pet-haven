@@ -33,6 +33,8 @@ def new_user_doc(**fields) -> dict:
         "lifestyleProfile": {"lastUpdated": now},
         "experienceProfile": {"petOwnershipExperience": "none", "previousPets": [], "lastUpdated": now},
         "environmentProfile": {"childrenAges": [], "otherPets": [], "lastUpdated": now},
+        "gameProfile": None,  # 配對小遊戲結果（T10）
+        "matchFeedback": [],  # Top 3 適合／不適合回饋（T13）
         "browsingHistory": [],
         "favorites": [],
         "collections": [],
