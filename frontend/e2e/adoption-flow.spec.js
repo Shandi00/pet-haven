@@ -140,12 +140,16 @@ test.describe.serial('認養流程：申請 → 審核通過 → 完成 → 認�
     await expect(adopter.getByRole('heading', { name: '我的認養申請' })).toBeVisible();
     await expect(adopterCard(adopter, pet.name)).toContainText('已通過');
 
-    // 3. 完成認養：前端沒有任何頁面呼叫 POST /api/adoptions/:id/complete
-    //    （api.js 有 completeAdoption 但沒有頁面使用），所以這一步改用 API，身分仍是收容所。
-    const done = await api.post(`adoptions/${adoptionId}/complete`, {
-      headers: { Authorization: `Bearer ${shelterToken}` }, data: {} });
+    // 3. 收容所在同一張卡片按「完成認養」並確認（UI）
+    shelter.once('dialog', (d) => d.accept());
+    const completeResp = shelter.waitForResponse(
+      (r) => r.url().includes(`/api/adoptions/${adoptionId}/complete`) && r.request().method() === 'POST');
+    await card.getByRole('button', { name: '完成認養' }).click();
+    const done = await completeResp;
     expect(done.status(), await done.text()).toBe(200);
-    expect((await done.json()).adoption.status).toBe('completed');
+    await expect(shelter.getByText('已完成認養').first()).toBeVisible();
+    await expect(card).toContainText('已完成');
+    await expect(card.getByRole('button', { name: '完成認養' })).toHaveCount(0);
     const mine = await api.get('adoptions/my-applications', {
       headers: { Authorization: `Bearer ${adopterToken}` } });
     expect((await mine.json()).applications.find((a) => a._id === adoptionId)?.status).toBe('completed');
