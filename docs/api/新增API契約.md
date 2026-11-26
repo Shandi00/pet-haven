@@ -35,7 +35,7 @@
 | 送給 LLM 的欄位（白名單） | 動物：`name`、`species`、`breed`、`ageCategory`、`size`、`personality.traits`、`personality.activityLevel`、`personality.goodWith`、`personality.specialNeeds`。使用者：`lifestyleProfile`、`experienceProfile` 的 `petOwnershipExperience`／`trainingExperience`、`environmentProfile` 的四個布林值、`gameProfile.petType.label`。**白名單以外一律不送**，包括姓名、Email、電話、地址、健康與醫療紀錄 |
 | 紀錄 | log 只記 user id、pet id、`source`、耗時；不記錄訊息內容與 LLM 回覆 |
 | 醫療問題 | 用關鍵字判斷（生病、發燒、嘔吐、拉肚子、腹瀉、咳嗽、受傷、流血、藥、疫苗副作用、症狀、診斷、獸醫……）。命中時**不呼叫 LLM**，直接拒答並提醒就醫 |
-| 知識庫檢索 | 關鍵字比對（中文以字元 bigram 計算重疊），取最相關的前 3 筆，分數低於門檻視為查無資料；**查無資料時不呼叫 LLM**，直接回答不知道。知識庫格式見附錄。實作（T14，`app/services/knowledge_base.py`）：分數＝問題的 bigram 被條目（標題＋tags＋內容）涵蓋的比例，門檻 0.3；「什麼、怎麼、可以」等問句詞不列入比對；門檻在 T19 用實際問題集再調整 |
+| 知識庫檢索 | 兩段式（2026-11-27 調整）：① 關鍵字比對（中文以字元 bigram 計算重疊），取最相關的前 3 筆交給 Gemini；② 比對不到時（口語、換句話說、追問，例如「狗可以吃甜食嗎」對不到「巧克力、木醣醇」），把**整份知識庫**交給 Gemini 依語意挑選相關條目。Gemini 的回答只能使用它引用的條目內容，可以整理、換句話說，不能加入條目沒有的事實；**沒有引用任何條目時不採用 AI 的回答**，改回規則的「不知道」。原因：原本「查無資料時不呼叫 LLM」讓換句話說的常見問題都答不出來。知識庫格式見附錄。實作（T14，`app/services/knowledge_base.py` 的 `search`、`all_entries`）：分數＝問題的 bigram 被條目（標題＋tags＋內容）涵蓋的比例，門檻 0.3；「什麼、怎麼、可以」等問句詞不列入比對；門檻在 T19 用實際問題集再調整。知識庫超過約 200 則時，② 改用向量檢索 |
 
 ### Top 3 的硬條件（先篩掉，不計分）
 
@@ -221,12 +221,14 @@
 
 | 順序 | 情況 | `reply` | `sources` | `refused` | `source` |
 |---|---|---|---|---|---|
-| 1 | 醫療或疾病問題（§0 關鍵字） | 提醒這可能和健康有關，建議盡快就醫 | `[]` | `true` | `rule` |
-| 2 | 知識庫查無資料 | 明確說不知道，不編造，並建議可以做的事 | `[]` | `false` | `rule` |
-| 3 | LLM 逾時或失敗 | 「小幫手暫時無法回答，請稍後再試」 | `[]` | `false` | `fallback` |
-| 4 | 正常 | Gemini 只根據檢索到的知識庫內容回答 | 實際引用的條目 | `false` | `ai` |
+| 1 | 醫療或疾病問題（§0 關鍵字） | 提醒這可能和健康有關，建議盡快就醫；**不呼叫 LLM** | `[]` | `true` | `rule` |
+| 2 | LLM 逾時或失敗 | 「小幫手暫時無法回答，請稍後再試」 | `[]` | `false` | `fallback` |
+| 3 | Gemini 沒有引用任何條目（知識庫沒有答案） | 明確說不知道，不編造，並建議可以做的事；訊息提到「推薦、適合、哪隻」時改為引導到推薦頁 | `[]` | `false` | `rule` |
+| 4 | 正常 | Gemini 只根據它引用的知識庫條目回答（§0 知識庫檢索的兩段式） | 實際引用的條目 | `false` | `ai` |
 
-- `sources[].ref` 是知識庫條目的 `id`，`title` 是條目標題；只列出回答真的用到的條目。
+- 知識庫檔案不存在或沒有任何有效條目時，不呼叫 LLM，直接依順序 3 回答。
+- 送給 Gemini 前，訊息與 `history` 中的 Email 與電話號碼會先遮掉。
+- `sources[].ref` 是知識庫條目的 `id`，`title` 是條目標題；只列出回答真的用到、而且確實是這次交給 Gemini 的條目。
 - `actions` 每次都提供（最多 2 個），路徑固定為 `/match-game`（配對遊戲）和 `/recommendations`（推薦），由前端計畫定案；訊息提到「推薦、適合、哪隻」時把「看推薦動物」排第一。
 
 ## 5. AI 推薦理由（T12）
