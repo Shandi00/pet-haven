@@ -3,8 +3,9 @@ import ApplicationDetailModal from '../components/ApplicationDetailModal';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../services/auth';
+import { adoptionAPI } from '../services/api';
 import toast from 'react-hot-toast';
-import { CheckCircle, XCircle, Clock, Eye } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Eye, Home } from 'lucide-react';
 
 const MyPetsApplicationsPage = () => {
   const navigate = useNavigate();
@@ -72,10 +73,28 @@ const MyPetsApplicationsPage = () => {
     reviewMutation.mutate({ id, decision, reason });
   };
 
+  // 完成認養：已通過的申請交付後按下，寵物會改成已被認養
+  const completeMutation = useMutation((id) => adoptionAPI.completeAdoption(id, {}), {
+    onSuccess: () => {
+      toast.success('已完成認養');
+      queryClient.invalidateQueries(['myPetsApplications']);
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.error || '完成認養失敗，請稍後再試');
+    }
+  });
+
+  const handleComplete = (id) => {
+    if (!window.confirm('確定已完成交付？完成後寵物會標示為「已被認養」，無法復原。')) return;
+    completeMutation.mutate(id);
+  };
+
   const getStatusBadge = (status) => {
     const badges = {
       pending: { text: '待審核', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
+      'under-review': { text: '審核中', color: 'bg-blue-100 text-blue-800', icon: Clock },
       approved: { text: '已通過', color: 'bg-green-100 text-green-800', icon: CheckCircle },
+      completed: { text: '已完成', color: 'bg-indigo-100 text-indigo-800', icon: CheckCircle },
       rejected: { text: '已拒絕', color: 'bg-red-100 text-red-800', icon: XCircle },
       cancelled: { text: '已取消', color: 'bg-gray-100 text-gray-800', icon: XCircle }
     };
@@ -256,6 +275,16 @@ const MyPetsApplicationsPage = () => {
                             拒絕
                           </button>
                         </>
+                      )}
+                      {app.status === 'approved' && (
+                        <button
+                          onClick={() => handleComplete(app._id)}
+                          disabled={completeMutation.isLoading}
+                          className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors flex items-center gap-2 disabled:opacity-50"
+                        >
+                          <Home className="w-4 h-4" />
+                          完成認養
+                        </button>
                       )}
                       <button
                         onClick={() => {

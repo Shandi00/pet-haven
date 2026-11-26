@@ -83,7 +83,8 @@ SCHEMA = {
         "name": F("str", required="緊急聯絡人姓名為必填項目", maxlength=(50, "姓名不能超過 50 個字元")),
         "relationship": F("str", maxlength=(50, "關係不能超過 50 個字元")),
         "phone": F("str", required="緊急聯絡人電話為必填項目", match=(r"^09\d{8}$", "請輸入有效的台灣手機號碼格式")),
-        "email": F("str", match=(r"^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$", "請輸入有效的電子郵件格式")),
+        # 與舊版 Mongoose 規則接受相同的字串，但拿掉巢狀量詞：舊寫法比對失敗時會指數級回溯，卡住整個後端（ReDoS）
+        "email": F("str", match=(r"^\w+(?:[.-]\w+)*@\w+(?:[.-]\w+)*\.\w{2,3}$", "請輸入有效的電子郵件格式")),
     },
     "reviewNotes": Arr({
         "reviewer": F("oid", required=True),
