@@ -156,7 +156,7 @@
 - `pet` 是精簡過的動物資料：`age` 沿用 Pet 的 `{ value, unit }`（`unit` 為 `years` 或 `months`）；`activityLevel` 取自 `personality.activityLevel`；`photo` 是第一張照片的網址，沒有照片時為空字串。
 - `score` 是四捨五入後的整數 `matchScore`（扣除回饋重排後）。
 - `matchLevel` 沿用既有 `match_level()` 的 `level`：`perfect`（85 以上）、`excellent`（70 以上）、`good`（55 以上）、`fair`（40 以上）、`poor`。
-- `reason`：`summary` 最多 80 字；`highlights`、`cautions` 各 0–3 筆，**只能引用 §0 白名單裡的真實欄位**（見 AGENTS.md）。
+- `reason`：`summary` 最多 80 字；`highlights`、`cautions` 各 0–3 筆、每筆最多 40 字（前後空白會去掉），**只能引用 §0 白名單裡的真實欄位**（見 AGENTS.md）。
 - `reason.source = "rule"` 時，理由由既有 `generate_analysis()` 的 `strengths`、`highlights`、`concerns` 組成。
 - `avoided` 列出這位使用者目前所有按過「不適合」的動物（最新的在前），`note` 由規則產生，說明避開了什麼。沒有回饋時為空陣列。
 - 符合條件的動物不足 3 隻時，`items` 可以少於 3 筆；沒有任何結果時回傳空陣列，前端顯示空狀態和「重新開始」按鈕（呼叫 `DELETE /feedback`）。

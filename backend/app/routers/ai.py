@@ -17,7 +17,8 @@ async def explain_pet(body: dict | None = None, user: dict = Depends(current_use
     if not pid:
         raise HTTPException(400, "參數錯誤")
     matching_limiter.check(user["_id"])
-    pet = await get_db().pets.find_one({"_id": pid})
+    # 已下架（isActive=False）的動物不產生理由，與 Top 3 候選條件一致
+    pet = await get_db().pets.find_one({"_id": pid, "isActive": {"$ne": False}})
     if not pet:
         raise HTTPException(404, "找不到指定的寵物")
     full = await get_db().users.find_one({"_id": user["_id"]}, {"password": 0})

@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     google_callback_url: str = "http://localhost:5000/api/auth/google/callback"
 
     # AI（T12）：只在後端讀取；規則見 docs/api/新增API契約.md §0
-    gemini_api_key: str = ""
+    gemini_api_key: SecretStr = SecretStr("")  # SecretStr：設定被印出或記錄時不會露出金鑰
     gemini_model: str = "gemini-3.1-flash-lite"
     llm_timeout_seconds: float = 8
 

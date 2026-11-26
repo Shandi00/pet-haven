@@ -2,13 +2,14 @@ import asyncio
 from types import SimpleNamespace
 
 import httpx
+from pydantic import SecretStr
 import pytest
 from fastapi import HTTPException
 
 from app.core.ratelimit import UserRateLimiter
 from app.services import llm
 
-SETTINGS = SimpleNamespace(gemini_api_key="test-key", gemini_model="gemini-test", llm_timeout_seconds=1)
+SETTINGS = SimpleNamespace(gemini_api_key=SecretStr("test-key"), gemini_model="gemini-test", llm_timeout_seconds=1)
 
 
 def _reply(text: str) -> dict:
@@ -55,7 +56,7 @@ def test_generate_json_returns_none_on_failure(monkeypatch, result):
 
 
 def test_generate_json_without_key_returns_none_without_calling(monkeypatch):
-    monkeypatch.setattr(llm, "get_settings", lambda: SimpleNamespace(**{**vars(SETTINGS), "gemini_api_key": ""}))
+    monkeypatch.setattr(llm, "get_settings", lambda: SimpleNamespace(**{**vars(SETTINGS), "gemini_api_key": SecretStr("")}))
     seen = {}
     _fake_post(monkeypatch, _reply("{}"), seen)
     assert asyncio.run(llm.generate_json("sys", "prompt")) is None
@@ -97,3 +98,13 @@ def test_generate_json_enforces_total_deadline(monkeypatch, caplog):
     with caplog.at_level("WARNING", logger="app.services.llm"):
         assert asyncio.run(llm.generate_json("sys", "prompt")) is None
     assert "type=TimeoutError" in caplog.text
+
+
+def test_api_key_is_hidden_when_settings_are_printed():
+    from pydantic import SecretStr
+
+    from app.config import Settings
+    s = Settings(gemini_api_key="real-secret-key")
+    assert isinstance(s.gemini_api_key, SecretStr)
+    assert "real-secret-key" not in repr(s) and "real-secret-key" not in str(s.model_dump())
+    assert s.gemini_api_key.get_secret_value() == "real-secret-key"
