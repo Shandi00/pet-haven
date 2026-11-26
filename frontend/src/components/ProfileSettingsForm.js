@@ -263,10 +263,10 @@ const ExperienceForm = ({ data, onChange, onSave, saving }) => {
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
         >
           <option value="">請選擇</option>
-          <option value="none">沒有經驗</option>
-          <option value="beginner">初學者（1-2年）</option>
-          <option value="intermediate">中級（3-5年）</option>
-          <option value="experienced">資深（5年以上）</option>
+          <option value="none">從來沒養過</option>
+          <option value="beginner">幫忙照顧過別人的寵物</option>
+          <option value="intermediate">養過一兩隻</option>
+          <option value="experienced">養過好幾隻</option>
         </select>
       </div>
 
