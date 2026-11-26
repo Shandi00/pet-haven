@@ -34,7 +34,7 @@
 | 送給 LLM 的欄位（白名單） | 動物：`name`、`species`、`breed`、`ageCategory`、`size`、`personality.traits`、`personality.activityLevel`、`personality.goodWith`、`personality.specialNeeds`。使用者：`lifestyleProfile`、`experienceProfile` 的 `petOwnershipExperience`／`trainingExperience`、`environmentProfile` 的四個布林值、`gameProfile.petType.label`。**白名單以外一律不送**，包括姓名、Email、電話、地址、健康與醫療紀錄 |
 | 紀錄 | log 只記 user id、pet id、`source`、耗時；不記錄訊息內容與 LLM 回覆 |
 | 醫療問題 | 用關鍵字判斷（生病、發燒、嘔吐、拉肚子、腹瀉、咳嗽、受傷、流血、藥、疫苗副作用、症狀、診斷、獸醫……）。命中時**不呼叫 LLM**，直接拒答並提醒就醫 |
-| 知識庫檢索 | 關鍵字比對（中文以字元 bigram 計算重疊），取最相關的前 3 筆，分數低於門檻視為查無資料；**查無資料時不呼叫 LLM**，直接回答不知道。知識庫格式見附錄 |
+| 知識庫檢索 | 關鍵字比對（中文以字元 bigram 計算重疊），取最相關的前 3 筆，分數低於門檻視為查無資料；**查無資料時不呼叫 LLM**，直接回答不知道。知識庫格式見附錄。實作（T14，`app/services/knowledge_base.py`）：分數＝問題的 bigram 被條目（標題＋tags＋內容）涵蓋的比例，門檻 0.3；「什麼、怎麼、可以」等問句詞不列入比對；門檻在 T19 用實際問題集再調整 |
 
 ### Top 3 的硬條件（先篩掉，不計分）
 
