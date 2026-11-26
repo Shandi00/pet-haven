@@ -1,8 +1,6 @@
 ﻿// 模擬資料 API 包裝器 - 當後端無法連接時使用
 import { mockPets, mockShelterAccount } from './mockData';
-
-// 開發模式標記 - 設為 true 使用模擬資料
-const USE_MOCK_DATA = process.env.REACT_APP_USE_MOCK === 'true';
+import { shouldUseMockData } from './mockMode';
 
 // 模擬延遲 (讓體驗更真實)
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -81,10 +79,8 @@ export const mockAPI = {
   },
 };
 
-// 檢查是否應該使用模擬資料
-export const shouldUseMockData = () => {
-  return USE_MOCK_DATA || window.localStorage.getItem('useMockData') === 'true';
-};
+// 檢查是否應該使用模擬資料（實作在 mockMode.js，這裡保留匯出給既有程式使用）
+export { shouldUseMockData };
 
 // 切換模擬資料模式 (開發用)
 export const toggleMockData = () => {

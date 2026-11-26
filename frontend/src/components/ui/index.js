@@ -15,6 +15,7 @@ export { default as Pagination } from './Pagination';
 export { default as Badge } from './Badge';
 export { default as LoadingSpinner } from './LoadingSpinner';
 export { default as Skeleton } from './Skeleton';
+export { default as ProgressBar } from './ProgressBar';
 
 // 業務元件
 export { default as PetCard } from './PetCard';

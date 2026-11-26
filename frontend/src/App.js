@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { ErrorBoundary } from 'react-error-boundary';
-import { AuthProvider } from './services/auth';
+import { AuthProvider, ProtectedRoute } from './services/auth';
 import { SocketProvider } from './services/socket';
 
 // 導入頁面組件
@@ -32,6 +32,7 @@ import CreatePetPage from './pages/CreatePetPage'; // 用戶發布送養動物�
 import MyPetsApplicationsPage from './pages/MyPetsApplicationsPage'; // 送養者管理申請頁面
 import MyPetsPage from './pages/MyPetsPage'; // 我的送養動物列表頁面
 import EditPetPage from './pages/EditPetPage'; // 編輯送養動物頁面
+import MatchGamePage from './pages/MatchGamePage'; // 配對小遊戲（T10）
 
 // 導入布局組件
 import Layout from './components/Layout';
@@ -106,6 +107,7 @@ function App() {
                 <Route path="/my-pets-applications" element={<Layout><MyPetsApplicationsPage /></Layout>} /> {/* 送養者管理申請 */}
                 <Route path="/my-pets" element={<Layout><MyPetsPage /></Layout>} /> {/* 我的送養列表 */}
                 <Route path="/pets/:id/edit" element={<Layout><EditPetPage /></Layout>} /> {/* 編輯送養動物 */}
+                <Route path="/match-game" element={<ProtectedRoute><Layout><MatchGamePage /></Layout></ProtectedRoute>} /> {/* 配對小遊戲（T10） */}
                 
                 {/* 重定向根路徑到首頁 */}
                 <Route path="*" element={<Navigate to="/" replace />} />

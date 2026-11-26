@@ -81,6 +81,11 @@ npm run test:e2e:headed
 -  點擊統計卡片導航
 -  查看寵物管理
 
+### 配對小遊戲測試 (match-game.spec.js)
+-  登入後答完 8 題，看到毛孩類型與「看推薦」按鈕
+-  需要一般使用者帳號：執行前設定環境變數 `E2E_USER_EMAIL`、`E2E_USER_PASSWORD`（見 `frontend/.env.example`），沒設定時會跳過
+-  後端完成 `PUT /api/matching/profile/game` 前，測試會打開假資料開關保存遊戲結果
+
 ## 測試狀態
 
 | 測試類型 | 通過 | 總數 | 成功率 |
