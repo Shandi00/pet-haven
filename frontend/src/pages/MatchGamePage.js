@@ -39,9 +39,16 @@ const MatchGamePage = () => {
     const result = computeGameResult(questions, answerList);
     setStatus('saving');
     try {
-      await matchingAPI.updateLifestyleProfile(result.lifestyle);
-      await matchingAPI.updateExperienceProfile(result.experience);
-      await matchingAPI.updateEnvironmentProfile(result.environment);
+      // 後端的 PUT 會整包取代、沒帶的欄位設回預設值，所以先讀目前的檔案再合併遊戲答案，
+      // 遊戲沒問到的欄位（過往養過的寵物、訓練經驗、孩子年齡、其他寵物等）才不會被清掉。
+      // 讀取失敗或沒有拿到資料時不存檔，交給錯誤畫面讓使用者重試
+      const current = (await matchingAPI.getProfile()).data?.data;
+      if (!current) {
+        throw new Error('讀不到目前的配對檔案');
+      }
+      await matchingAPI.updateLifestyleProfile({ ...current.lifestyleProfile, ...result.lifestyle });
+      await matchingAPI.updateExperienceProfile({ ...current.experienceProfile, ...result.experience });
+      await matchingAPI.updateEnvironmentProfile({ ...current.environmentProfile, ...result.environment });
       await aiService.saveGameResult({ answers: answerList, petType: result.petType });
       setPetType(result.petType);
       setStatus('done');
