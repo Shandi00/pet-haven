@@ -25,6 +25,13 @@ def test_rule_reason_flags_unknown_other_pets_when_good_with_missing():
     assert cautions[0] == "還不確定小黑能否和其他寵物相處，建議先向送養人確認"
 
 
+def test_rule_reason_ignores_unfilled_preferences():
+    # 沒填偏好不能說「基本屬性高度相容」，也不能叫使用者考慮其他選項
+    r = ai_explain.rule_reason(PET, {})
+    assert "基本屬性高度相容" not in r["highlights"]
+    assert not any("基本偏好" in c for c in r["cautions"])
+
+
 def test_summary_truncated_to_80():
     assert len(ai_explain.rule_reason({**PET, "name": "長" * 80}, USER)["summary"]) == 80
 

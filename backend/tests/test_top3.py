@@ -65,8 +65,16 @@ def test_rank_applies_penalty_and_missing_created_at_sorts_last():
     assert [r["pet"]["name"] for r in top3.rank([other, similar], {}, [])] == ["相似", "不同"]
 
 
+def test_rank_shows_penalty_for_user_without_preferences():
+    # 玩完小遊戲的使用者通常沒填 recommendationProfile；分數要在 100 以內，扣 5 分看得到
+    disliked, similar = pet(name="阿福"), pet(name="相似")
+    base = top3.rank([similar], {}, [])[0]["score"]
+    assert base < 100
+    assert top3.rank([similar], {}, [disliked])[0]["score"] == base - 5
+
+
 def test_rank_clamps_score_to_100_but_keeps_order():
-    # 既有 calculate_compatibility 在使用者沒填偏好時會超過 100（舊版 JS 的行為），契約要求 0–100
+    # 防禦：environment 最高 110，加權後仍可能略超過 100；契約要求 0–100
     disliked = pet(name="阿福")
     similar, other = pet(name="相似"), pet(name="不同", species="cat", createdAt=datetime(2026, 1, 1, tzinfo=timezone.utc))
     ranked = top3.rank([similar, other], {}, [disliked])
@@ -77,7 +85,7 @@ def test_rank_clamps_score_to_100_but_keeps_order():
 def test_rank_equal_rounded_scores_tie_break_by_newer(monkeypatch):
     # 契約：分數（四捨五入後的整數）相同時，較新上架的排前面，不看小數
     raw = {"舊": 87.2, "新": 86.6}
-    monkeypatch.setattr(top3, "calculate_match", lambda p, u: {"matchScore": raw[p["name"]]})
+    monkeypatch.setattr(top3, "calculate_match", lambda p, u, **_: {"matchScore": raw[p["name"]]})
     older = pet(name="舊", createdAt=datetime(2026, 1, 1, tzinfo=timezone.utc))
     newer = pet(name="新", createdAt=datetime(2026, 11, 1, tzinfo=timezone.utc))
     assert [r["pet"]["name"] for r in top3.rank([older, newer], {}, [])] == ["新", "舊"]

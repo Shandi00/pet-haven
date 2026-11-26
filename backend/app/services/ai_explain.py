@@ -10,7 +10,7 @@ _UNKNOWN_GOOD_WITH = (("hasChildren", "children", "小孩"), ("hasOtherPets", "o
 
 
 def rule_reason(pet: dict, user: dict) -> dict:
-    analysis = calculate_match(pet, user)["analysis"]
+    analysis = calculate_match(pet, user, normalized=True)["analysis"]
     name = pet.get("name") or "這隻毛孩"
     env = user.get("environmentProfile") or {}
     good_with = (pet.get("personality") or {}).get("goodWith") or {}

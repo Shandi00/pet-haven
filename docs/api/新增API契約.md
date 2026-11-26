@@ -49,7 +49,7 @@
 
 ### 排序與回饋重排
 
-1. 用既有規則配對 `app/services/advanced_matching.py` 的 `calculate_match` 計分（`matchScore`，0–100）。
+1. 用既有規則配對 `app/services/advanced_matching.py` 的 `calculate_match(pet, user, normalized=True)` 計分（`matchScore`，0–100）。`normalized=True` 時，相容度只用使用者**有填的** `recommendationProfile` 偏好計算，完全沒填時給中性分 75。原因是既有相容度在偏好沒填時會把分母重設，分數超過 100（實測 150–190），只玩小遊戲的使用者每隻都會顯示 100。既有 API（`/analyze`、`/best-matches`）維持舊算法不變。顯示分數另外夾在 0–100。推薦理由（§5）也用同一個算法。（2026-11-26 調整）
 2. **回饋重排**：使用者每按一次「不適合」，其他「物種與 `personality.activityLevel` 都和那隻相同」的動物扣 5 分，同一隻最多扣 15 分。
 3. 分數相同時，較新上架（`createdAt` 較晚）的排前面；取前 3 名。
 
