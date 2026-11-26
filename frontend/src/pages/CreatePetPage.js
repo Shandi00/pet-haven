@@ -3,6 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation } from 'react-query';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Upload, X } from 'lucide-react';
+import { appendGoodWith } from '../utils/petFormData';
+
+// 「相處」下拉選單的值與表單狀態互換：不確定 = null
+const GOOD_WITH_VALUE = { null: '', true: 'true', false: 'false' };
+const GOOD_WITH_STATE = { '': null, true: true, false: false };
 
 const CreatePetPage = () => {
   const navigate = useNavigate();
@@ -76,6 +81,8 @@ const CreatePetPage = () => {
       
       // personality 欄位 - activityLevel 必填
       formDataToSend.append('personality[activityLevel]', petData.personality.activityLevel || 'moderate');
+      // 適合小孩／其他寵物：適合送 true、不適合送 false，不確定不送（T09）
+      appendGoodWith(formDataToSend, petData.personality.goodWith);
       
       // personalityTraits 使用 JSON 字串
       formDataToSend.append('personalityTraits', JSON.stringify(petData.personality.traits || []));
@@ -284,6 +291,23 @@ const CreatePetPage = () => {
                 <span className="text-sm">已植入晶片</span>
               </label>
             </div>
+          </div>
+
+          {/* 相處（T09）：Top 3 推薦會用到；不確定就不送出，後端存成 null */}
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { key: 'children', id: 'goodWithChildren', label: '適合有小孩的家庭' },
+              { key: 'otherPets', id: 'goodWithOtherPets', label: '適合與其他寵物相處' },
+            ].map(({ key, id, label }) => (
+              <div key={key}>
+                <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+                <select id={id} value={GOOD_WITH_VALUE[formData.personality.goodWith[key]]} onChange={(e) => setFormData({...formData, personality: {...formData.personality, goodWith: {...formData.personality.goodWith, [key]: GOOD_WITH_STATE[e.target.value]}}})} className="input-field">
+                  <option value="">不確定</option>
+                  <option value="true">適合</option>
+                  <option value="false">不適合</option>
+                </select>
+              </div>
+            ))}
           </div>
 
           {/* 詳細描述 */}

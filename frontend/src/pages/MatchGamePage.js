@@ -1,18 +1,14 @@
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, ArrowLeft, CheckCircle2, HeartHandshake, Mountain, RotateCcw, Sofa } from 'lucide-react';
-import { Badge, Button, Card, LoadingSpinner, ProgressBar } from '../components/ui';
+import { AlertCircle, ArrowLeft, CheckCircle2, RotateCcw } from 'lucide-react';
+import { Button, Card, LoadingSpinner, ProgressBar } from '../components/ui';
+import PetTypeCard from '../components/PetTypeCard';
 import { questions } from '../data/matchGameQuestions';
 import { computeGameResult } from '../utils/matchGame';
 import { matchingAPI } from '../services/api';
 import { aiService } from '../services/aiService';
 
 // 配對小遊戲（T10）：題目與計分見 docs/features/配對遊戲題目對照表.md
-const TYPE_ICONS = {
-  'outdoor-buddy': Mountain,
-  'balanced-buddy': HeartHandshake,
-  'couch-buddy': Sofa,
-};
 
 // 換題後這段時間內忽略選項點擊，避免連點兩下時第二下落在下一題、把下一題也答掉。
 // 涵蓋換題動畫 animate-slide-up（0.3 秒），再多留一點給較慢的連點
@@ -76,7 +72,6 @@ const MatchGamePage = () => {
   };
 
   const question = questions[step];
-  const TypeIcon = petType ? TYPE_ICONS[petType.code] : null;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -164,13 +159,7 @@ const MatchGamePage = () => {
 
         {status === 'done' && petType && (
           <Card>
-            <div className="animate-fade-in flex flex-col items-center text-center py-4">
-              <div className="w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center mb-4">
-                {TypeIcon && <TypeIcon className="w-10 h-10 text-orange-500" aria-hidden="true" />}
-              </div>
-              <Badge variant="primary">你的毛孩類型</Badge>
-              <h2 className="mt-3 text-2xl font-bold text-gray-900">{petType.label}</h2>
-              <p className="mt-2 max-w-md text-gray-600">{petType.description}</p>
+            <PetTypeCard petType={petType} className="animate-fade-in py-4">
               <p className="mt-4 flex items-center gap-2 text-sm text-green-600">
                 <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
                 已更新你的配對檔案
@@ -181,7 +170,7 @@ const MatchGamePage = () => {
                   再玩一次
                 </Button>
               </div>
-            </div>
+            </PetTypeCard>
           </Card>
         )}
       </div>
