@@ -20,16 +20,26 @@ SHELTER = {
     "firstName": "愛心", "lastName": "收容所", "role": "shelter",
     "address": {"city": "台北市", "district": "大安區", "street": "愛心路100號"},
 }
-SHELTER_PASSWORD = "shelter123"
+# repo 是公開的，這組預設密碼人人都知道；展示機請設定 SEED_SHELTER_PASSWORD
+DEFAULT_SHELTER_PASSWORD = "shelter123"
+
+
+def shelter_password() -> str:
+    return get_settings().seed_shelter_password.get_secret_value() or DEFAULT_SHELTER_PASSWORD
 
 
 async def seed(clear: bool = False) -> dict:
     db = get_db()
     shelter = await db.users.find_one({"email": SHELTER["email"]})
+    custom = get_settings().seed_shelter_password.get_secret_value()
     if shelter:
         print(" 使用現有收容所帳號")
+        if custom:
+            # 資料庫可能先前用預設密碼 seed 過，有設定時一律換成指定的密碼
+            await db.users.update_one({"_id": shelter["_id"]}, {"$set": {"password": hash_password(custom)}})
+            print(" 已依 SEED_SHELTER_PASSWORD 更新收容所密碼")
     else:
-        shelter = new_user_doc(**SHELTER, password=hash_password(SHELTER_PASSWORD))
+        shelter = new_user_doc(**SHELTER, password=hash_password(shelter_password()))
         shelter["_id"] = (await db.users.insert_one(shelter)).inserted_id
         print(f" 收容所帳號已建立：{SHELTER['email']}")
     if clear:

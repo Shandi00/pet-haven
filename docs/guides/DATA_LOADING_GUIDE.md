@@ -31,7 +31,7 @@ node seed.js --clear
 
 執行成功後,您會看到:
 -  8 隻寵物資料 (5隻狗 + 3隻貓)
--  1 個收容所帳號: \shelter@example.com\ / \shelter123\
+-  1 個收容所帳號: \shelter@example.com\ / \shelter123\（預設密碼只能用在本機與 CI；展示機請在 `backend/.env` 設定 `SEED_SHELTER_PASSWORD`）
 
 ---
 
@@ -124,7 +124,7 @@ Invoke-RestMethod -Uri 'http://localhost:5000/api/pets' -Method Post -Body \ -He
 
 **收容所帳號:**
 - 帳號: \shelter@example.com\
-- 密碼: \shelter123\
+- 密碼: \shelter123\（`backend/.env` 有設定 `SEED_SHELTER_PASSWORD` 時改用該值）
 - 用途: 管理寵物、查看認養申請
 
 **一般用戶:**
