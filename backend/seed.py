@@ -8,6 +8,7 @@ import asyncio
 import json
 import secrets
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 from app.config import get_settings
@@ -94,7 +95,9 @@ async def seed(clear: bool = False) -> dict:
         print(" 使用現有收容所帳號")
         if custom:
             # 資料庫可能先前用預設密碼 seed 過，有設定時一律換成指定的密碼
-            await db.users.update_one({"_id": shelter["_id"]}, {"$set": {"password": hash_password(custom)}})
+            # 同時讓用舊密碼登入的 token 失效
+            await db.users.update_one({"_id": shelter["_id"]}, {"$set": {
+                "password": hash_password(custom), "passwordChangedAt": datetime.now(timezone.utc)}})
             print(" 已依 SEED_SHELTER_PASSWORD 更新收容所密碼")
     else:
         shelter = new_user_doc(**SHELTER, password=hash_password(shelter_password()))

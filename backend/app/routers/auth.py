@@ -19,7 +19,7 @@ from app.core.logging import audit
 from app.core.ids import oid
 from app.core.captcha import verify_captcha
 from app.core.ratelimit import auth_limiter, register_limiter
-from app.core.security import create_token, decode_token, hash_password, verify_password
+from app.core.security import create_token, decode_token, hash_password, token_revoked, verify_password
 from app.core.validation import A, B, O, S, validate
 from app.db import get_db
 from app.deps import legacy_token_user
@@ -173,7 +173,7 @@ async def update_profile(body: dict | None = None, user: dict = Depends(token_us
     return {"message": "Profile updated successfully", "user": user_json(updated)}
 
 
-@router.put("/change-password", summary="變更密碼")
+@router.put("/change-password", summary="變更密碼；成功後之前發出的 token 全部失效，回應附上新的 token")
 async def change_password(body: dict | None = None, user: dict = Depends(token_user)):
     body = body or {}
     current, new = body.get("currentPassword"), body.get("newPassword")
@@ -184,11 +184,14 @@ async def change_password(body: dict | None = None, user: dict = Depends(token_u
     full = await get_db().users.find_one({"_id": user["_id"]})
     if not verify_password(str(current), full.get("password")):
         raise _err(400, "Current password is incorrect")
+    now = datetime.now(timezone.utc)
     await get_db().users.update_one(
         {"_id": user["_id"]},
-        {"$set": {"password": hash_password(new), "updatedAt": datetime.now(timezone.utc)}})
+        {"$set": {"password": hash_password(new), "passwordChangedAt": now, "updatedAt": now}})
     audit("password_changed", user=user["_id"])
-    return {"message": "Password changed successfully"}
+    # 舊 token 已失效（token_revoked），給一個新的，目前這台裝置不用重新登入
+    return {"message": "Password changed successfully",
+            "token": create_token(user["_id"], user.get("role", "user"))}
 
 
 @router.delete("/account", summary="停用帳號")
@@ -216,7 +219,7 @@ async def verify_token(body: dict | None = None):
         raise RawError(401, {"valid": False, "error": "Invalid token"})
     uid = oid(payload.get("userId"))
     user = await get_db().users.find_one({"_id": uid}, {"password": 0}) if uid else None
-    if not user or not user.get("isActive", True):
+    if not user or not user.get("isActive", True) or token_revoked(payload, user):
         raise _err(401, "Invalid token")
     return {"valid": True, "user": user_json(user)}
 

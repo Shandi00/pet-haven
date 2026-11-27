@@ -49,8 +49,17 @@ def audit(action: str, **fields) -> None:
     audit_log.info(f"{action} {detail}".strip())
 
 
+# 每個回應都帶的安全標頭：不讓瀏覽器猜檔案類型（上傳的檔案不會被當成網頁執行）、不能被別的網站用 iframe 嵌入、
+# 連到外站時只送出來源網域。CSP 要列出 Google 登入、Turnstile、圖片來源等網域，等展示環境確定再加。
+SECURITY_HEADERS = [
+    (b"x-content-type-options", b"nosniff"),
+    (b"x-frame-options", b"DENY"),
+    (b"referrer-policy", b"strict-origin-when-cross-origin"),
+]
+
+
 class RequestContextMiddleware:
-    """純 ASGI middleware：設定 request id、回傳 X-Request-ID、記錄存取紀錄與 401/403。"""
+    """純 ASGI middleware：設定 request id、回傳 X-Request-ID 與安全標頭、記錄存取紀錄與 401/403。"""
 
     def __init__(self, app):
         self.app = app
@@ -68,7 +77,7 @@ class RequestContextMiddleware:
             if message["type"] == "http.response.start":
                 status["code"] = message["status"]
                 message.setdefault("headers", [])
-                message["headers"] = list(message["headers"]) + [(b"x-request-id", rid.encode())]
+                message["headers"] = list(message["headers"]) + [(b"x-request-id", rid.encode())] + SECURITY_HEADERS
             await send(message)
 
         try:

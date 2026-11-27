@@ -1,4 +1,6 @@
 """Socket.IO 事件處理：連線必須帶有效 JWT，只能加入自己的房間，不能冒名轉送訊息。"""
+from datetime import datetime, timedelta, timezone
+
 import pytest
 from bson import ObjectId
 
@@ -43,6 +45,9 @@ def test_connect_requires_valid_token(api, make_user, fake):
     assert run(api, realtime.connect, "s1", {}, {"token": create_token(ObjectId(), "user")}) is False
     inactive, ih = make_user(isActive=False)
     assert run(api, realtime.connect, "s1", {}, {"token": ih["Authorization"].split()[1]}) is False
+    # 改密碼之前發出的 token 不能連線
+    _, rh = make_user(passwordChangedAt=datetime.now(timezone.utc) + timedelta(minutes=1))
+    assert run(api, realtime.connect, "s1", {}, {"token": rh["Authorization"].split()[1]}) is False
     assert run(api, realtime.connect, "s1", {}, {"token": token}) is True
     assert fake.sessions["s1"]["user_id"] == str(user["_id"])
     # 連線成功就自動加入自己的房間

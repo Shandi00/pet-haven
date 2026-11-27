@@ -233,7 +233,9 @@ export const AuthProvider = ({ children }) => {
   // 變更密碼
   const changePassword = async (passwordData) => {
     try {
-      await authAPI.changePassword(passwordData);
+      const response = await authAPI.changePassword(passwordData);
+      // 改密碼後舊 token 會失效，換成後端回傳的新 token，才不會被登出
+      if (response.data?.token) localStorage.setItem('token', response.data.token);
       toast.success('密碼變更成功！');
       return { success: true };
     } catch (error) {

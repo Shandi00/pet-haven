@@ -51,3 +51,10 @@ def test_access_denied_is_logged(api, make_user, caplog):
     denied = [r.getMessage() for r in records(caplog, "audit") if "access_denied" in r.getMessage()]
     assert any("status=403 GET /api/users/admin/all" in m for m in denied)
     assert any("status=401 GET /api/notifications" in m for m in denied)
+
+
+def test_security_headers_on_every_response(client):
+    for r in (client.get("/api/health"), client.get("/no-such-path")):
+        assert r.headers["x-content-type-options"] == "nosniff"
+        assert r.headers["x-frame-options"] == "DENY"
+        assert r.headers["referrer-policy"] == "strict-origin-when-cross-origin"

@@ -3,7 +3,7 @@ import jwt
 from fastapi import Depends, HTTPException, Request
 
 from app.core.ids import oid
-from app.core.security import decode_token
+from app.core.security import decode_token, token_revoked
 from app.db import get_db
 
 
@@ -37,6 +37,8 @@ async def current_user(request: Request) -> dict:
         raise HTTPException(401, "認證失敗,用戶不存在")
     if not user.get("isActive", True):
         raise HTTPException(401, "帳號已被停用，請聯繫管理員")
+    if token_revoked(payload, user):
+        raise HTTPException(401, "密碼已變更，請重新登入")
     return user
 
 
@@ -49,7 +51,7 @@ async def optional_user(request: Request) -> dict | None:
     except jwt.InvalidTokenError:
         return None
     user = await _load_user(payload.get("userId") or payload.get("id"))
-    if user and user.get("isActive", True):
+    if user and user.get("isActive", True) and not token_revoked(payload, user):
         return user
     return None
 
@@ -78,7 +80,7 @@ def legacy_token_user(missing: str, invalid_user: str, invalid_token: str):
         except jwt.InvalidTokenError:
             raise RawError(403, {"error": invalid_token})
         user = await _load_user(payload.get("userId"))
-        if not user or not user.get("isActive", True):
+        if not user or not user.get("isActive", True) or token_revoked(payload, user):
             raise RawError(401, {"error": invalid_user})
         return user
 

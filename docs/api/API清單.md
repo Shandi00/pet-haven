@@ -67,7 +67,7 @@
 | POST | `/api/auth/login` | 登入；有設定人機驗證時要帶 `captchaToken`（[契約 §8](新增API契約.md)） | 公開 |
 | GET | `/api/auth/me` | 取得目前使用者 | 登入 |
 | PUT | `/api/auth/profile` | 更新個人資料 | 登入 |
-| PUT | `/api/auth/change-password` | 變更密碼 | 登入 |
+| PUT | `/api/auth/change-password` | 變更密碼；之前發出的 token 全部失效，回應附新的 `token` | 登入 |
 | DELETE | `/api/auth/account` | 停用帳號 | 登入 |
 | POST | `/api/auth/verify-token` | 驗證 token | 公開 |
 | POST | `/api/auth/google/verify` | Google 登入（ID token） | 公開 |

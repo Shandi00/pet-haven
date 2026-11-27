@@ -11,13 +11,17 @@ def iso(dt: datetime) -> str:
     return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.") + f"{dt.microsecond // 1000:03d}Z"
 
 
+# 不輸出的欄位：密碼雜湊，以及改密碼時間（只供 token 失效判斷）
+_HIDDEN = {"password", "passwordChangedAt"}
+
+
 def to_json(value: Any) -> Any:
     if isinstance(value, ObjectId):
         return str(value)
     if isinstance(value, datetime):
         return iso(value)
     if isinstance(value, dict):
-        out = {k: to_json(v) for k, v in value.items() if k != "password"}
+        out = {k: to_json(v) for k, v in value.items() if k not in _HIDDEN}
         if "_id" in out and "id" not in out:
             out["id"] = out["_id"]
         return out

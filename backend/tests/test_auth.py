@@ -1,4 +1,10 @@
+from datetime import datetime, timedelta, timezone
+
 import httpx
+import jwt
+
+from app.config import get_settings
+from app.core.security import token_revoked
 from app.routers import auth as auth_router
 from tests.conftest import TEST_PASSWORD
 
@@ -60,6 +66,7 @@ def test_profile_change_password_delete(api, make_user):
                 headers=h)
     assert r.status_code == 200
     assert api.post("/api/auth/login", json={"email": user["email"], "password": "Newpass1"}).status_code == 200
+    h = {"Authorization": f"Bearer {r.json()['token']}"}  # 舊 token 已失效，改用改密碼回傳的新 token
 
     assert api.request("DELETE", "/api/auth/account", json={"password": "Newpass1"}, headers=h).status_code == 200
     assert api.get("/api/auth/me", headers=h).status_code == 401
@@ -154,3 +161,39 @@ def test_google_does_not_take_over_unverified_password_account(api, monkeypatch,
     # 已驗證 Email 的帳號照舊可以綁定
     sync_db.users.update_one({"email": "alice@example.com"}, {"$set": {"isEmailVerified": True}})
     assert api.post("/api/auth/google/verify", json={"token": "t"}).status_code == 200
+
+
+def _token_issued(user, seconds_ago):
+    now = datetime.now(timezone.utc)
+    payload = {"userId": str(user["_id"]), "role": user["role"],
+               "iat": now - timedelta(seconds=seconds_ago), "exp": now + timedelta(days=1)}
+    return {"Authorization": f"Bearer {jwt.encode(payload, get_settings().jwt_secret, algorithm='HS256')}"}
+
+
+def test_change_password_revokes_older_tokens(api, make_user):
+    # 帳號被盜時改密碼，對方手上較早發出的 token 要立刻失效；改密碼回傳的新 token 可以繼續用
+    user, _ = make_user()
+    old = _token_issued(user, 60)
+    assert api.get("/api/auth/me", headers=old).status_code == 200
+    r = api.put("/api/auth/change-password", json={"currentPassword": TEST_PASSWORD, "newPassword": "Newpass1"},
+                headers=old)
+    assert r.status_code == 200
+    new = {"Authorization": f"Bearer {r.json()['token']}"}
+
+    assert api.get("/api/auth/me", headers=old).status_code == 401  # 舊版格式的路由（token_user）
+    r = api.get("/api/notifications", headers=old)  # current_user
+    assert r.status_code == 401 and "密碼已變更" in r.text
+    assert api.post("/api/auth/verify-token", json={"token": old["Authorization"].split()[1]}).status_code == 401
+
+    me = api.get("/api/auth/me", headers=new)
+    assert me.status_code == 200 and "passwordChangedAt" not in me.json()["user"]
+    assert api.get("/api/notifications", headers=new).status_code == 200
+
+
+def test_token_revoked_compares_whole_seconds():
+    changed = datetime(2026, 11, 27, 12, 0, 0, 700000, tzinfo=timezone.utc)
+    second = int(changed.timestamp())
+    assert token_revoked({"iat": second - 1}, {"passwordChangedAt": changed}) is True
+    assert token_revoked({"iat": second}, {"passwordChangedAt": changed}) is False  # 改密碼當下發的新 token
+    assert token_revoked({}, {"passwordChangedAt": changed}) is True
+    assert token_revoked({"iat": second - 1}, {}) is False  # 從沒改過密碼

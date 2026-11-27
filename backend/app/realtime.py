@@ -11,7 +11,7 @@ import socketio
 
 from app.config import get_settings
 from app.core.ids import oid
-from app.core.security import decode_token
+from app.core.security import decode_token, token_revoked
 from app.core.serialize import to_json
 from app.db import get_db
 
@@ -40,8 +40,8 @@ async def connect(sid, environ, auth=None):
         audit.info("socket_rejected reason=invalid_token")
         return False
     uid = oid(payload.get("userId"))
-    user = await get_db().users.find_one({"_id": uid}, {"isActive": 1}) if uid else None
-    if not user or not user.get("isActive", True):
+    user = await get_db().users.find_one({"_id": uid}, {"isActive": 1, "passwordChangedAt": 1}) if uid else None
+    if not user or not user.get("isActive", True) or token_revoked(payload, user):
         audit.info("socket_rejected reason=inactive_or_missing_user")
         return False
     await sio.save_session(sid, {"user_id": str(user["_id"])})
