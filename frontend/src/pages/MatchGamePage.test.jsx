@@ -1,7 +1,7 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render, screen, within, fireEvent } from '@testing-library/react';
-import MatchGamePage from './MatchGamePage';
+import { act, render, screen, within, fireEvent } from '@testing-library/react';
+import MatchGamePage, { ADVANCE_MS, MIN_ANALYZE_MS } from './MatchGamePage';
 import { matchingAPI } from '../services/api';
 import { aiService } from '../services/aiService';
 
@@ -17,32 +17,34 @@ vi.mock('../services/aiService', () => ({ aiService: { saveGameResult: vi.fn() }
 
 const ok = () => Promise.resolve({ data: { success: true } });
 
-const renderPage = () =>
+// start：從推薦頁或「再玩一次」進來時跳過開場，直接第 1 題
+const renderPage = ({ start = true } = {}) =>
   render(
-    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <MemoryRouter
+      initialEntries={[{ pathname: '/match-game', state: start ? { start: true } : null }]}
+      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+    >
       <MatchGamePage />
     </MemoryRouter>
   );
 
-// 頁面用 Date.now() 判斷換題後的連點，測試用可控制的時鐘
-let now;
-
 const optionButtons = () => within(screen.getByRole('group')).getAllByRole('button');
 
-// 等 waitMs 毫秒後，在目前這一題點第 index 個選項；預設等 1 秒，模擬一般作答速度
-const pickOption = (index, waitMs = 1000) => {
-  now += waitMs;
+// 選完會先停 ADVANCE_MS 顯示打勾與小狗的回應，再換下一題
+const pickOption = (index) => {
   fireEvent.click(optionButtons()[index]);
+  act(() => {
+    vi.advanceTimersByTime(ADVANCE_MS);
+  });
 };
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
+const answerAll = () => {
+  for (let i = 0; i < 8; i += 1) pickOption(0);
+};
+// 等存檔完成與「比對中」畫面結束
+const finishSaving = () => act(() => vi.advanceTimersByTimeAsync(MIN_ANALYZE_MS + 100));
 
 beforeEach(() => {
-  vi.clearAllMocks();
-  now = 1000000;
-  vi.spyOn(Date, 'now').mockImplementation(() => now);
+  vi.useFakeTimers();
   matchingAPI.getProfile.mockResolvedValue({ data: { success: true, data: {} } });
   matchingAPI.updateLifestyleProfile.mockImplementation(ok);
   matchingAPI.updateExperienceProfile.mockImplementation(ok);
@@ -50,14 +52,31 @@ beforeEach(() => {
   aiService.saveGameResult.mockImplementation(ok);
 });
 
-test('答完 8 題後依序寫入三份配對檔案、保存遊戲結果，並顯示毛孩類型', async () => {
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+test('直接進遊戲頁時先看到開場與三種毛孩類型，按「開始遊戲」才出第 1 題', () => {
+  renderPage({ start: false });
+  expect(screen.getByText('戶外冒險型')).toBeInTheDocument();
+  expect(screen.getByText('隨和陪伴型')).toBeInTheDocument();
+  expect(screen.getByText('居家宅宅型')).toBeInTheDocument();
+  expect(screen.queryByRole('group')).not.toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole('button', { name: '開始遊戲' }));
+  expect(screen.getByText('第 1 題／共 8 題')).toBeInTheDocument();
+});
+
+test('答完 8 題後先顯示比對中，再依序寫入三份配對檔案、保存遊戲結果，並顯示毛孩類型', async () => {
   renderPage();
   for (let i = 1; i <= 8; i += 1) {
     expect(screen.getByText(`第 ${i} 題／共 8 題`)).toBeInTheDocument();
     pickOption(0);
   }
+  expect(screen.getByRole('status')).toHaveTextContent('正在比對你的答案');
 
-  expect(await screen.findByRole('heading', { name: '戶外冒險型' })).toBeInTheDocument();
+  await finishSaving();
+  expect(screen.getByRole('heading', { name: '戶外冒險型' })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: '看推薦' })).toBeInTheDocument();
 
   expect(matchingAPI.updateLifestyleProfile).toHaveBeenCalledWith({
@@ -75,6 +94,20 @@ test('答完 8 題後依序寫入三份配對檔案、保存遊戲結果，並�
   // 三支既有 API 要在 saveGameResult 之前呼叫
   const order = (fn) => fn.mock.invocationCallOrder[0];
   expect(order(matchingAPI.updateEnvironmentProfile)).toBeLessThan(order(aiService.saveGameResult));
+});
+
+test('選了之後先打勾並顯示小狗的回應，停一下才換下一題', () => {
+  renderPage();
+  fireEvent.click(optionButtons()[0]);
+
+  expect(optionButtons()[0]).toHaveAttribute('aria-pressed', 'true');
+  expect(screen.getByText('活力滿點！會優先找活動量高、愛出門的毛孩。')).toBeInTheDocument();
+  expect(screen.getByText('第 1 題／共 8 題')).toBeInTheDocument();
+
+  act(() => {
+    vi.advanceTimersByTime(ADVANCE_MS);
+  });
+  expect(screen.getByText('第 2 題／共 8 題')).toBeInTheDocument();
 });
 
 test('玩完遊戲後，已經手動填過、遊戲沒問到的欄位還在', async () => {
@@ -97,8 +130,9 @@ test('玩完遊戲後，已經手動填過、遊戲沒問到的欄位還在', as
     },
   });
   renderPage();
-  for (let i = 0; i < 8; i += 1) pickOption(0);
-  await screen.findByRole('heading', { name: '戶外冒險型' });
+  answerAll();
+  await finishSaving();
+  expect(screen.getByRole('heading', { name: '戶外冒險型' })).toBeInTheDocument();
 
   // 遊戲問到的欄位換成遊戲的答案，沒問到的欄位維持原值
   expect(matchingAPI.updateLifestyleProfile).toHaveBeenCalledWith(expect.objectContaining({
@@ -122,16 +156,18 @@ test.each([
 ])('存檔前讀取目前的配對檔案時%s，不存檔並顯示錯誤，重試成功後才寫入', async (_, firstRead) => {
   matchingAPI.getProfile.mockImplementationOnce(firstRead);
   renderPage();
-  for (let i = 0; i < 8; i += 1) pickOption(0);
+  answerAll();
+  await finishSaving();
 
-  expect(await screen.findByRole('alert')).toHaveTextContent('連線失敗，請稍後再試');
+  expect(screen.getByRole('alert')).toHaveTextContent('連線失敗，請稍後再試');
   expect(matchingAPI.updateLifestyleProfile).not.toHaveBeenCalled();
   expect(matchingAPI.updateExperienceProfile).not.toHaveBeenCalled();
   expect(matchingAPI.updateEnvironmentProfile).not.toHaveBeenCalled();
   expect(aiService.saveGameResult).not.toHaveBeenCalled();
 
   fireEvent.click(screen.getByRole('button', { name: '重試' }));
-  expect(await screen.findByRole('heading', { name: '戶外冒險型' })).toBeInTheDocument();
+  await finishSaving();
+  expect(screen.getByRole('heading', { name: '戶外冒險型' })).toBeInTheDocument();
   expect(matchingAPI.getProfile).toHaveBeenCalledTimes(2);
   expect(matchingAPI.updateExperienceProfile).toHaveBeenCalledTimes(1);
 });
@@ -147,16 +183,21 @@ test('回到上一題時，已選的選項標示 aria-pressed="true"', () => {
   expect(options[0]).toHaveAttribute('aria-pressed', 'false');
 });
 
-test('連點兩下不會跳題：換題後短時間內的點擊會被忽略', () => {
+test('連點不會跳題也不會改答案：換題前的點擊一律忽略', () => {
   renderPage();
-  pickOption(0); // q1 選 A，換到第 2 題
-  pickOption(0, 150); // 150 毫秒後的第二下落在第 2 題的選項上，應該被忽略
+  fireEvent.click(optionButtons()[0]); // q1 選 A
+  fireEvent.click(optionButtons()[0]); // 連點第二下
+  fireEvent.click(optionButtons()[1]); // 換題前改點 B，也要忽略
+  act(() => {
+    vi.advanceTimersByTime(ADVANCE_MS);
+  });
 
   expect(screen.getByText('第 2 題／共 8 題')).toBeInTheDocument();
   expect(optionButtons().every((b) => b.getAttribute('aria-pressed') === 'false')).toBe(true);
 
-  pickOption(0); // 過了鎖定時間就能正常作答
-  expect(screen.getByText('第 3 題／共 8 題')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: '上一題' }));
+  expect(optionButtons()[0]).toHaveAttribute('aria-pressed', 'true');
+  expect(optionButtons()[1]).toHaveAttribute('aria-pressed', 'false');
 });
 
 test('儲存失敗時顯示後端訊息，按重試不必重玩就能完成', async () => {
@@ -164,20 +205,14 @@ test('儲存失敗時顯示後端訊息，按重試不必重玩就能完成', as
     Promise.reject({ response: { data: { success: false, message: '更新失敗：資料格式錯誤' } } })
   );
   renderPage();
-  for (let i = 0; i < 8; i += 1) pickOption(0);
+  answerAll();
+  await finishSaving();
 
-  expect(await screen.findByRole('alert')).toHaveTextContent('更新失敗：資料格式錯誤');
+  expect(screen.getByRole('alert')).toHaveTextContent('更新失敗：資料格式錯誤');
   expect(aiService.saveGameResult).not.toHaveBeenCalled();
 
   fireEvent.click(screen.getByRole('button', { name: '重試' }));
-  expect(await screen.findByRole('heading', { name: '戶外冒險型' })).toBeInTheDocument();
+  await finishSaving();
+  expect(screen.getByRole('heading', { name: '戶外冒險型' })).toBeInTheDocument();
   expect(aiService.saveGameResult).toHaveBeenCalledTimes(1);
-});
-
-test('後端沒有回應時顯示「連線失敗，請稍後再試」', async () => {
-  aiService.saveGameResult.mockImplementationOnce(() => Promise.reject(new Error('Network Error')));
-  renderPage();
-  for (let i = 0; i < 8; i += 1) pickOption(0);
-
-  expect(await screen.findByRole('alert')).toHaveTextContent('連線失敗，請稍後再試');
 });

@@ -1,7 +1,7 @@
 // 配對小遊戲的 8 題題目（T05 定案）
 // 對照表：docs/features/配對遊戲題目對照表.md
 // effects 的欄位名稱與英文值照 docs/api/新增API契約.md §1，不可自行更改；
-// 題目有異動時，對照表、本檔與 utils/matchGame.test.js 要一起更新。
+// 題目有異動時，對照表、本檔、utils/matchGame.test.js 與選項的圖示和回應（matchGameDisplay.js）要一起更新。
 
 export const petTypes = [
   { code: 'outdoor-buddy', label: '戶外冒險型', description: '適合活動量高、喜歡出門散步和玩耍的毛孩' },

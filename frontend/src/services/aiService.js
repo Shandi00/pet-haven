@@ -8,6 +8,8 @@ import { shouldUseMockData } from './mockMode';
 const matching = () => (shouldUseMockData() ? aiMock : matchingAPI);
 
 export const aiService = {
+  // 推薦頁用來判斷有沒有玩過配對遊戲（gameProfile 為 null 表示沒玩過）
+  getProfile: () => matching().getProfile(),
   saveGameResult: (data) => matching().saveGameResult(data),
   getTop3: () => matching().getTop3(),
   sendFeedback: (petId, verdict) => matching().sendFeedback(petId, verdict),

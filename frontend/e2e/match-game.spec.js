@@ -15,6 +15,9 @@ test.describe('配對小遊戲', () => {
     await page.locator('button[type="submit"]').filter({ hasText: '登入' }).click();
     await page.waitForURL('**/match-game', { timeout: 20000 });
 
+    // 直接進遊戲頁會先看到開場
+    await page.getByRole('button', { name: '開始遊戲' }).click();
+    // 選完會先顯示打勾與小狗的回應，約 1 秒後才換題，所以每題都先等題號出現再作答
     for (let i = 1; i <= 8; i += 1) {
       await expect(page.getByText(`第 ${i} 題／共 8 題`)).toBeVisible();
       await page.getByRole('group').getByRole('button').first().click();

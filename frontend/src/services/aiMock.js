@@ -46,10 +46,23 @@ const avoided = () =>
 const top3 = () => pets.filter((p) => !disliked.includes(p._id)).slice(0, 3).map(toItem);
 const top3Data = () => ({ items: top3(), avoided: avoided(), generatedAt: new Date().toISOString() });
 
+// 假資料模式預設已經玩過遊戲，推薦頁直接顯示推薦（e2e/recommendations.spec.js 用這個模式）
+let gameProfile = {
+  answers: [],
+  petType: { code: 'balanced-buddy', label: '隨和陪伴型', description: '適合個性穩定、能配合家人作息的毛孩' },
+  completedAt: '2026-12-01T08:00:00.000Z',
+};
+
 export const aiMock = {
+  getProfile: async () => {
+    await delay(200);
+    return ok({ lifestyleProfile: {}, experienceProfile: {}, environmentProfile: {}, gameProfile });
+  },
+
   saveGameResult: async (data) => {
     await delay(300);
-    return ok({ gameProfile: { ...data, completedAt: new Date().toISOString() } });
+    gameProfile = { ...data, completedAt: new Date().toISOString() };
+    return ok({ gameProfile });
   },
 
   getTop3: async () => {

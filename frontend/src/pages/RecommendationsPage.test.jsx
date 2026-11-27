@@ -1,5 +1,5 @@
 import React from 'react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import RecommendationsPage from './RecommendationsPage';
 import { aiService } from '../services/aiService';
@@ -8,12 +8,18 @@ vi.mock('react-hot-toast', () => ({ toast: { success: vi.fn(), error: vi.fn() } 
 vi.mock('../services/api', () => ({ matchingAPI: {}, aiAPI: {} }));
 vi.mock('../services/aiService', async () => ({
   ...(await vi.importActual('../services/aiService')),
-  aiService: { getTop3: vi.fn(), sendFeedback: vi.fn(), resetFeedback: vi.fn() },
+  aiService: { getProfile: vi.fn(), getTop3: vi.fn(), sendFeedback: vi.fn(), resetFeedback: vi.fn() },
 }));
 
 const pet = (id, name) => ({ _id: id, name, species: 'dog', breed: '米克斯', age: { value: 2, unit: 'years' }, size: 'medium', activityLevel: 'high', photo: '' });
 const item = (id, name) => ({ pet: pet(id, name), score: 80, matchLevel: 'excellent', reason: { summary: `${name}的理由`, highlights: [], cautions: [], source: 'ai' } });
 const top3 = (items, avoided = []) => ({ data: { success: true, data: { items, avoided, generatedAt: '2026-12-01T08:00:00.000Z' } } });
+
+const profile = (gameProfile) => ({ data: { success: true, data: { lifestyleProfile: {}, gameProfile } } });
+const PLAYED = { answers: [], petType: { code: 'outdoor-buddy', label: '戶外冒險型' }, completedAt: '2026-12-01T08:00:00.000Z' };
+
+// 顯示有沒有帶「直接開始」，確認從推薦頁進遊戲時跳過開場
+const GameProbe = () => <div>配對小遊戲頁{useLocation().state?.start ? '（直接開始）' : ''}</div>;
 
 const renderPage = () =>
   render(
@@ -21,11 +27,54 @@ const renderPage = () =>
       <Routes>
         <Route path="/recommendations" element={<RecommendationsPage />} />
         <Route path="/pets/:id" element={<div>動物詳情頁</div>} />
+        <Route path="/match-game" element={<GameProbe />} />
       </Routes>
     </MemoryRouter>
   );
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  aiService.getProfile.mockResolvedValue(profile(PLAYED));
+});
+
+test('沒玩過配對遊戲時先請使用者玩遊戲，不讀推薦；按「先看推薦」才讀取', async () => {
+  aiService.getProfile.mockResolvedValue(profile(null));
+  aiService.getTop3.mockResolvedValue(top3([item('a', '小黑')]));
+  renderPage();
+
+  expect(await screen.findByRole('heading', { name: '先陪我玩個小遊戲吧！' })).toBeInTheDocument();
+  expect(aiService.getTop3).not.toHaveBeenCalled();
+  expect(screen.queryByRole('button', { name: '玩配對遊戲讓推薦更準' })).not.toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole('button', { name: '先看推薦' }));
+  expect(await screen.findByRole('heading', { name: '小黑' })).toBeInTheDocument();
+  expect(aiService.getTop3).toHaveBeenCalledTimes(1);
+});
+
+test('沒玩過時按「開始配對遊戲」前往遊戲並直接開始', async () => {
+  aiService.getProfile.mockResolvedValue(profile(null));
+  renderPage();
+
+  fireEvent.click(await screen.findByRole('button', { name: '開始配對遊戲' }));
+  expect(await screen.findByText('配對小遊戲頁（直接開始）')).toBeInTheDocument();
+});
+
+test('玩過遊戲時直接顯示推薦，標題下方顯示毛孩類型', async () => {
+  aiService.getTop3.mockResolvedValue(top3([item('a', '小黑')]));
+  renderPage();
+
+  expect(await screen.findByRole('heading', { name: '小黑' })).toBeInTheDocument();
+  expect(screen.getByText('你的毛孩類型：戶外冒險型')).toBeInTheDocument();
+  expect(screen.queryByRole('heading', { name: '先陪我玩個小遊戲吧！' })).not.toBeInTheDocument();
+});
+
+test('讀不到配對檔案時不擋，照常顯示推薦', async () => {
+  aiService.getProfile.mockRejectedValue(new Error('Network Error'));
+  aiService.getTop3.mockResolvedValue(top3([item('a', '小黑')]));
+  renderPage();
+
+  expect(await screen.findByRole('heading', { name: '小黑' })).toBeInTheDocument();
+});
 
 test('按「不適合」用回應直接換掉卡片並顯示「已避開」，送出期間按鈕停用、不會送兩次', async () => {
   aiService.getTop3.mockResolvedValue(top3([item('a', '小黑'), item('b', '豆豆'), item('c', '奶茶')]));

@@ -54,6 +54,10 @@ module.exports = {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.3s ease-out',
         'bounce-slow': 'bounce 2s infinite',
+        // 配對小遊戲（T10）：選項打勾、腳印進度、小狗跳一下、結果揭曉的彩帶。一律搭配 motion-safe: 使用
+        'pop-in': 'popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'hop': 'hop 0.5s ease-out',
+        'confetti': 'confetti 1.6s ease-in forwards',
       },
       keyframes: {
         fadeIn: {
@@ -63,7 +67,21 @@ module.exports = {
         slideUp: {
           '0%': { transform: 'translateY(20px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
-        }
+        },
+        popIn: {
+          '0%': { transform: 'scale(0.5)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        hop: {
+          '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+          '40%': { transform: 'translateY(-8px) rotate(-6deg)' },
+          '70%': { transform: 'translateY(0) rotate(4deg)' },
+        },
+        // --drift 由每片彩帶自己設定，讓落下時左右飄的距離不同
+        confetti: {
+          '0%': { transform: 'translate3d(0, -12px, 0) rotate(0deg)', opacity: '1' },
+          '100%': { transform: 'translate3d(var(--drift, 0px), 360px, 0) rotate(540deg)', opacity: '0' },
+        },
       }
     },
   },

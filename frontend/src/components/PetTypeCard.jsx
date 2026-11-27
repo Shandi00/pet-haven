@@ -5,7 +5,8 @@ import { Badge } from './ui';
 import { petTypes } from '../data/matchGameQuestions';
 
 // 毛孩類型卡片：配對小遊戲結果頁（T10）與個人中心配對檔案分頁（T09）共用
-const TYPE_ICONS = {
+// 遊戲開場與比對中的動畫也用這組圖示
+export const TYPE_ICONS = {
   'outdoor-buddy': Mountain,
   'balanced-buddy': HeartHandshake,
   'couch-buddy': Sofa,
