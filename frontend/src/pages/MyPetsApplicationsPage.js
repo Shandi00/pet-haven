@@ -6,6 +6,12 @@ import { useAuth } from '../services/auth';
 import { adoptionAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { CheckCircle, XCircle, Clock, Eye, Home } from 'lucide-react';
+import { Button, Modal, Pagination, Textarea } from '../components/ui';
+
+const PAGE_SIZE = 10;
+const REJECT_REASON_MAX = 200;
+// 拒絕時可以直接點選的常用原因，點了會填進輸入框，還可以再修改
+const REJECT_REASONS = ['居住環境不適合這隻動物', '照顧時間不足', '已有其他更適合的認養人', '申請資料不完整'];
 
 const MyPetsApplicationsPage = () => {
   const navigate = useNavigate();
@@ -20,23 +26,33 @@ const MyPetsApplicationsPage = () => {
   }, [location.search]);
   
   const [filter, setFilter] = useState(initialFilter);
+  const [page, setPage] = useState(1);
 
   // 此頁面應顯示「我發布的寵物收到的申請」；即便是 admin 帳號也只看自己發布的寵物
   const apiEndpoint = '/api/adoptions/my-pets-applications';
 
-  // 獲取收到的申請列表
+  // 獲取收到的申請列表；後端每頁 10 筆，沒帶 page 只會拿到前 10 筆
   const { data, isLoading, isError } = useQuery(
-    ['myPetsApplications', filter, user?._id],
+    ['myPetsApplications', filter, user?._id, page],
     async () => {
       const token = localStorage.getItem('token');
-      const statusParam = filter !== 'all' ? `?status=${filter}` : '';
-      const response = await fetch(`http://localhost:5000${apiEndpoint}${statusParam}`, {
+      const statusParam = filter !== 'all' ? `&status=${filter}` : '';
+      const response = await fetch(`http://localhost:5000${apiEndpoint}?page=${page}&limit=${PAGE_SIZE}${statusParam}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!response.ok) throw new Error('載入失敗');
       return response.json();
-    }
+    },
+    { keepPreviousData: true }  // 換頁或篩選時保留上一頁內容，不會整頁變成載入中
   );
+  const changeFilter = (next) => {
+    setFilter(next);
+    setPage(1);
+  };
+  const changePage = (next) => {
+    setPage(next);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // 審核申請
   const reviewMutation = useMutation(
@@ -64,13 +80,20 @@ const MyPetsApplicationsPage = () => {
     }
   );
 
-  const handleReview = (id, decision) => {
-    let reason = '';
-    if (decision === 'rejected') {
-      reason = prompt('請輸入拒絕原因:');
-      if (!reason) return;
-    }
-    reviewMutation.mutate({ id, decision, reason });
+  // 拒絕要先在視窗填原因（申請人會在通知看到）；成功才關閉視窗，失敗時保留填好的內容
+  const [rejecting, setRejecting] = useState(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const openReject = (app) => {
+    setRejecting(app);
+    setRejectReason('');
+  };
+  const closeReject = () => {
+    if (!reviewMutation.isLoading) setRejecting(null);
+  };
+  const submitReject = () => {
+    const reason = rejectReason.trim();
+    if (!reason) return;
+    reviewMutation.mutate({ id: rejecting._id, decision: 'rejected', reason }, { onSuccess: () => setRejecting(null) });
   };
 
   // 完成認養：已通過的申請交付後按下，寵物會改成已被認養
@@ -84,9 +107,12 @@ const MyPetsApplicationsPage = () => {
     }
   });
 
-  const handleComplete = (id) => {
-    if (!window.confirm('確定已完成交付？完成後寵物會標示為「已被認養」，無法復原。')) return;
-    completeMutation.mutate(id);
+  const [completing, setCompleting] = useState(null);
+  const closeComplete = () => {
+    if (!completeMutation.isLoading) setCompleting(null);
+  };
+  const submitComplete = () => {
+    completeMutation.mutate(completing._id, { onSuccess: () => setCompleting(null) });
   };
 
   const getStatusBadge = (status) => {
@@ -109,6 +135,11 @@ const MyPetsApplicationsPage = () => {
   };
 
   const applications = data?.data?.applications || [];
+  const totalPages = data?.data?.pagination?.totalPages || 0;
+  // 審核後最後一頁可能變空（例如在「待審核」把最後一筆拒絕了），退回到還有資料的最後一頁
+  useEffect(() => {
+    if (totalPages > 0 && page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
 
   const [selectedApplicationId, setSelectedApplicationId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -155,7 +186,7 @@ const MyPetsApplicationsPage = () => {
             {['all', 'pending', 'approved', 'completed', 'rejected'].map((status) => (
               <button
                 key={status}
-                onClick={() => setFilter(status)}
+                onClick={() => changeFilter(status)}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   filter === status
                     ? 'bg-primary-600 text-white'
@@ -266,14 +297,16 @@ const MyPetsApplicationsPage = () => {
                       {app.status === 'pending' && (
                         <>
                           <button
-                            onClick={() => handleReview(app._id, 'approved')}
+                            onClick={() => reviewMutation.mutate({ id: app._id, decision: 'approved', reason: '' })}
+                            disabled={reviewMutation.isLoading}
                             className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
                           >
                             <CheckCircle className="w-4 h-4" />
                             通過
                           </button>
                           <button
-                            onClick={() => handleReview(app._id, 'rejected')}
+                            onClick={() => openReject(app)}
+                            disabled={reviewMutation.isLoading}
                             className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
                           >
                             <XCircle className="w-4 h-4" />
@@ -283,7 +316,7 @@ const MyPetsApplicationsPage = () => {
                       )}
                       {app.status === 'approved' && (
                         <button
-                          onClick={() => handleComplete(app._id)}
+                          onClick={() => setCompleting(app)}
                           disabled={completeMutation.isLoading}
                           className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2 disabled:opacity-50"
                         >
@@ -320,6 +353,9 @@ const MyPetsApplicationsPage = () => {
                 </div>
               </div>
             ))}
+            {totalPages > 1 && (
+              <Pagination currentPage={page} totalPages={totalPages} onPageChange={changePage} className="pt-2" />
+            )}
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
@@ -336,6 +372,53 @@ const MyPetsApplicationsPage = () => {
           }}
           applicationId={selectedApplicationId}
         />
+
+        <Modal
+          isOpen={Boolean(rejecting)}
+          onClose={closeReject}
+          title={`拒絕 ${rejecting?.pet?.name || ''} 的申請`}
+          size="sm"
+          footer={(
+            <>
+              <Button variant="ghost" onClick={closeReject} disabled={reviewMutation.isLoading}>取消</Button>
+              <Button variant="danger" onClick={submitReject} loading={reviewMutation.isLoading}
+                disabled={!rejectReason.trim()}>
+                確定拒絕
+              </Button>
+            </>
+          )}
+        >
+          <p className="text-sm text-gray-600 mb-3">申請人會收到通知，並看到你填寫的原因。</p>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {REJECT_REASONS.map((r) => (
+              <button key={r} type="button" onClick={() => setRejectReason(r)}
+                className="px-3 py-1 text-sm rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100">
+                {r}
+              </button>
+            ))}
+          </div>
+          <Textarea label="拒絕原因" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)}
+            maxLength={REJECT_REASON_MAX} rows={3} fullWidth
+            helperText={`${rejectReason.length}/${REJECT_REASON_MAX} 字，可以點上方的常用原因再修改`} />
+        </Modal>
+
+        <Modal
+          isOpen={Boolean(completing)}
+          onClose={closeComplete}
+          title="確認完成認養"
+          size="sm"
+          footer={(
+            <>
+              <Button variant="ghost" onClick={closeComplete} disabled={completeMutation.isLoading}>取消</Button>
+              <Button onClick={submitComplete} loading={completeMutation.isLoading}>確認完成</Button>
+            </>
+          )}
+        >
+          <p className="text-gray-700">
+            確定 <strong>{completing?.pet?.name}</strong> 已經交付給 <strong>{completing?.applicant?.username}</strong>？
+          </p>
+          <p className="mt-2 text-sm text-gray-600">完成後動物會標示為「已被認養」，這個動作無法復原。</p>
+        </Modal>
       </div>
     </div>
   );

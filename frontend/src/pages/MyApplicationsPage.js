@@ -7,9 +7,22 @@ import { Calendar, Eye, FileText, Clock, CheckCircle, XCircle, AlertCircle } fro
 import { toast } from 'react-hot-toast';
 import { useQueryClient } from 'react-query';
 import { motion } from 'framer-motion';
+import { Button, Modal } from '../components/ui';
+
+// 狀態分頁；值和後端 status 一致，由後端 ?status= 篩選
+const STATUS_TABS = [
+  { value: 'all', label: '全部' },
+  { value: 'pending', label: '待審核' },
+  { value: 'approved', label: '已通過' },
+  { value: 'completed', label: '已完成' },
+  { value: 'rejected', label: '已拒絕' },
+  { value: 'cancelled', label: '已取消' },
+];
 
 const MyApplicationsPage = () => {
   const [page, setPage] = useState(1);
+  const [status, setStatus] = useState('all');
+  const [cancelTarget, setCancelTarget] = useState(null);
   const [selectedApplicationId, setSelectedApplicationId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const location = useLocation();
@@ -30,10 +43,11 @@ const MyApplicationsPage = () => {
   // 獲取我的認養申請
   const queryClient = useQueryClient();
   const { data: applicationsData, isLoading, error, refetch } = useQuery(
-    ['myApplications', page],
+    ['myApplications', page, status],
     async () => {
+      const statusParam = status !== 'all' ? `&status=${status}` : '';
       const response = await fetch(
-        `http://localhost:5000/api/adoptions/my-applications?page=${page}&limit=10`,
+        `http://localhost:5000/api/adoptions/my-applications?page=${page}&limit=10${statusParam}`,
         {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -70,6 +84,7 @@ const MyApplicationsPage = () => {
       }
 
       toast.success('取消申請成功');
+      setCancelTarget(null);
       // 重新抓取我的申請列表
       if (refetch) await refetch();
       // 也更新快取相關查詢（保險）
@@ -164,6 +179,24 @@ const MyApplicationsPage = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">我的認養申請</h1>
         <p className="mt-2 text-gray-600">追蹤您的寵物認養申請進度</p>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="依狀態篩選">
+          {STATUS_TABS.map((tab) => (
+            <button
+              key={tab.value}
+              type="button"
+              aria-pressed={status === tab.value}
+              onClick={() => { setStatus(tab.value); setPage(1); }}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                status === tab.value ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {applicationsData?.applications && applicationsData.applications.length > 0 ? (
@@ -283,7 +316,7 @@ const MyApplicationsPage = () => {
                       {application.status === 'pending' && (
                         <button
                           className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm"
-                          onClick={() => handleCancel(application._id)}
+                          onClick={() => setCancelTarget(application)}
                           disabled={cancelingId === application._id}
                         >
                           {cancelingId === application._id ? '取消中...' : '取消申請'}
@@ -321,6 +354,14 @@ const MyApplicationsPage = () => {
             </div>
           )}
         </>
+      ) : status !== 'all' ? (
+        <div className="bg-white rounded-lg shadow p-12 text-center">
+          <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-600 mb-6">
+            沒有「{STATUS_TABS.find((t) => t.value === status)?.label}」的申請
+          </p>
+          <Button variant="outline" onClick={() => { setStatus('all'); setPage(1); }}>看全部申請</Button>
+        </div>
       ) : (
         <div className="bg-white rounded-lg shadow p-12 text-center">
           <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -340,6 +381,26 @@ const MyApplicationsPage = () => {
         }}
         applicationId={selectedApplicationId}
       />
+
+      <Modal
+        isOpen={Boolean(cancelTarget)}
+        onClose={() => { if (!cancelingId) setCancelTarget(null); }}
+        title="確定要取消申請？"
+        size="sm"
+        footer={(
+          <>
+            <Button variant="ghost" onClick={() => setCancelTarget(null)} disabled={Boolean(cancelingId)}>先不要</Button>
+            <Button variant="danger" onClick={() => handleCancel(cancelTarget._id)} loading={Boolean(cancelingId)}>
+              確定取消
+            </Button>
+          </>
+        )}
+      >
+        <p className="text-gray-700">
+          要取消 <strong>{cancelTarget?.pet?.name}</strong> 的認養申請嗎？
+        </p>
+        <p className="mt-2 text-sm text-gray-600">取消後這份申請就不會再被審核；之後還想認養，可以重新送出申請。</p>
+      </Modal>
     </div>
   );
 };

@@ -651,6 +651,9 @@ async def review(adoption_id: str, body: dict | None = None, user: dict = Depend
     decision, reason = body.get("decision"), body.get("reason")
     if decision not in ("approved", "rejected"):
         raise _fail(400, "請提供有效的審核決定 (approved 或 rejected)")
+    # 原因會存進申請並寫進給申請人的通知，限制型別與長度
+    if reason is not None and (not isinstance(reason, str) or len(reason) > 500):
+        raise _fail(400, "審核原因最多 500 字")
     adoption, pet = await _load_managed(adoption_id, user, _fail(404, "找不到此認養申請"),
                                         _fail(403, "您沒有權限審核此申請"))
     if adoption.get("status") not in ("pending", "under-review"):

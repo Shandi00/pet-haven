@@ -23,39 +23,48 @@ const Pagination = ({ currentPage, totalPages, onPageChange, className = '' }) =
     return pages;
   };
 
+  const edgeButton = 'px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors';
+
+  // flex-wrap：手機寬度放不下 7 個頁碼時換行，不會撐出水平捲軸
   return (
-    <div className={`flex items-center justify-center gap-2 ${className}`}>
+    <nav aria-label="分頁" className={`flex flex-wrap items-center justify-center gap-2 ${className}`}>
       <button
+        type="button"
         onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        disabled={currentPage <= 1}
+        className={edgeButton}
       >
         上一頁
       </button>
 
-      {getPageNumbers().map((page, index) => (
+      {getPageNumbers().map((page, index) => (page === '...' ? (
+        <span key={`gap-${index}`} className="px-2 py-2 text-gray-500" aria-hidden="true">…</span>
+      ) : (
         <button
-          key={index}
-          onClick={() => typeof page === 'number' && onPageChange(page)}
-          disabled={page === '...'}
+          key={page}
+          type="button"
+          onClick={() => onPageChange(page)}
+          aria-label={`第 ${page} 頁`}
+          aria-current={page === currentPage ? 'page' : undefined}
           className={`px-4 py-2 rounded-lg border transition-colors ${
             page === currentPage
               ? 'bg-primary-600 text-white border-primary-500'
-              : 'border-gray-300 text-gray-700 hover:bg-gray-50 disabled:cursor-default'
+              : 'border-gray-300 text-gray-700 hover:bg-gray-50'
           }`}
         >
           {page}
         </button>
-      ))}
+      )))}
 
       <button
+        type="button"
         onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        disabled={currentPage >= totalPages}
+        className={edgeButton}
       >
         下一頁
       </button>
-    </div>
+    </nav>
   );
 };
 

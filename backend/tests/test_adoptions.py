@@ -52,6 +52,20 @@ def test_main_line_apply_review_complete(api, make_user, make_pet, sync_db):
     assert mine["applications"][0]["status"] == "completed" and "reviewNotes" not in mine["applications"][0]
 
 
+def test_reject_reason_is_validated_and_sent_to_applicant(api, make_user, make_pet, sync_db):
+    owner, oh, applicant, ah, xh, pet = setup_flow(make_user, make_pet)
+    aid = apply(api, pet, ah).json()["data"]["adoption"]["_id"]
+    url = f"/api/adoptions/{aid}/review"
+    for bad in ("字" * 501, 123, ["x"]):
+        r = api.post(url, json={"decision": "rejected", "reason": bad}, headers=oh)
+        assert r.status_code == 400 and r.json() == {"success": False, "error": "審核原因最多 500 字"}
+    assert sync_db.adoptions.find_one({"_id": ObjectId(aid)})["status"] == "pending"  # 沒有被改動
+    r = api.post(url, json={"decision": "rejected", "reason": "照顧時間不足"}, headers=oh)
+    assert r.status_code == 200 and r.json()["adoption"]["status"] == "rejected"
+    note = sync_db.notifications.find_one({"recipient": applicant["_id"], "type": "adoption_rejected"})
+    assert "原因：照顧時間不足" in note["content"]
+
+
 def test_apply_validation_and_duplicates(api, make_user, make_pet):
     _, _, _, ah, _, pet = setup_flow(make_user, make_pet)
     r = api.post(f"/api/adoptions/apply/{pet['_id']}", json={**APPLY, "occupation": ""}, headers=ah)

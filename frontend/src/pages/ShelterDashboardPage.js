@@ -19,6 +19,9 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ApplicationDetailModal from '../components/ApplicationDetailModal';
+import { Pagination } from '../components/ui';
+
+const APPLICATIONS_PER_PAGE = 10;
 
 const ShelterDashboardPage = () => {
   const { user, loading: authLoading } = useAuth();
@@ -218,6 +221,12 @@ const ApplicationManagementTab = ({ overview, applications, navigate, onViewDeta
       app.applicant?.username?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesStatus && matchesSearch;
   });
+  // 申請已一次載入，在畫面上分頁；篩選或搜尋後筆數變少時，頁碼自動收回到最後一頁
+  const [page, setPage] = useState(1);
+  const totalPages = Math.ceil(filteredApplications.length / APPLICATIONS_PER_PAGE);
+  const currentPage = Math.min(page, Math.max(totalPages, 1));
+  const pageApplications = filteredApplications.slice(
+    (currentPage - 1) * APPLICATIONS_PER_PAGE, currentPage * APPLICATIONS_PER_PAGE);
 
   // 使用目前取得的 applications 計算三個關鍵指標，避免與後端欄位不同步
   const shelterApplications = applications || [];
@@ -304,7 +313,8 @@ const ApplicationManagementTab = ({ overview, applications, navigate, onViewDeta
                 type="text"
                 placeholder="搜尋寵物或申請人..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+                aria-label="搜尋寵物或申請人"
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
             </div>
@@ -313,21 +323,25 @@ const ApplicationManagementTab = ({ overview, applications, navigate, onViewDeta
             <Filter className="w-5 h-5 text-gray-400" />
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+              aria-label="申請狀態"
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
+              {/* 值要和後端的 status 一致（under-review 是連字號） */}
               <option value="all">全部狀態</option>
               <option value="pending">待審核</option>
-              <option value="under_review">審核中</option>
+              <option value="under-review">審核中</option>
               <option value="approved">已核准</option>
+              <option value="completed">已完成</option>
               <option value="rejected">已拒絕</option>
+              <option value="cancelled">已取消</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* 申請列表 */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      {/* 申請列表；overflow-x-auto：手機上欄位放不下時可以左右捲動，不會被切掉 */}
+      <div className="bg-white rounded-lg shadow overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -359,7 +373,7 @@ const ApplicationManagementTab = ({ overview, applications, navigate, onViewDeta
                 </td>
               </tr>
             ) : (
-              filteredApplications.map((app) => (
+              pageApplications.map((app) => (
                 <tr key={app._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {app.applicationId || app._id.slice(-8)}
@@ -390,6 +404,12 @@ const ApplicationManagementTab = ({ overview, applications, navigate, onViewDeta
           </tbody>
         </table>
       </div>
+      {totalPages > 1 && (
+        <div className="flex flex-col items-center gap-2">
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setPage} />
+          <p className="text-sm text-gray-500">共 {filteredApplications.length} 筆</p>
+        </div>
+      )}
     </div>
   );
 };

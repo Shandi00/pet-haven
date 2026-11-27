@@ -14,6 +14,7 @@ import {
   Info
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { Pagination } from '../components/ui';
 
 const DataImportPage = () => {
   const [activeTab, setActiveTab] = useState('animals'); // 'animals' or 'shops'
@@ -33,6 +34,7 @@ const DataImportPage = () => {
   
   // 寵物店資料
   const [petShops, setPetShops] = useState([]);
+  const [shopTotal, setShopTotal] = useState(0);
   const [shopFilters, setShopFilters] = useState({
     county: '',
     page: 1,
@@ -87,8 +89,9 @@ const DataImportPage = () => {
     }
   };
 
-  // 獲取合法寵物業名單
-  const fetchPetShops = async () => {
+  // 獲取合法寵物業名單；換頁時傳入頁碼（按「載入資料」時收到的是 click 事件，沿用目前頁碼）
+  const fetchPetShops = async (pageArg) => {
+    const page = typeof pageArg === 'number' ? pageArg : shopFilters.page;
     try {
       setLoading(true);
       // Helper: 只取日期部分（YYYY-MM-DD），對各種 raw 格式做防護
@@ -131,7 +134,7 @@ const DataImportPage = () => {
       const params = new URLSearchParams();
       
       if (shopFilters.county) params.append('county', shopFilters.county);
-      params.append('page', shopFilters.page);
+      params.append('page', page);
       params.append('limit', shopFilters.limit);
 
       // 先從本地已匯入的資料庫讀取（若要改為即時政府 API，改回原 endpoint）
@@ -168,6 +171,8 @@ const DataImportPage = () => {
         }));
 
         setPetShops(mapped);
+        setShopTotal(data.data.pagination?.total || mapped.length);
+        setShopFilters((f) => ({ ...f, page }));
         toast.success(`成功載入 ${mapped.length} 筆寵物業資料`);
       } else {
         throw new Error(data.error.message);
@@ -317,6 +322,7 @@ const DataImportPage = () => {
                   counties={counties}
                   loading={loading}
                   onFetch={fetchPetShops}
+                  total={shopTotal}
                 />
               )}
             </AnimatePresence>
@@ -571,7 +577,8 @@ const AnimalCard = ({ animal, isSelected, onToggle }) => {
 };
 
 // 寵物店分頁
-const PetShopTab = ({ petShops, filters, setFilters, counties, loading, onFetch }) => {
+const PetShopTab = ({ petShops, filters, setFilters, counties, loading, onFetch, total }) => {
+  const totalPages = Math.ceil(total / filters.limit);
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -678,6 +685,13 @@ const PetShopTab = ({ petShops, filters, setFilters, counties, loading, onFetch 
               ))}
             </tbody>
           </table>
+          {totalPages > 1 && (
+            <div className="flex flex-col items-center gap-2 mt-6">
+              <Pagination currentPage={filters.page} totalPages={totalPages}
+                onPageChange={(p) => { if (!loading) onFetch(p); }} />
+              <p className="text-sm text-gray-500">共 {total} 筆</p>
+            </div>
+          )}
         </div>
       ) : (
         <div className="text-center py-12 text-gray-500">

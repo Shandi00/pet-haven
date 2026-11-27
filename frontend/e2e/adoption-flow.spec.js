@@ -141,12 +141,15 @@ test.describe.serial('認養流程：申請 → 審核通過 → 完成 → 認�
     await expect(adopter.getByRole('heading', { name: '我的認養申請' })).toBeVisible();
     await expect(adopterCard(adopter, pet.name)).toContainText('已通過');
 
-    // 3. 收容所在同一張卡片按「完成認養」並確認（UI）
-    shelter.once('dialog', (d) => d.accept());
+    // 3. 收容所在同一張卡片按「完成認養」，在確認視窗按「確認完成」（UI）
     const completeResp = shelter.waitForResponse(
       (r) => r.url().includes(`/api/adoptions/${adoptionId}/complete`) && r.request().method() === 'POST');
     await card.getByRole('button', { name: '完成認養' }).click();
+    const confirmDialog = shelter.getByRole('dialog', { name: '確認完成認養' });
+    await expect(confirmDialog).toContainText(pet.name);
+    await confirmDialog.getByRole('button', { name: '確認完成' }).click();
     const done = await completeResp;
+    await expect(confirmDialog).toHaveCount(0);
     expect(done.status(), await done.text()).toBe(200);
     await expect(shelter.getByText('已完成認養').first()).toBeVisible();
     await expect(card).toContainText('已完成');
