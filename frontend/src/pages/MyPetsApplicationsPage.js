@@ -98,10 +98,11 @@ const MyPetsApplicationsPage = () => {
     reviewMutation.mutate({ id: rejecting._id, decision: 'rejected', reason }, { onSuccess: () => setRejecting(null) });
   };
 
-  // 完成認養：已通過的申請交付後按下，寵物會改成已被認養
+  // 完成認養：已通過的申請交付後按下，寵物會改成已被認養；同一隻的其他進行中申請由後端一併結束並通知
   const completeMutation = useMutation((id) => adoptionAPI.completeAdoption(id, {}), {
-    onSuccess: () => {
-      toast.success('已完成認養');
+    onSuccess: (res) => {
+      const closed = res?.data?.closedApplications || 0;
+      toast.success(closed ? `已完成認養，另外 ${closed} 份申請已結束並通知申請人` : '已完成認養');
       queryClient.invalidateQueries(['myPetsApplications']);
     },
     onError: (error) => {
@@ -110,6 +111,19 @@ const MyPetsApplicationsPage = () => {
   });
 
   const [completing, setCompleting] = useState(null);
+  // 確認視窗先告訴送養者會一併結束幾份申請（申請詳情的審核輔助裡有這個數字，和詳情視窗共用快取）
+  const { data: completingDetail } = useQuery(
+    ['applicationDetail', completing?._id],
+    async () => {
+      const response = await fetch(`http://localhost:5000/api/adoptions/${completing._id}/details`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      if (!response.ok) throw new Error('載入失敗');
+      return (await response.json()).data;
+    },
+    { enabled: Boolean(completing), retry: false }
+  );
+  const othersToClose = completingDetail?.reviewInsights?.pet?.otherActiveApplications || 0;
   const closeComplete = () => {
     if (!completeMutation.isLoading) setCompleting(null);
   };
@@ -424,6 +438,11 @@ const MyPetsApplicationsPage = () => {
             確定 <strong>{completing?.pet?.name}</strong> 已經交付給 <strong>{completing?.applicant?.username}</strong>？
           </p>
           <p className="mt-2 text-sm text-gray-600">完成後動物會標示為「已被認養」，這個動作無法復原。</p>
+          {othersToClose > 0 && (
+            <p className="mt-2 text-sm text-gray-600">
+              另外 {othersToClose} 份這隻動物進行中的申請會一併結束，並通知申請人。
+            </p>
+          )}
         </Modal>
       </div>
     </div>

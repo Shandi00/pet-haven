@@ -53,7 +53,7 @@
 | GET | `/api/adoptions/admin/stats` | 認養統計（管理員） | 登入＋admin |
 | GET | `/api/adoptions/{adoption_id}` | 認養申請詳情（申請人或管理員） | 登入 |
 | PUT | `/api/adoptions/{adoption_id}/status` | 更新申請狀態（寵物擁有者或管理員） | 登入 |
-| POST | `/api/adoptions/{adoption_id}/complete` | 完成認養（寵物擁有者或管理員） | 登入 |
+| POST | `/api/adoptions/{adoption_id}/complete` | 完成認養（寵物擁有者或管理員）；同一隻動物其他進行中的申請一併結束並通知，回傳 `closedApplications` | 登入 |
 | PUT | `/api/adoptions/{adoption_id}/cancel` | 取消申請（申請人） | 登入 |
 | POST | `/api/adoptions/{adoption_id}/notes` | 新增審核備註（寵物擁有者或管理員） | 登入 |
 | POST | `/api/adoptions/{adoption_id}/review` | 審核申請（寵物擁有者或管理員） | 登入 |

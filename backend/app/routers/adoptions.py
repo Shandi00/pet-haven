@@ -539,10 +539,11 @@ async def _load_managed(adoption_id: str, user: dict, error_404: RawError, error
     return adoption, pet
 
 
-async def _notify_applicant(adoption: dict, pet: dict, status: str, content: str | None = None) -> None:
-    ntype, title, template, priority = STATUS_NOTICE.get(status, ("adoption_received", "認養申請更新", "", "high"))
+async def _notify_applicant(adoption: dict, pet: dict, status: str, content: str | None = None,
+                            title: str | None = None) -> None:
+    ntype, default_title, template, priority = STATUS_NOTICE.get(status, ("adoption_received", "認養申請更新", "", "high"))
     await safe_notify({
-        "recipient": adoption["applicant"], "type": ntype, "title": title,
+        "recipient": adoption["applicant"], "type": ntype, "title": title or default_title,
         "content": content or template.format(pet.get("name")) or f"您對 {pet.get('name')} 的認養申請狀態已更新",
         "relatedAdoption": adoption["_id"], "relatedPet": pet["_id"],
         "link": f"/my-applications?applicationId={adoption['_id']}", "priority": priority,
@@ -567,6 +568,8 @@ async def update_status(adoption_id: str, body: dict | None = None, user: dict =
     if status in PET_STATUS_FOR:
         await _sync_pet_status(pet, adoption["_id"], PET_STATUS_FOR[status])
     await _notify_applicant(adoption, pet, status)
+    if status == "completed":
+        await _close_other_applications(adoption, pet, user)
     updated = await _load(adoption_id)
     await populate(updated, "pet", "pets", "name species breed photos adoptionStatus")
     await populate(updated, "applicant", "users", "firstName lastName email phone")
@@ -575,7 +578,8 @@ async def update_status(adoption_id: str, body: dict | None = None, user: dict =
     return {"message": "申請狀態更新成功", "adoption": adoption_json(updated)}
 
 
-@router.post("/{adoption_id}/complete", summary="完成認養（寵物擁有者或管理員）")
+@router.post("/{adoption_id}/complete",
+             summary="完成認養（寵物擁有者或管理員）；同一隻動物其他進行中的申請一併結束並通知申請人")
 async def complete(adoption_id: str, body: dict | None = None, user: dict = Depends(token_user_zh)):
     body = body or {}
     adoption, pet = await _load_managed(adoption_id, user, _err(404, "找不到此認養申請"),
@@ -603,12 +607,35 @@ async def complete(adoption_id: str, body: dict | None = None, user: dict = Depe
     await get_db().users.update_one({"_id": adoption["applicant"]}, {"$push": {"adoptionHistory": adoption["_id"]}})
     # T07：完成時通知認養者（舊版只有改狀態 API 會通知）
     await _notify_applicant(adoption, pet, "completed")
+    closed = await _close_other_applications(adoption, pet, user)
     updated = await _load(adoption_id)
     updated["pet"] = await get_db().pets.find_one({"_id": pet["_id"]})
     out = adoption_json(updated)
     out["pet"] = pet_json(updated["pet"])
-    audit("adoption_completed", by=user["_id"], adoption=adoption["_id"])
-    return {"message": "認養流程完成", "adoption": out}
+    audit("adoption_completed", by=user["_id"], adoption=adoption["_id"], closed_others=closed)
+    return {"message": "認養流程完成", "adoption": out, "closedApplications": closed}
+
+
+CLOSED_REASON = "這隻動物已由其他認養人完成認養"
+
+
+async def _close_other_applications(adoption: dict, pet: dict, user: dict) -> int:
+    """完成認養後，同一隻動物其他進行中的申請改為已拒絕並通知申請人，否則他們會一直停在待審核。
+    用中性的「已結束」措辭，不寫成申請未通過。回傳結束的筆數。"""
+    others = await get_db().adoptions.find(
+        {"pet": pet["_id"], "_id": {"$ne": adoption["_id"]}, "status": {"$in": list(ACTIVE_STATUSES)}},
+        {"_id": 1, "applicant": 1}).to_list(None)
+    if not others:
+        return 0
+    now = datetime.now(timezone.utc)
+    await get_db().adoptions.update_many({"_id": {"$in": [o["_id"] for o in others]}}, {"$set": {
+        "status": "rejected", "updatedAt": now,
+        "reviewDecision": {"decision": "rejected", "reviewer": user["_id"], "reason": CLOSED_REASON, "reviewDate": now}}})
+    content = f"{pet.get('name')} 已經找到家了，你的認養申請已結束，歡迎看看其他毛孩。"
+    for other in others:
+        if other.get("applicant"):
+            await _notify_applicant(other, pet, "rejected", content=content, title="認養申請已結束")
+    return len(others)
 
 
 @router.put("/{adoption_id}/cancel", summary="取消申請（申請人）")

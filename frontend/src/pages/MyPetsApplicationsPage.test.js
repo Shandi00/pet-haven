@@ -46,6 +46,17 @@ describe('MyPetsApplicationsPage 完成認養', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   });
 
+  test('同一隻動物還有其他進行中的申請時，確認視窗說明會一併結束', async () => {
+    renderPage([app('approved')]);
+    const listFetch = global.fetch;
+    global.fetch = jest.fn((url) => (url.includes('/details')
+      ? Promise.resolve({ ok: true, json: async () => ({ data: { reviewInsights: { pet: { otherActiveApplications: 2 } } } }) })
+      : listFetch(url)));
+    fireEvent.click(await screen.findByRole('button', { name: '完成認養' }));
+    const dialog = screen.getByRole('dialog', { name: '確認完成認養' });
+    await waitFor(() => expect(dialog).toHaveTextContent('另外 2 份這隻動物進行中的申請會一併結束，並通知申請人。'));
+  });
+
   test('按取消或 Esc 關閉視窗，不呼叫 API', async () => {
     renderPage([app('approved')]);
     fireEvent.click(await screen.findByRole('button', { name: '完成認養' }));

@@ -74,6 +74,37 @@ def test_leftover_application_on_adopted_pet_keeps_pet_adopted(api, make_user, m
     assert sync_db.pets.find_one({"_id": pet["_id"]})["adoptionStatus"] == "adopted"
 
 
+def test_complete_closes_other_active_applications_and_notifies(api, make_user, make_pet, sync_db):
+    owner, oh, applicant, ah, xh, pet = setup_flow(make_user, make_pet)
+    aid = apply(api, pet, ah).json()["data"]["adoption"]["_id"]
+    assert api.post(f"/api/adoptions/{aid}/review", json={"decision": "approved"}, headers=oh).status_code == 200
+    # 同一隻動物留下的其他申請：進行中的要結束，已經結束的不動
+    other_a, other_b, done = ObjectId(), ObjectId(), ObjectId()
+    ids = sync_db.adoptions.insert_many([
+        {"pet": pet["_id"], "applicant": other_a, "status": "pending"},
+        {"pet": pet["_id"], "applicant": other_b, "status": "under-review"},
+        {"pet": pet["_id"], "applicant": done, "status": "cancelled"},
+    ]).inserted_ids
+    r = api.post(f"/api/adoptions/{aid}/complete", json={}, headers=oh)
+    assert r.status_code == 200 and r.json()["closedApplications"] == 2
+    closed = [sync_db.adoptions.find_one({"_id": i}) for i in ids]
+    assert [a["status"] for a in closed] == ["rejected", "rejected", "cancelled"]
+    assert closed[0]["reviewDecision"]["reason"] == "這隻動物已由其他認養人完成認養"
+    for who in (other_a, other_b):
+        note = sync_db.notifications.find_one({"recipient": who, "type": "adoption_rejected"})
+        assert note["title"] == "認養申請已結束" and "已經找到家了" in note["content"]
+    assert not sync_db.notifications.find_one({"recipient": done})
+    assert sync_db.pets.find_one({"_id": pet["_id"]})["adoptionStatus"] == "adopted"
+
+
+def test_status_api_completed_also_closes_others(api, make_user, make_pet, sync_db):
+    owner, oh, applicant, ah, xh, pet = setup_flow(make_user, make_pet)
+    aid = apply(api, pet, ah).json()["data"]["adoption"]["_id"]
+    other = sync_db.adoptions.insert_one({"pet": pet["_id"], "applicant": ObjectId(), "status": "pending"}).inserted_id
+    assert api.put(f"/api/adoptions/{aid}/status", json={"status": "completed"}, headers=oh).status_code == 200
+    assert sync_db.adoptions.find_one({"_id": other})["status"] == "rejected"
+
+
 def test_reject_keeps_pet_pending_while_other_applications_are_active(api, make_user, make_pet, sync_db):
     owner, oh, applicant, ah, xh, pet = setup_flow(make_user, make_pet)
     aid = apply(api, pet, ah).json()["data"]["adoption"]["_id"]
