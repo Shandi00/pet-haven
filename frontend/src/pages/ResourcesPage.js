@@ -136,7 +136,9 @@ const ResourcesPage = () => {
     { id: 'sponsors', label: '贊助機構', icon: <Heart className="w-5 h-5" /> }
   ];
 
-  const cities = ['all', '台北市', '新北市', '台中市'];
+  // 縣市選項從資料本身產生：原本寫死台北、新北、台中，選了沒資料，嘉義縣的資料卻選不到
+  const cities = ['all', ...new Set([...medicalResources, ...friendlyPlaces, ...sponsorOrganizations]
+    .map((item) => item.city).filter(Boolean))];
 
   const getMapLink = (address) => {
     if (!address || !address.trim()) return null;
@@ -158,6 +160,9 @@ const ResourcesPage = () => {
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-3">寵物資源整合</h1>
           <p className="text-lg text-gray-600">為您整理完整的寵物醫療、友善場所與贊助資訊</p>
+          <p className="mt-2 text-sm text-gray-500">
+            以下資料由專題團隊整理自各機構的公開資訊，營業時間、電話可能有異動，前往前請以各機構公告為準。
+          </p>
         </motion.div>
 
         {/* 分類標籤 */}
@@ -185,7 +190,7 @@ const ResourcesPage = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600" />
             </div>
-            <select value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)}
+            <select value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)} aria-label="縣市"
               className="pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 appearance-none bg-white"
               style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}>
               {cities.map(city => (<option key={city} value={city}>{city === 'all' ? '所有縣市' : city}</option>))}

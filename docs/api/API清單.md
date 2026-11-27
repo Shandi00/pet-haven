@@ -63,8 +63,8 @@
 
 | 方法 | 路徑 | 說明 | 權限 |
 |---|---|---|---|
-| POST | `/api/auth/register` | 註冊 | 公開 |
-| POST | `/api/auth/login` | 登入 | 公開 |
+| POST | `/api/auth/register` | 註冊；有設定人機驗證時要帶 `captchaToken`，同一 IP 每小時最多 10 個（[契約 §8](新增API契約.md)） | 公開 |
+| POST | `/api/auth/login` | 登入；有設定人機驗證時要帶 `captchaToken`（[契約 §8](新增API契約.md)） | 公開 |
 | GET | `/api/auth/me` | 取得目前使用者 | 登入 |
 | PUT | `/api/auth/profile` | 更新個人資料 | 登入 |
 | PUT | `/api/auth/change-password` | 變更密碼 | 登入 |

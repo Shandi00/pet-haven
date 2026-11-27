@@ -51,19 +51,27 @@ class UserRateLimiter:
         self.limit, self.window, self._enabled = limit, window_seconds, enabled
         self._hits: dict[str, deque] = defaultdict(deque)
 
-    def check(self, user_id) -> None:
+    def allow(self, key) -> bool:
+        """還有額度就記一次並回傳 True；超過時回傳 False（不丟例外，給要改用備援的呼叫端）。"""
         enabled = self._enabled if self._enabled is not None else get_settings().app_env != "test"
         if not enabled:
-            return
-        q = self._hits[str(user_id)]
+            return True
+        q = self._hits[str(key)]
         now = time.monotonic()
         while q and now - q[0] > self.window:
             q.popleft()
         if len(q) >= self.limit:
-            raise HTTPException(429, "呼叫太頻繁，請稍後再試")
+            return False
         q.append(now)
+        return True
+
+    def check(self, user_id) -> None:
+        if not self.allow(user_id):
+            raise HTTPException(429, "呼叫太頻繁，請稍後再試")
 
 
 # 契約 §0：聊天每分鐘 10 次；top3、feedback、explain 合計每分鐘 30 次
 ai_chat_limiter = UserRateLimiter(10, 60)
 matching_limiter = UserRateLimiter(30, 60)
+# 同一個 IP 一小時最多成功註冊 10 個帳號，擋住用大量帳號繞過每人限流（展示機前面有反向代理時會共用額度）
+register_limiter = UserRateLimiter(10, 3600)

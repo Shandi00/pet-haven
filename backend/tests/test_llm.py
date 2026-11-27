@@ -108,3 +108,14 @@ def test_api_key_is_hidden_when_settings_are_printed():
     assert isinstance(s.gemini_api_key, SecretStr)
     assert "real-secret-key" not in repr(s) and "real-secret-key" not in str(s.model_dump())
     assert s.gemini_api_key.get_secret_value() == "real-secret-key"
+
+
+def test_site_wide_cap_falls_back_without_calling_gemini(monkeypatch):
+    # 大量帳號輪流呼叫會耗盡免費額度；全站超過上限時直接回 None，由呼叫端改用規則回覆
+    monkeypatch.setattr(llm, "site_limiter", UserRateLimiter(1, 60, enabled=True))
+    seen = {}
+    _fake_post(monkeypatch, _reply('{"ok": true}'), seen)
+    assert asyncio.run(llm.generate_json("s", "p")) == {"ok": True}
+    seen.clear()
+    assert asyncio.run(llm.generate_json("s", "p")) is None
+    assert seen == {}

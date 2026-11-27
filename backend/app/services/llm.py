@@ -7,9 +7,12 @@ import time
 import httpx
 
 from app.config import get_settings
+from app.core.ratelimit import UserRateLimiter
 
 logger = logging.getLogger(__name__)
 API_BASE = "https://generativelanguage.googleapis.com/v1beta"
+# 全站每分鐘最多 30 次 Gemini 呼叫（所有使用者合計），保住展示當天的免費額度
+site_limiter = UserRateLimiter(30, 60)
 
 
 async def _post(url: str, key: str, body: dict, timeout: float) -> dict:
@@ -24,6 +27,10 @@ async def generate_json(system: str, prompt: str) -> dict | None:
     s = get_settings()
     key = s.gemini_api_key.get_secret_value()
     if not key:
+        return None
+    if not site_limiter.allow("site"):
+        # 全站上限：每人限流擋不住大量帳號輪流呼叫；超過時回 None，呼叫端改用規則回覆
+        logger.warning("gemini site limit reached")
         return None
     body = {
         "systemInstruction": {"parts": [{"text": system}]},

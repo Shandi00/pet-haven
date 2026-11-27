@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../services/auth';
 import { Heart, Eye, EyeOff, Loader } from 'lucide-react';
-import GoogleLoginButton from '../components/GoogleLoginButton';
+import GoogleLoginButton, { googleLoginEnabled } from '../components/GoogleLoginButton';
+import Captcha, { isCaptchaEnabled } from '../components/Captcha';
 // ?redirect= 只接受站內路徑，避免被當成跳到外站的跳板（開放式轉址）
 import { safeRedirect } from '../utils/safeRedirect';
 
@@ -20,10 +21,33 @@ const LoginPage = () => {
     setError,
   } = useForm();
 
+  // 人機驗證的 token 只能用一次：送出失敗後換 key 讓驗證元件重新載入
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [captchaKey, setCaptchaKey] = useState(0);
+  const resetCaptcha = () => {
+    setCaptchaToken('');
+    setCaptchaKey((k) => k + 1);
+  };
+
+  // Google 登入失敗時後端會導回 /login?error=...
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get('error');
+    if (code) {
+      setError('email', {
+        message: code === 'email_registered' ? '這個 Email 已用密碼註冊，請用密碼登入' : 'Google 登入失敗，請再試一次',
+      });
+    }
+  }, [setError]);
+
   const onSubmit = async (data) => {
+    if (isCaptchaEnabled() && !captchaToken) {
+      setError('email', { message: '請先完成人機驗證' });
+      return;
+    }
     setIsLoading(true);
     try {
-      const result = await login(data);
+      const result = await login({ ...data, captchaToken });
+      if (!result.success) resetCaptcha();
       if (result.success) {
         // 檢查是否有重定向的目標頁面
         const redirectParam = safeRedirect(new URLSearchParams(window.location.search).get('redirect'));
@@ -43,6 +67,7 @@ const LoginPage = () => {
         setError('email', { message: result.error });
       }
     } catch (error) {
+      resetCaptcha();
       setError('email', { message: '登入時發生錯誤，請稍後再試' });
     } finally {
       setIsLoading(false);
@@ -163,11 +188,13 @@ const LoginPage = () => {
               </div>
             </div>
 
+            <Captcha key={captchaKey} onToken={setCaptchaToken} />
+
             {/* 登入按鈕 */}
             <div>
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || (isCaptchaEnabled() && !captchaToken)}
                 className="w-full btn-primary flex justify-center items-center py-3 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
@@ -182,7 +209,8 @@ const LoginPage = () => {
             </div>
           </form>
 
-          {/* 分隔線 */}
+          {/* 分隔線與 Google 登入：沒設定 Google 用戶端 ID 時整段不顯示 */}
+          {googleLoginEnabled && (<>
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -218,6 +246,7 @@ const LoginPage = () => {
               }}
             />
           </div>
+          </>)}
 
           {/* 快速訪問 */}
           <div className="mt-6">

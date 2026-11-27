@@ -2,12 +2,17 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../services/auth';
 
+const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+// 沒設定 Google 用戶端 ID 時不顯示按鈕（原本用佔位字串，按了只會出錯）
+export const googleLoginEnabled = Boolean(CLIENT_ID);
+
 const GoogleLoginButton = ({ onSuccess, onError }) => {
   const googleButtonRef = useRef(null);
   const { loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!CLIENT_ID) return;
     // 確保 Google Identity Services 已載入
     if (!window.google) {
       console.error('Google Identity Services not loaded');
@@ -17,7 +22,7 @@ const GoogleLoginButton = ({ onSuccess, onError }) => {
     // 初始化 Google One Tap
     try {
       window.google.accounts.id.initialize({
-        client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID || '您的 Google Client ID',
+        client_id: CLIENT_ID,
         callback: handleGoogleCallback,
         auto_select: false,
         cancel_on_tap_outside: true,
@@ -74,6 +79,7 @@ const GoogleLoginButton = ({ onSuccess, onError }) => {
     }
   };
 
+  if (!CLIENT_ID) return null;
   return (
     <div className="w-full">
       <div ref={googleButtonRef} className="w-full"></div>

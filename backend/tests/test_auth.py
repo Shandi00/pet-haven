@@ -1,3 +1,4 @@
+import httpx
 from app.routers import auth as auth_router
 from tests.conftest import TEST_PASSWORD
 
@@ -88,3 +89,68 @@ def test_google_not_configured(api, monkeypatch):
     monkeypatch.setattr(get_settings(), "google_client_id", "")
     assert api.post("/api/auth/google/verify", json={"token": "t"}).status_code == 503
     assert api.get("/api/auth/google", follow_redirects=False).status_code == 503
+
+
+def test_captcha_required_when_configured(api, make_user, monkeypatch):
+    # 設定 Turnstile 密鑰後，登入與註冊都要附上驗證碼 token；沒設定時（開發、CI）不檢查
+    from pydantic import SecretStr
+    from app.config import get_settings
+    from app.core import captcha
+    user, _ = make_user()
+    login = {"email": user["email"], "password": TEST_PASSWORD}
+    assert api.post("/api/auth/login", json=login).status_code == 200
+    monkeypatch.setattr(get_settings(), "turnstile_secret_key", SecretStr("secret"))
+    seen = []
+
+    async def fake_siteverify(secret, token, ip):
+        seen.append((secret, token))
+        return {"success": token == "good"}
+
+    monkeypatch.setattr(captcha, "_siteverify", fake_siteverify)
+    r = api.post("/api/auth/login", json=login)
+    assert r.status_code == 400 and r.json()["error"] == "請先完成人機驗證"
+    assert api.post("/api/auth/login", json={**login, "captchaToken": "bad"}).status_code == 400
+    assert api.post("/api/auth/login", json={**login, "captchaToken": "good"}).status_code == 200
+    assert seen[-1] == ("secret", "good")
+    assert api.post("/api/auth/register", json=REG).status_code == 400
+    assert api.post("/api/auth/register", json={**REG, "captchaToken": "good"}).status_code == 201
+
+
+def test_captcha_service_unreachable_does_not_block_login(api, make_user, monkeypatch):
+    from pydantic import SecretStr
+    from app.config import get_settings
+    from app.core import captcha
+    user, _ = make_user()
+    monkeypatch.setattr(get_settings(), "turnstile_secret_key", SecretStr("secret"))
+
+    async def down(secret, token, ip):
+        raise httpx.ConnectError("down")
+
+    monkeypatch.setattr(captcha, "_siteverify", down)
+    r = api.post("/api/auth/login", json={"email": user["email"], "password": TEST_PASSWORD, "captchaToken": "t"})
+    assert r.status_code == 200
+
+
+def test_successful_signups_are_capped_per_ip(api, monkeypatch):
+    from app.core.ratelimit import UserRateLimiter
+    monkeypatch.setattr(auth_router, "register_limiter", UserRateLimiter(2, 3600, enabled=True))
+    for i in range(2):
+        r = api.post("/api/auth/register", json={**REG, "username": f"bulk{i}x", "email": f"bulk{i}@example.com"})
+        assert r.status_code == 201, r.text
+    r = api.post("/api/auth/register", json={**REG, "username": "bulk9x", "email": "bulk9@example.com"})
+    assert r.status_code == 429
+
+
+def test_google_does_not_take_over_unverified_password_account(api, monkeypatch, sync_db):
+    # 有人先用別人的 Email 加自己的密碼註冊（沒驗證 Email），本人之後用 Google 登入不能被綁進這個帳號
+    from app.config import get_settings
+    monkeypatch.setattr(get_settings(), "google_client_id", "cid")
+    assert api.post("/api/auth/register", json=REG).status_code == 201
+    monkeypatch.setattr(auth_router, "_verify_google_id_token", lambda t: {
+        "sub": "g-9", "email": "alice@example.com", "email_verified": True, "name": "A"})
+    r = api.post("/api/auth/google/verify", json={"token": "t"})
+    assert r.status_code == 409 and r.json()["error"] == "這個 Email 已用密碼註冊，請用密碼登入"
+    assert not sync_db.users.find_one({"email": "alice@example.com"}).get("googleId")
+    # 已驗證 Email 的帳號照舊可以綁定
+    sync_db.users.update_one({"email": "alice@example.com"}, {"$set": {"isEmailVerified": True}})
+    assert api.post("/api/auth/google/verify", json={"token": "t"}).status_code == 200

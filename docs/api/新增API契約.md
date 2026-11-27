@@ -32,6 +32,7 @@
 | 費用上限 | 展示期間使用 Gemini API 免費額度；如果改用付費方案，在 Google Cloud 帳單設定預算警示（建議 NT$300），超過就改回免費額度或只用規則理由。另外由 §0 的速率限制控制呼叫量 |
 | 理由快取 | 送給 LLM 的白名單輸入完全相同時，10 分鐘內重用上次的 AI 理由，不再呼叫 Gemini；失敗的結果不快取。存在後端程序記憶體（最多 500 筆），重啟就清空。目的：免費額度每分鐘請求數有限，重排或重新整理 Top 3 時只需要替新的動物呼叫（2026-11-26 加入） |
 | 速率限制（每位使用者） | `POST /api/ai/chat`：每分鐘 10 次；`GET /top3`、`POST /feedback`、`POST /api/ai/explain`：合計每分鐘 30 次。超過回 429 |
+| 全站上限（2026-11-27 加入） | 所有使用者合計每分鐘最多呼叫 Gemini 30 次（`app/services/llm.py` 的 `site_limiter`）。超過時不回 429，直接當成 LLM 失敗：推薦改用規則理由、聊天回「暫時無法回答」。目的：每人限流擋不住用大量帳號輪流呼叫，保住展示當天的免費額度 |
 | 送給 LLM 的欄位（白名單） | 動物：`name`、`species`、`breed`、`ageCategory`、`size`、`personality.traits`、`personality.activityLevel`、`personality.goodWith`、`personality.specialNeeds`。使用者：`lifestyleProfile`、`experienceProfile` 的 `petOwnershipExperience`／`trainingExperience`、`environmentProfile` 的四個布林值、`gameProfile.petType.label`。**白名單以外一律不送**，包括姓名、Email、電話、地址、健康與醫療紀錄 |
 | 紀錄 | log 只記 user id、pet id、`source`、耗時；不記錄訊息內容與 LLM 回覆 |
 | 醫療問題 | 用關鍵字判斷（生病、發燒、嘔吐、拉肚子、腹瀉、咳嗽、受傷、流血、藥、疫苗副作用、症狀、診斷、獸醫……）。命中時**不呼叫 LLM**，直接拒答並提醒就醫 |
@@ -247,6 +248,8 @@
 
 ## 6. 持照寵物業者依縣市列表（T16，選做）
 
+> 2026-11-27 PM 決定移到後續規劃：資料庫還沒匯入業者資料，優先完成 T08、T17、T19。以下保留設計，之後實作時沿用。
+
 `GET /api/resources/licensed-shops?county=臺北市&page=1&limit=20`
 
 **公開，不需要登入**（資源頁給所有人看）。既有的 `GET /api/data-import/legal-pet-shops-db` 有縣市篩選，但限 `admin`／`shelter`，而且會回傳負責人姓名，所以另開這支只讀、只回公開欄位的 API。12/5 前沒完成就移出展示，不影響主線。
@@ -323,6 +326,20 @@
 - **全部由規則產生，不呼叫 LLM**（`source` 固定為 `"rule"`），畫面要標示「規則產生，沒有使用 AI」。
 - 只指出要確認的地方：**不替申請人打分數、不建議核准或拒絕**；`match` 是動物與配對檔案的契合度，不是對申請人的評價。是否核准由審核者決定。
 - 平台沒有的資料不判斷，例如《動物保護法》第 33-1 條的棄養紀錄。
+
+---
+
+## 8. 登入與註冊的濫用防護（資安，2026-11-27 加入）
+
+既有的 `POST /api/auth/login`、`POST /api/auth/register` 多一個選填欄位 `captchaToken`，程式在 `backend/app/core/captcha.py`。
+
+| 項目 | 規則 |
+|---|---|
+| 人機驗證 | 使用 Cloudflare Turnstile。後端設定 `TURNSTILE_SECRET_KEY`、前端設定 `REACT_APP_TURNSTILE_SITE_KEY` 後，登入與註冊頁會顯示驗證元件，請求要帶 `captchaToken`；缺少或驗證失敗回 400 `{"error": "請先完成人機驗證"}`，並計入登入失敗次數。兩邊都沒設定時（開發、CI）不驗證 |
+| 驗證服務連不上 | 放行（記 warning），避免展示時整個登入壞掉；登入失敗次數限流仍然有效。正式營運要改成拒絕 |
+| 註冊上限 | 同一個 IP 每小時最多成功註冊 10 個帳號，超過回 429 `{"error": "註冊太頻繁，請稍後再試"}`。展示機前面有反向代理時所有人會共用同一個額度 |
+| Google 登入 | Google 的 Email 對到「用密碼註冊、還沒驗證 Email」的帳號時不自動綁定，回 409 `{"error": "這個 Email 已用密碼註冊，請用密碼登入"}`（轉址流程導回 `/login?error=email_registered`）。原因：註冊不驗證 Email，別人可以先用你的 Email 註冊，自動綁定等於把帳號交給對方。沒設定 `REACT_APP_GOOGLE_CLIENT_ID` 時前端不顯示 Google 登入 |
+| Gemini 呼叫 | 全站每分鐘最多 30 次，見 §0 |
 
 ---
 

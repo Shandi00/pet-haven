@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../services/auth';
 import { Heart, Eye, EyeOff, Loader, CheckCircle } from 'lucide-react';
+import Captcha, { isCaptchaEnabled } from '../components/Captcha';
+import { googleLoginEnabled } from '../components/GoogleLoginButton';
 
 const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -21,10 +23,22 @@ const RegisterPage = () => {
 
   const password = watch('password');
 
+  // 人機驗證的 token 只能用一次：送出失敗後換 key 讓驗證元件重新載入
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [captchaKey, setCaptchaKey] = useState(0);
+
   const onSubmit = async (data) => {
+    if (isCaptchaEnabled() && !captchaToken) {
+      setError('email', { message: '請先完成人機驗證' });
+      return;
+    }
     setIsLoading(true);
     try {
-      const result = await registerUser(data);
+      const result = await registerUser({ ...data, captchaToken });
+      if (!result.success) {
+        setCaptchaToken('');
+        setCaptchaKey((k) => k + 1);
+      }
       if (result.success) {
         // 註冊成功後跳轉到使用者儀表板
         navigate('/dashboard');
@@ -39,6 +53,8 @@ const RegisterPage = () => {
         }
       }
     } catch (error) {
+      setCaptchaToken('');
+      setCaptchaKey((k) => k + 1);
       setError('email', { message: '註冊時發生錯誤，請稍後再試' });
     } finally {
       setIsLoading(false);
@@ -388,11 +404,13 @@ const RegisterPage = () => {
               <p className="form-error">{errors.agreeTerms.message}</p>
             )}
 
+            <Captcha key={captchaKey} onToken={setCaptchaToken} />
+
             {/* 註冊按鈕 */}
             <div>
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || (isCaptchaEnabled() && !captchaToken)}
                 className="w-full btn-primary flex justify-center items-center py-3 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
@@ -410,7 +428,8 @@ const RegisterPage = () => {
             </div>
           </form>
 
-          {/* 分隔線 */}
+          {/* 分隔線與 Google 註冊：沒設定 Google 用戶端 ID 時整段不顯示 */}
+          {googleLoginEnabled && (<>
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -452,6 +471,7 @@ const RegisterPage = () => {
               使用 Google 帳號註冊
             </button>
           </div>
+          </>)}
 
           {/* 註冊好處 */}
           <div className="mt-6 p-4 bg-primary-50 rounded-lg">

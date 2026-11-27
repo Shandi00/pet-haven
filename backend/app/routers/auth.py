@@ -17,7 +17,8 @@ from pymongo.errors import DuplicateKeyError
 from app.config import get_settings
 from app.core.logging import audit
 from app.core.ids import oid
-from app.core.ratelimit import auth_limiter
+from app.core.captcha import verify_captcha
+from app.core.ratelimit import auth_limiter, register_limiter
 from app.core.security import create_token, decode_token, hash_password, verify_password
 from app.core.validation import A, B, O, S, validate
 from app.db import get_db
@@ -77,6 +78,14 @@ def _err(status: int, error: str, **extra) -> RawError:
     return RawError(status, {"error": error, **extra})
 
 
+async def _require_captcha(request: Request, body: dict | None) -> None:
+    """登入、註冊前先檢查人機驗證；captchaToken 不屬於帳號欄位，驗證前從 body 拿掉。"""
+    token = body.pop("captchaToken", None) if isinstance(body, dict) else None
+    if not await verify_captcha(token, request.client.host if request.client else None):
+        auth_limiter.fail(request)
+        raise _err(400, "請先完成人機驗證")
+
+
 token_user = legacy_token_user("Authentication token required", "Invalid user account", "Invalid token")
 
 
@@ -90,6 +99,7 @@ async def _touch_login(user_id) -> dict:
 @router.post("/register", status_code=201, summary="註冊")
 async def register(request: Request, body: dict | None = None):
     auth_limiter.check(request)
+    await _require_captcha(request, body)
     try:
         data = validate(REGISTER_SCHEMA, body)
     except RawError:
@@ -101,6 +111,8 @@ async def register(request: Request, body: dict | None = None):
     if existing:
         auth_limiter.fail(request)
         raise _err(400, "Email already registered" if existing.get("email") == email else "Username already taken")
+    if not register_limiter.allow(request.client.host if request.client else "unknown"):
+        raise _err(429, "註冊太頻繁，請稍後再試")
     doc = new_user_doc(
         username=data["username"].strip(),
         email=email,
@@ -124,6 +136,7 @@ async def register(request: Request, body: dict | None = None):
 @router.post("/login", summary="登入")
 async def login(request: Request, body: dict | None = None):
     auth_limiter.check(request)
+    await _require_captcha(request, body)
     try:
         data = validate(LOGIN_SCHEMA, body)
     except RawError:
@@ -214,11 +227,21 @@ def _verify_google_id_token(token: str) -> dict:
     return google_id_token.verify_oauth2_token(token, google_requests.Request(), get_settings().google_client_id)
 
 
+GOOGLE_EMAIL_TAKEN = "這個 Email 已用密碼註冊，請用密碼登入"
+
+
+class EmailTakenByPassword(Exception):
+    """這個 Email 已有用密碼註冊、但沒驗證過 Email 的帳號。"""
+
+
 async def _google_user(payload: dict) -> dict:
     users = get_db().users
     email, google_id = payload.get("email"), payload.get("sub")
     avatar = payload.get("picture")
     user = await users.find_one({"$or": [{"email": email}, {"googleId": google_id}]})
+    if user and not user.get("googleId") and user.get("password") and not user.get("isEmailVerified"):
+        # 註冊不驗證 Email：別人可能先用這個 Email 加自己的密碼註冊，自動綁定就等於把帳號交給對方
+        raise EmailTakenByPassword()
     if user:
         updates = {"lastLogin": datetime.now(timezone.utc), "updatedAt": datetime.now(timezone.utc)}
         if not user.get("googleId"):
@@ -255,7 +278,10 @@ async def google_verify(request: Request, body: dict | None = None):
         raise _err(500, "Google verification failed")
     if not payload.get("email_verified"):
         raise _err(400, "Email not verified", details="Please verify your email with Google")
-    user = await _google_user(payload)
+    try:
+        user = await _google_user(payload)
+    except EmailTakenByPassword:
+        raise _err(409, GOOGLE_EMAIL_TAKEN)
     audit("login_success", user=user["_id"], provider="google")
     return {"message": "Google login successful", "token": create_token(user["_id"], user.get("role", "user")),
             "user": user_json(user)}
@@ -300,6 +326,8 @@ async def google_callback(code: str | None = None, error: str | None = None):
             return RedirectResponse(f"{front}/login?error=email_not_verified")
         user = await _google_user(payload)
         return RedirectResponse(f"{front}/auth/callback?token={create_token(user['_id'], user.get('role', 'user'))}")
+    except EmailTakenByPassword:
+        return RedirectResponse(f"{front}/login?error=email_registered")
     except Exception:
         logger.exception("Google callback 失敗")
         return RedirectResponse(f"{front}/login?error=callback_failed")

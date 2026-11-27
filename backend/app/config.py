@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     # npm run seed 建立的收容所帳號密碼；沒設定時用 seed.py 的預設值（只能用在本機與 CI）
     seed_shelter_password: SecretStr = SecretStr("")
 
+    # Cloudflare Turnstile 人機驗證的密鑰（登入、註冊）；留空時不驗證（開發、CI）
+    turnstile_secret_key: SecretStr = SecretStr("")
+
     upload_path: str = "uploads"
     log_level: str = "INFO"
     # 單一請求上限：寵物最多 10 張 5MB 照片，加上表單欄位
