@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation } from 'react-query';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Upload, X } from 'lucide-react';
-import { appendGoodWith, GOOD_WITH_FIELDS, GOOD_WITH_STATE, GOOD_WITH_VALUE } from '../utils/petFormData';
+import {
+  appendGoodWith, GOOD_WITH_FIELDS, GOOD_WITH_STATE, GOOD_WITH_VALUE, PHOTO_ACCEPT, PHOTO_HINT, PHOTO_MAX_COUNT, pickPhotos,
+} from '../utils/petFormData';
 
 const CreatePetPage = () => {
   const navigate = useNavigate();
@@ -100,7 +102,7 @@ const CreatePetPage = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Server error:', errorData);
-        throw new Error(errorData.details || errorData.error || '發布失敗');
+        throw new Error(errorData.details || errorData.error || errorData.message || '發布失敗');
       }
       return response.json();
     },
@@ -118,8 +120,10 @@ const CreatePetPage = () => {
   );
 
   const handlePhotoChange = (e) => {
-    const files = Array.from(e.target.files);
-    setPhotos(prev => [...prev, ...files].slice(0, 5));
+    const { photos: picked, errors } = pickPhotos(Array.from(e.target.files), photos.length);
+    errors.forEach((message) => toast.error(message));
+    setPhotos(prev => [...prev, ...picked]);
+    e.target.value = '';  // 清掉選取，同一個檔案刪掉後還能再選
   };
 
   const removePhoto = (index) => {
@@ -167,8 +171,9 @@ const CreatePetPage = () => {
           {/* 照片上傳 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              寵物照片 <span className="text-red-500">*</span> (最多5張)
+              寵物照片 <span className="text-red-500">*</span>
             </label>
+            <p className="text-sm text-gray-500 mb-2">{PHOTO_HINT}</p>
             <div className="flex flex-wrap gap-4">
               {photos.map((photo, index) => (
                 <div key={index} className="relative w-24 h-24">
@@ -178,9 +183,10 @@ const CreatePetPage = () => {
                   </button>
                 </div>
               ))}
-              {photos.length < 5 && (
+              {photos.length < PHOTO_MAX_COUNT && (
                 <label className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-primary-500">
-                  <input type="file" multiple accept="image/*" onChange={handlePhotoChange} className="hidden" />
+                  <input type="file" multiple accept={PHOTO_ACCEPT} onChange={handlePhotoChange} className="hidden"
+                    aria-label="新增寵物照片" />
                   <Upload className="w-6 h-6 text-gray-400" />
                 </label>
               )}

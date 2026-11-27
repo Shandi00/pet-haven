@@ -1,4 +1,24 @@
-import { appendGoodWith } from './petFormData';
+import { appendGoodWith, pickPhotos } from './petFormData';
+
+const file = (name, type, mb) => {
+  const f = new File(['x'], name, { type });
+  Object.defineProperty(f, 'size', { value: mb * 1024 * 1024 });
+  return f;
+};
+
+test('照片超過 5MB 或格式不對會被擋下並說明原因', () => {
+  const { photos, errors } = pickPhotos([
+    file('ok.jpg', 'image/jpeg', 4.9), file('big.png', 'image/png', 5.1), file('doc.pdf', 'application/pdf', 1),
+  ]);
+  expect(photos.map((p) => p.name)).toEqual(['ok.jpg']);
+  expect(errors).toEqual(['「big.png」超過 5MB，請壓縮後再上傳', '「doc.pdf」不是 JPG、PNG、GIF 或 WEBP 圖片']);
+});
+
+test('加上已有的照片最多 5 張，多的略過並提示', () => {
+  const { photos, errors } = pickPhotos([1, 2, 3].map((i) => file(`${i}.webp`, 'image/webp', 1)), 3);
+  expect(photos).toHaveLength(2);
+  expect(errors).toEqual(['每隻動物最多 5 張照片，已略過 1 張']);
+});
 
 test('適合送 true、不適合送 false', () => {
   const fd = new FormData();

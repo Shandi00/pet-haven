@@ -54,3 +54,11 @@ def test_save_files_reads_at_most_limit_plus_one(tmp_path, monkeypatch):
     with pytest.raises(Exception) as e:
         asyncio.run(uploads.save_images([f], "pets", "pet", max_bytes=100))
     assert f.requested == 101 and "檔案大小超過限制" in str(e.value.detail)
+
+
+def test_oversized_image_message_names_file_and_limit(tmp_path, monkeypatch):
+    monkeypatch.setattr(get_settings(), "upload_path", str(tmp_path))
+    f = FakeUpload(uploads.MAX_IMAGE_BYTES + 1)
+    with pytest.raises(Exception) as e:
+        asyncio.run(uploads.save_images([f], "pets", "pet"))
+    assert e.value.detail == "「a.png」檔案大小超過限制，每個檔案最多 5MB"

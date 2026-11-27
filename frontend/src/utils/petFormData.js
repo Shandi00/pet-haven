@@ -14,6 +14,27 @@ export const appendGoodWith = (formData, goodWith = {}, { clearUnknown = false }
   });
 };
 
+// 寵物照片限制：格式與每張大小和後端 app/core/uploads.py 一致；每隻最多 5 張沿用刊登頁原本的規則
+export const PHOTO_MAX_COUNT = 5;
+export const PHOTO_MAX_MB = 5;
+const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+export const PHOTO_ACCEPT = PHOTO_TYPES.join(',');
+export const PHOTO_HINT = `JPG、PNG、GIF 或 WEBP，每張最多 ${PHOTO_MAX_MB}MB，最多 ${PHOTO_MAX_COUNT} 張`;
+
+// 選了檔案之後先在前端檢查，不合格的直接說原因，不要等送出後才失敗；current 是已經有的張數
+export const pickPhotos = (files, current = 0) => {
+  const errors = [];
+  const ok = [];
+  files.forEach((f) => {
+    if (!PHOTO_TYPES.includes(f.type)) errors.push(`「${f.name}」不是 JPG、PNG、GIF 或 WEBP 圖片`);
+    else if (f.size > PHOTO_MAX_MB * 1024 * 1024) errors.push(`「${f.name}」超過 ${PHOTO_MAX_MB}MB，請壓縮後再上傳`);
+    else ok.push(f);
+  });
+  const room = Math.max(PHOTO_MAX_COUNT - current, 0);
+  if (ok.length > room) errors.push(`每隻動物最多 ${PHOTO_MAX_COUNT} 張照片，已略過 ${ok.length - room} 張`);
+  return { photos: ok.slice(0, room), errors };
+};
+
 // 「相處」下拉選單的選項值與表單狀態互換：不確定 = null
 export const GOOD_WITH_VALUE = { null: '', true: 'true', false: 'false' };
 export const GOOD_WITH_STATE = { '': null, true: true, false: false };

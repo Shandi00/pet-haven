@@ -3,7 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from 'react-query';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Upload, X } from 'lucide-react';
-import { appendGoodWith, GOOD_WITH_FIELDS, GOOD_WITH_STATE, GOOD_WITH_VALUE } from '../utils/petFormData';
+import {
+  appendGoodWith, GOOD_WITH_FIELDS, GOOD_WITH_STATE, GOOD_WITH_VALUE, PHOTO_ACCEPT, PHOTO_HINT, PHOTO_MAX_COUNT, pickPhotos,
+} from '../utils/petFormData';
 
 const EditPetPage = () => {
   const navigate = useNavigate();
@@ -121,7 +123,7 @@ const EditPetPage = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.details || errorData.error || '更新失敗');
+        throw new Error(errorData.details || errorData.error || errorData.message || '更新失敗');
       }
       
       return response.json();
@@ -138,8 +140,10 @@ const EditPetPage = () => {
   );
 
   const handlePhotoChange = (e) => {
-    const files = Array.from(e.target.files);
-    setPhotos(prev => [...prev, ...files]);
+    const { photos: picked, errors } = pickPhotos(Array.from(e.target.files), existingPhotos.length + photos.length);
+    errors.forEach((message) => toast.error(message));
+    setPhotos(prev => [...prev, ...picked]);
+    e.target.value = '';  // 清掉選取，同一個檔案刪掉後還能再選
   };
 
   const removeNewPhoto = (index) => {
@@ -245,20 +249,24 @@ const EditPetPage = () => {
               </div>
             )}
 
-            {/* 新增照片 */}
+            {/* 新增照片：舊照片加新照片最多 PHOTO_MAX_COUNT 張 */}
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-              <label className="cursor-pointer">
-                <span className="text-primary-600 hover:text-primary-700">點擊上傳新照片</span>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handlePhotoChange}
-                  className="hidden"
-                />
-              </label>
-              <p className="text-sm text-gray-500 mt-1">支援 JPG、PNG 格式</p>
+              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-2" aria-hidden="true" />
+              {existingPhotos.length + photos.length < PHOTO_MAX_COUNT ? (
+                <label className="cursor-pointer">
+                  <span className="text-primary-600 hover:text-primary-700">點擊上傳新照片</span>
+                  <input
+                    type="file"
+                    multiple
+                    accept={PHOTO_ACCEPT}
+                    onChange={handlePhotoChange}
+                    className="hidden"
+                  />
+                </label>
+              ) : (
+                <p className="text-gray-700">已達 {PHOTO_MAX_COUNT} 張上限，要新增請先移除舊照片</p>
+              )}
+              <p className="text-sm text-gray-500 mt-1">{PHOTO_HINT}</p>
             </div>
 
             {/* 新照片預覽 */}

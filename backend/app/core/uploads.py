@@ -37,7 +37,8 @@ async def save_files(files: list[UploadFile], subdir: str, prefix: str, *, allow
         finally:
             await f.close()
         if len(data) > max_bytes:
-            raise HTTPException(400, "檔案大小超過限制")
+            # 說出是哪個檔案、上限多少，使用者才知道要怎麼改（前端會直接顯示這段訊息）
+            raise HTTPException(400, f"「{f.filename}」檔案大小超過限制，每個檔案最多 {max_bytes / 1024 / 1024:g}MB")
         name = f"{prefix}-{int(time.time() * 1000)}-{random.randint(0, 10**9)}{ext}"
         (target / name).write_bytes(data)
         saved.append({"filename": name, "path": f"/uploads/{subdir}/{name}", "originalname": f.filename,
