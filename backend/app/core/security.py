@@ -9,8 +9,14 @@ TOKEN_DAYS = 7
 BCRYPT_ROUNDS = 12
 
 
+def _bcrypt_bytes(password: str) -> bytes:
+    # bcrypt 只用前 72 bytes；bcrypt 5 起超過會丟 ValueError（註冊與改密碼回 500），
+    # 這裡照舊版 bcryptjs 的行為截斷，舊帳號的長密碼也能照常登入
+    return password.encode("utf-8")[:72]
+
+
 def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(BCRYPT_ROUNDS)).decode("utf-8")
+    return bcrypt.hashpw(_bcrypt_bytes(password), bcrypt.gensalt(BCRYPT_ROUNDS)).decode("utf-8")
 
 
 def verify_password(password: str, hashed: str | None) -> bool:
@@ -18,7 +24,7 @@ def verify_password(password: str, hashed: str | None) -> bool:
     if not hashed or not password:
         return False
     try:
-        return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
+        return bcrypt.checkpw(_bcrypt_bytes(password), hashed.encode("utf-8"))
     except ValueError:
         return False
 

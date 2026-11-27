@@ -1,5 +1,6 @@
 """/api/auth：對應舊版 routes/auth.js，回應格式（{ error } / { message, token, user }）維持不變。"""
 import logging
+import re
 import time
 from datetime import datetime, timezone
 from urllib.parse import urlencode
@@ -30,6 +31,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
 PET_TYPES = ("dog", "cat", "rabbit", "bird", "hamster", "guinea-pig", "other")
+# 註冊與改密碼共用：至少要有小寫、大寫、數字各一
+PASSWORD_PATTERN = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)"
+PASSWORD_PATTERN_MSG = "密碼必須包含大小寫字母和數字"
 
 REGISTER_SCHEMA = O({
     "username": S(required=True, alphanum=True, min=3, max=30, msgs={
@@ -39,9 +43,9 @@ REGISTER_SCHEMA = O({
         "any.required": "使用者名稱為必填欄位"}),
     "email": S(required=True, email=True, msgs={
         "string.email": "Email 格式不正確", "any.required": "Email 為必填欄位"}),
-    "password": S(required=True, min=6, pattern=r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)", msgs={
+    "password": S(required=True, min=6, pattern=PASSWORD_PATTERN, msgs={
         "string.min": "密碼至少 6 個字元",
-        "string.pattern.base": "密碼必須包含大小寫字母和數字",
+        "string.pattern.base": PASSWORD_PATTERN_MSG,
         "any.required": "密碼為必填欄位"}),
     "firstName": S(required=True, min=1, max=50, msgs={"any.required": "名字為必填欄位"}),
     "lastName": S(required=True, min=1, max=50, msgs={"any.required": "姓氏為必填欄位"}),
@@ -173,7 +177,7 @@ async def update_profile(body: dict | None = None, user: dict = Depends(token_us
     return {"message": "Profile updated successfully", "user": user_json(updated)}
 
 
-@router.put("/change-password", summary="變更密碼；成功後之前發出的 token 全部失效，回應附上新的 token")
+@router.put("/change-password", summary="變更密碼（新密碼規則同註冊）；成功後之前發出的 token 全部失效，回應附上新的 token")
 async def change_password(body: dict | None = None, user: dict = Depends(token_user)):
     body = body or {}
     current, new = body.get("currentPassword"), body.get("newPassword")
@@ -181,6 +185,8 @@ async def change_password(body: dict | None = None, user: dict = Depends(token_u
         raise _err(400, "Current password and new password required")
     if not isinstance(new, str) or len(new) < 6:
         raise _err(400, "New password must be at least 6 characters")
+    if not re.match(PASSWORD_PATTERN, new):
+        raise _err(400, PASSWORD_PATTERN_MSG)
     full = await get_db().users.find_one({"_id": user["_id"]})
     if not verify_password(str(current), full.get("password")):
         raise _err(400, "Current password is incorrect")

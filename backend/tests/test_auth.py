@@ -197,3 +197,21 @@ def test_token_revoked_compares_whole_seconds():
     assert token_revoked({"iat": second}, {"passwordChangedAt": changed}) is False  # 改密碼當下發的新 token
     assert token_revoked({}, {"passwordChangedAt": changed}) is True
     assert token_revoked({"iat": second - 1}, {}) is False  # 從沒改過密碼
+
+
+def test_change_password_uses_register_rules(api, make_user):
+    # 註冊要求大小寫字母和數字；改密碼原本只檢查長度，可以改成 aaaaaa 這種弱密碼
+    user, h = make_user()
+    for weak in ("newpass1", "NEWPASS1", "Newpass"):
+        r = api.put("/api/auth/change-password", json={"currentPassword": TEST_PASSWORD, "newPassword": weak},
+                    headers=h)
+        assert r.status_code == 400 and r.json() == {"error": "密碼必須包含大小寫字母和數字"}
+    assert api.post("/api/auth/login", json={"email": user["email"], "password": TEST_PASSWORD}).status_code == 200
+
+
+def test_password_longer_than_72_bytes(api):
+    # bcrypt 5 遇到超過 72 bytes 的密碼會丟 ValueError（原本註冊回 500）；照舊版 bcryptjs 只用前 72 bytes
+    long_pw = "Abc123" + "x" * 80
+    r = api.post("/api/auth/register", json={**REG, "password": long_pw})
+    assert r.status_code == 201, r.text
+    assert api.post("/api/auth/login", json={"email": REG["email"], "password": long_pw}).status_code == 200
