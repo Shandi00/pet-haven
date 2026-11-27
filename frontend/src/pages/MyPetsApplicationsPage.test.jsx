@@ -5,16 +5,16 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import MyPetsApplicationsPage from './MyPetsApplicationsPage';
 import { adoptionAPI } from '../services/api';
 
-jest.mock('../services/auth', () => ({ useAuth: () => ({ user: { _id: 'shelter1', role: 'shelter' } }) }));
-jest.mock('../services/api', () => ({ adoptionAPI: { completeAdoption: jest.fn() } }));
-jest.mock('react-hot-toast', () => ({ __esModule: true, default: { success: jest.fn(), error: jest.fn() } }));
+vi.mock('../services/auth', () => ({ useAuth: () => ({ user: { _id: 'shelter1', role: 'shelter' } }) }));
+vi.mock('../services/api', () => ({ adoptionAPI: { completeAdoption: vi.fn() } }));
+vi.mock('react-hot-toast', () => ({ __esModule: true, default: { success: vi.fn(), error: vi.fn() } }));
 
 const app = (status) => ({
   _id: `app-${status}`, status, pet: { _id: 'p1', name: `小白-${status}` }, applicant: { _id: 'u1', username: 'adopter1' },
 });
 
 const renderPage = (applications, ok = true, pagination) => {
-  global.fetch = jest.fn().mockResolvedValue({ ok, json: async () => ({ data: { applications, pagination } }) });
+  global.fetch = vi.fn().mockResolvedValue({ ok, json: async () => ({ data: { applications, pagination } }) });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
@@ -49,7 +49,7 @@ describe('MyPetsApplicationsPage 完成認養', () => {
   test('同一隻動物還有其他進行中的申請時，確認視窗說明會一併結束', async () => {
     renderPage([app('approved')]);
     const listFetch = global.fetch;
-    global.fetch = jest.fn((url) => (url.includes('/details')
+    global.fetch = vi.fn((url) => (url.includes('/details')
       ? Promise.resolve({ ok: true, json: async () => ({ data: { reviewInsights: { pet: { otherActiveApplications: 2 } } } }) })
       : listFetch(url)));
     fireEvent.click(await screen.findByRole('button', { name: '完成認養' }));
@@ -107,7 +107,7 @@ describe('MyPetsApplicationsPage 拒絕申請', () => {
 describe('MyPetsApplicationsPage 分頁', () => {
   const listUrls = () => global.fetch.mock.calls.map(([url]) => url).filter((u) => u.includes('my-pets-applications'));
 
-  beforeEach(() => { window.scrollTo = jest.fn(); });
+  beforeEach(() => { window.scrollTo = vi.fn(); });
 
   test('帶頁碼向後端查詢；超過一頁時可以換頁，換篩選會回到第 1 頁', async () => {
     renderPage([app('pending')], true, { totalPages: 3 });

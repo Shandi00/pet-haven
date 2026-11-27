@@ -5,7 +5,7 @@ import ErrorFallback from './ErrorFallback';
 
 describe('ErrorFallback 元件測試', () => {
   const mockError = new Error('測試錯誤訊息');
-  const mockResetErrorBoundary = jest.fn();
+  const mockResetErrorBoundary = vi.fn();
 
   test('應該渲染 ErrorFallback 元件', () => {
     render(

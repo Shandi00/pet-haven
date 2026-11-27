@@ -10,8 +10,8 @@ const item = (reason = {}) => ({
 });
 
 const renderCard = (props = {}) => {
-  const onLike = jest.fn();
-  const onDislike = jest.fn();
+  const onLike = vi.fn();
+  const onDislike = vi.fn();
   render(<Top3Card item={item()} onLike={onLike} onDislike={onDislike} {...props} />);
   return { onLike, onDislike };
 };
@@ -27,13 +27,13 @@ test('顯示動物、分數、理由與 AI 標示', () => {
 });
 
 test('reason.source 是 rule 時顯示「目前使用規則推薦」，不標示 AI', () => {
-  render(<Top3Card item={item({ source: 'rule' })} onLike={jest.fn()} onDislike={jest.fn()} />);
+  render(<Top3Card item={item({ source: 'rule' })} onLike={vi.fn()} onDislike={vi.fn()} />);
   expect(screen.getByText(/目前使用規則推薦/)).toBeInTheDocument();
   expect(screen.queryByText(/AI 依你的配對檔案/)).not.toBeInTheDocument();
 });
 
 test('有 cautions 時顯示「注意事項」區塊，沒有時不顯示', () => {
-  const { unmount } = render(<Top3Card item={item({ cautions: ['住公寓需留意吠叫'] })} onLike={jest.fn()} onDislike={jest.fn()} />);
+  const { unmount } = render(<Top3Card item={item({ cautions: ['住公寓需留意吠叫'] })} onLike={vi.fn()} onDislike={vi.fn()} />);
   expect(screen.getByText('注意事項')).toBeInTheDocument();
   expect(screen.getByText('住公寓需留意吠叫')).toBeInTheDocument();
   unmount();

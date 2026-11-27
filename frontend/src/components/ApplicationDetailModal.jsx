@@ -449,7 +449,7 @@ const ApplicationDetailModal = ({ isOpen, onClose, applicationId }) => {
 
                 {/* Body */}
                 <div className="px-6 py-4" style={{ maxHeight: '70vh', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                  {process.env.NODE_ENV === 'development' && (
+                  {import.meta.env.MODE === 'development' && (
                     <div className="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded">
                       <p className="text-xs text-yellow-800">DEBUG (dev only):</p>
                       <p className="text-xs text-gray-700">currentUser: {user ? `${user._id || user.id} (${user.role})` : 'null'}</p>

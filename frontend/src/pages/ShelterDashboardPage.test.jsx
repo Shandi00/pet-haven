@@ -4,17 +4,17 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import ShelterDashboardPage from './ShelterDashboardPage';
 
-const mockNavigate = jest.fn();
+const mockNavigate = vi.fn();
 let mockAuth;
-jest.mock('react-router-dom', () => ({ ...jest.requireActual('react-router-dom'), useNavigate: () => mockNavigate }));
-jest.mock('../services/auth', () => ({ useAuth: () => mockAuth }));
+vi.mock('react-router-dom', async () => ({ ...(await vi.importActual('react-router-dom')), useNavigate: () => mockNavigate }));
+vi.mock('../services/auth', () => ({ useAuth: () => mockAuth }));
 
 const SHELTER = { _id: 'shelter1', role: 'shelter' };
 const APP = { _id: 'a1', status: 'pending', createdAt: '2026-11-26T00:00:00Z', pet: { _id: 'p1', name: '小白' }, applicant: { username: 'adopter1' } };
 
 // 依網址回傳後端真實的格式；後端沒有的路徑回 405、limit 超過 100 回 400（與後端驗證一致）
 const mockBackend = (applications = [APP]) => {
-  global.fetch = jest.fn(async (url) => {
+  global.fetch = vi.fn(async (url) => {
     const u = new URL(url);
     const reply = (status, body) => ({ ok: status < 400, status, json: async () => body });
     if (Number(u.searchParams.get('limit')) > 100) return reply(400, { success: false });

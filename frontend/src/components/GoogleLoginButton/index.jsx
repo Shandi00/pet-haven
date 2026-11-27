@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../services/auth';
 
-const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+const CLIENT_ID = import.meta.env.REACT_APP_GOOGLE_CLIENT_ID;
 // 沒設定 Google 用戶端 ID 時不顯示按鈕（原本用佔位字串，按了只會出錯）
 export const googleLoginEnabled = Boolean(CLIENT_ID);
 

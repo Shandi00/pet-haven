@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import Pagination from './Pagination';
 
 const showPager = (currentPage, totalPages) => {
-  const onPageChange = jest.fn();
+  const onPageChange = vi.fn();
   render(<Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />);
   return onPageChange;
 };

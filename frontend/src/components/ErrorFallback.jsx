@@ -52,7 +52,7 @@ function ErrorFallback({ error, resetErrorBoundary }) {
         </p>
 
         {/* 錯誤詳情 (僅開發環境顯示) */}
-        {process.env.NODE_ENV === 'development' && (
+        {import.meta.env.MODE === 'development' && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-sm font-semibold text-red-800 mb-2">
               錯誤詳情 (僅開發環境顯示):

@@ -3,8 +3,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import RegisterPage from './RegisterPage';
 
-const mockRegister = jest.fn();
-jest.mock('../services/auth', () => ({ useAuth: () => ({ register: mockRegister }) }));
+const mockRegister = vi.fn();
+vi.mock('../services/auth', () => ({ useAuth: () => ({ register: mockRegister }) }));
 
 // 前端規則要跟後端 REGISTER_SCHEMA 一致，否則畫面可送出、後端卻擋下
 describe('RegisterPage 欄位規則與後端一致', () => {

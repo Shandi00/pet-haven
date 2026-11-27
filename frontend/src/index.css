@@ -1,8 +1,9 @@
+/* @import 要放在最前面，否則瀏覽器會忽略（CRA 會自動搬到最前面，Vite 不會） */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* 全局縮放：90% 效果 */
 html {

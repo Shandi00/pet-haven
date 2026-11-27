@@ -3,7 +3,7 @@ import { toast } from 'react-hot-toast';
 
 // 建立 axios 實例
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.REACT_APP_API_URL || 'http://localhost:5000/api',
   timeout: 10000,
 });
 

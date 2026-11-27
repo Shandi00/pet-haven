@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 // 登入與註冊的人機驗證（Cloudflare Turnstile）。沒設定 REACT_APP_TURNSTILE_SITE_KEY 時不顯示、也不需要 token，
 // 後端同樣在沒設定 TURNSTILE_SECRET_KEY 時不驗證（開發與 CI）。
 const SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-const siteKey = () => process.env.REACT_APP_TURNSTILE_SITE_KEY;
+const siteKey = () => import.meta.env.REACT_APP_TURNSTILE_SITE_KEY;
 export const isCaptchaEnabled = () => Boolean(siteKey());
 
 let scriptPromise;

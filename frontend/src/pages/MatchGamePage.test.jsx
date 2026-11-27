@@ -5,15 +5,15 @@ import MatchGamePage from './MatchGamePage';
 import { matchingAPI } from '../services/api';
 import { aiService } from '../services/aiService';
 
-jest.mock('../services/api', () => ({
+vi.mock('../services/api', () => ({
   matchingAPI: {
-    getProfile: jest.fn(),
-    updateLifestyleProfile: jest.fn(),
-    updateExperienceProfile: jest.fn(),
-    updateEnvironmentProfile: jest.fn(),
+    getProfile: vi.fn(),
+    updateLifestyleProfile: vi.fn(),
+    updateExperienceProfile: vi.fn(),
+    updateEnvironmentProfile: vi.fn(),
   },
 }));
-jest.mock('../services/aiService', () => ({ aiService: { saveGameResult: jest.fn() } }));
+vi.mock('../services/aiService', () => ({ aiService: { saveGameResult: vi.fn() } }));
 
 const ok = () => Promise.resolve({ data: { success: true } });
 
@@ -36,13 +36,13 @@ const pickOption = (index, waitMs = 1000) => {
 };
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
 });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   now = 1000000;
-  jest.spyOn(Date, 'now').mockImplementation(() => now);
+  vi.spyOn(Date, 'now').mockImplementation(() => now);
   matchingAPI.getProfile.mockResolvedValue({ data: { success: true, data: {} } });
   matchingAPI.updateLifestyleProfile.mockImplementation(ok);
   matchingAPI.updateExperienceProfile.mockImplementation(ok);

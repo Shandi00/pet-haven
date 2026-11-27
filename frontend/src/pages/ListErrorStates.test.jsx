@@ -5,11 +5,11 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import MessagesPage from './MessagesPage';
 import NotificationsPage from './NotificationsPage';
 
-jest.mock('react-hot-toast', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
+vi.mock('react-hot-toast', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 // 讀取失敗時要顯示錯誤，不能顯示成「沒有資料」（原本 API 失敗也顯示「還沒有任何對話」）
 const renderPage = (Page) => {
-  global.fetch = jest.fn().mockResolvedValue({ ok: false, json: async () => ({}) });
+  global.fetch = vi.fn().mockResolvedValue({ ok: false, json: async () => ({}) });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={client}>

@@ -3,8 +3,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { AuthProvider, useAuth } from './auth';
 import { authAPI } from './api';
 
-jest.mock('./api', () => ({ authAPI: { getCurrentUser: jest.fn() } }));
-jest.mock('react-hot-toast', () => ({ __esModule: true, default: { success: jest.fn(), error: jest.fn() } }));
+vi.mock('./api', () => ({ authAPI: { getCurrentUser: vi.fn() } }));
+vi.mock('react-hot-toast', () => ({ __esModule: true, default: { success: vi.fn(), error: vi.fn() } }));
 
 const Name = () => {
   const { user } = useAuth();

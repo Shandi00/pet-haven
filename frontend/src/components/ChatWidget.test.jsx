@@ -5,10 +5,10 @@ import ChatWidget from './ChatWidget';
 import { aiService } from '../services/aiService';
 import { aiMock } from '../services/aiMock';
 
-jest.mock('../services/api', () => ({ matchingAPI: {}, aiAPI: {} }));
-jest.mock('../services/aiService', () => ({
-  ...jest.requireActual('../services/aiService'),
-  aiService: { chat: jest.fn() },
+vi.mock('../services/api', () => ({ matchingAPI: {}, aiAPI: {} }));
+vi.mock('../services/aiService', async () => ({
+  ...(await vi.importActual('../services/aiService')),
+  aiService: { chat: vi.fn() },
 }));
 
 const ok = (data) => ({ data: { success: true, data } });
@@ -31,7 +31,7 @@ const ask = (text) => {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   aiService.chat.mockImplementation((message) => aiMock.chat(message));
 });
 

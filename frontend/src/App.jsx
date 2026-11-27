@@ -47,7 +47,7 @@ function App() {
     
     // 可選: 發送錯誤日誌到後端
     // 生產環境中應該發送到錯誤追蹤服務 (如 Sentry)
-    if (process.env.NODE_ENV === 'production') {
+    if (import.meta.env.MODE === 'production') {
       // 這裡可以實作發送錯誤到後端的邏輯
       // fetch('/api/errors', {
       //   method: 'POST',
@@ -93,7 +93,7 @@ function App() {
                 <Route path="/notifications" element={<Layout><NotificationsPage /></Layout>} />
                 
                 {/* 測試路由 (僅開發環境) */}
-                {process.env.NODE_ENV === 'development' && (
+                {import.meta.env.MODE === 'development' && (
                   <Route path="/error-test" element={<Layout><ErrorTestPage /></Layout>} />
                 )}
                 

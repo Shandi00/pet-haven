@@ -4,15 +4,15 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import MyApplicationsPage from './MyApplicationsPage';
 
-jest.mock('react-hot-toast', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
-jest.mock('framer-motion', () => ({ motion: { div: ({ children, initial, animate, ...rest }) => <div {...rest}>{children}</div> } }));
+vi.mock('react-hot-toast', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock('framer-motion', () => ({ motion: { div: ({ children, initial, animate, ...rest }) => <div {...rest}>{children}</div> } }));
 // ApplicationDetailModal 會連後端；這裡只測列表、篩選與取消
-jest.mock('../components/ApplicationDetailModal', () => () => null);
+vi.mock('../components/ApplicationDetailModal', () => ({ default: () => null }));
 
 const application = (status) => ({ _id: `app-${status}`, status, pet: { _id: 'p1', name: `小白-${status}` } });
 
 const renderPage = (applications) => {
-  global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ applications }) });
+  global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ applications }) });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={client}>

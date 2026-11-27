@@ -1,7 +1,7 @@
 import { aiService } from './aiService';
 import { matchingAPI } from './api';
 
-jest.mock('./api', () => ({ matchingAPI: { saveGameResult: jest.fn() } }));
+vi.mock('./api', () => ({ matchingAPI: { saveGameResult: vi.fn() } }));
 
 const gameResult = {
   answers: [{ questionId: 'q1', optionId: 'A' }],
@@ -10,7 +10,7 @@ const gameResult = {
 
 afterEach(() => {
   window.localStorage.removeItem('useMockData');
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 test('假資料開關打開時，saveGameResult 改用 aiMock，不呼叫後端', async () => {

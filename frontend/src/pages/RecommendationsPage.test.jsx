@@ -4,11 +4,11 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import RecommendationsPage from './RecommendationsPage';
 import { aiService } from '../services/aiService';
 
-jest.mock('react-hot-toast', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
-jest.mock('../services/api', () => ({ matchingAPI: {}, aiAPI: {} }));
-jest.mock('../services/aiService', () => ({
-  ...jest.requireActual('../services/aiService'),
-  aiService: { getTop3: jest.fn(), sendFeedback: jest.fn(), resetFeedback: jest.fn() },
+vi.mock('react-hot-toast', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+vi.mock('../services/api', () => ({ matchingAPI: {}, aiAPI: {} }));
+vi.mock('../services/aiService', async () => ({
+  ...(await vi.importActual('../services/aiService')),
+  aiService: { getTop3: vi.fn(), sendFeedback: vi.fn(), resetFeedback: vi.fn() },
 }));
 
 const pet = (id, name) => ({ _id: id, name, species: 'dog', breed: '米克斯', age: { value: 2, unit: 'years' }, size: 'medium', activityLevel: 'high', photo: '' });
@@ -25,7 +25,7 @@ const renderPage = () =>
     </MemoryRouter>
   );
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => vi.clearAllMocks());
 
 test('按「不適合」用回應直接換掉卡片並顯示「已避開」，送出期間按鈕停用、不會送兩次', async () => {
   aiService.getTop3.mockResolvedValue(top3([item('a', '小黑'), item('b', '豆豆'), item('c', '奶茶')]));

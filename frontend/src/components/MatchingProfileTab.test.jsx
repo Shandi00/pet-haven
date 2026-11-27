@@ -5,12 +5,12 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import MatchingProfileTab from './MatchingProfileTab';
 import { matchingAPI } from '../services/api';
 
-jest.mock('../services/api', () => ({
+vi.mock('../services/api', () => ({
   matchingAPI: {
-    getProfile: jest.fn(),
-    updateLifestyleProfile: jest.fn(),
-    updateExperienceProfile: jest.fn(),
-    updateEnvironmentProfile: jest.fn(),
+    getProfile: vi.fn(),
+    updateLifestyleProfile: vi.fn(),
+    updateExperienceProfile: vi.fn(),
+    updateEnvironmentProfile: vi.fn(),
   },
 }));
 
