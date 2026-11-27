@@ -36,7 +36,7 @@ Pet Haven（寵愛有家）是寵物配對認養平台，也是「智慧型資�
 npm run setup          # 建立 backend/.venv 並安裝後端 Python 套件、安裝前端套件（需要 Python 3.11+、Node.js 22）
 npm run dev:backend    # 後端 :5000（需要 backend/.env，可參考 backend/.env.example）
 npm run dev:frontend   # 前端 :3000（前端程式直接呼叫 http://localhost:5000）
-npm run seed           # 載入展示測資（收容所帳號與 8 隻動物，可重複執行）
+npm run seed           # 載入展示測資（收容所帳號、8 隻動物、3 則示範領養故事，可重複執行；在 backend 執行 python seed.py --remove-demo 刪除示範故事）
 npm test               # 後端 pytest（連 pet_haven_test 資料庫）＋前端單元測試
 npm run test:e2e       # Playwright e2e（需要前後端都在執行）
 docker compose up --build   # 用 Docker 同時啟動前後端（需要 backend/.env）

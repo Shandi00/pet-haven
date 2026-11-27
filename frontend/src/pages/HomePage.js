@@ -27,6 +27,7 @@ import RecommendationSection from '../components/RecommendationSection';
 const HomePage = () => {
   const [featuredPets, setFeaturedPets] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statsError, setStatsError] = useState(false);
   const [stats, setStats] = useState({
     available: 0,
     adopted: 0,
@@ -110,46 +111,19 @@ const HomePage = () => {
 
   // 推薦內容（使用後端領養故事轉換為 testimonial 格式，若無文章則回退到靜態示例）
   // 轉換用於輪播顯示的 testimonials：以 sampledStories 為來源（優先使用隨機抽樣結果），若沒有則回退到靜態示例
-  const testimonials = sampledStories.length > 0 ? sampledStories.map((post) => ({
+  const testimonials = sampledStories.map((post) => ({
     id: post._id,
     name: post.author?.firstName || post.author?.username || '匿名',
     pet: post.relatedPets?.[0]?.name || post.title || '毛小孩',
+    // 有連到動物時寫「某某的新家長」；沒連的故事（例如 seed 的示範故事）就顯示貼文標題
+    subtitle: post.relatedPets?.[0]?.name ? `${post.relatedPets[0].name} 的新家長` : (post.title || '認養家庭'),
     content: post.excerpt || (post.content ? (post.content.length > 200 ? post.content.substring(0, 200) + '...' : post.content) : ''),
     // 只有當作者或貼文/相關寵物有真實圖片時才帶圖片，否則留為 null，避免自動帶入虛擬佔位圖
     image: post.author?.avatar_url || null,
     petImage: (post.images && post.images.length > 0 && post.images[0].url)
       ? post.images[0].url
       : (post.relatedPets?.[0]?.photos?.[0]?.url ? post.relatedPets[0].photos[0].url : null),
-    rating: 5
-  })) : [
-    {
-      id: 1,
-      name: '陳小美',
-      pet: '小白',
-      content: '透過這個平台，我找到了我的最佳夥伴小白。整個認養流程非常順利，工作人員也很貼心。',
-      image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80',
-      petImage: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-      rating: 5
-    },
-    {
-      id: 2,
-      name: '王大明',
-      pet: '咪咪',
-      content: '這個平台讓我們全家都找到了快樂。咪咪現在是我們家不可或缺的一員。',
-      image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80',
-      petImage: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-      rating: 5
-    },
-    {
-      id: 3,
-      name: '李志華',
-      pet: '旺旺',
-      content: '感謝平台讓我遇見旺旺，牠改變了我的生活，每天都充滿歡笑。',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80',
-      petImage: 'https://images.unsplash.com/photo-1552053831-71594a27632d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-      rating: 5
-    }
-  ];
+  }));
 
   const features = [
     {
@@ -275,9 +249,10 @@ const HomePage = () => {
           console.log('使用模擬寵物資料');
           return { data: [] };
         }),
-        generalAPI.getStats().catch((err) => {
-          console.log('使用模擬統計資料');
-          return { data: { available: 0, adopted: 0, pending: 0, bySpecies: [] } };
+        // 統計失敗時不要顯示 0（看起來像真的沒有資料），改為標示無法載入
+        generalAPI.getStats().catch(() => {
+          setStatsError(true);
+          return {};
         })
       ]);
 
@@ -398,7 +373,8 @@ const HomePage = () => {
                 {[
                   { label: '待認養寵物', value: stats.available, icon: Heart },
                   { label: '成功配對', value: stats.adopted, icon: Star },
-                  { label: '愛心家庭', value: stats.importedPets ?? 0, icon: Users },
+                  // importedPets 是從政府開放資料匯入、仍在架上的動物數（stats.py），不是家庭數
+                  { label: '政府收容所動物', value: stats.importedPets ?? 0, icon: Users },
                   { label: '動物種類', value: stats.bySpecies?.length || 0, icon: MessageCircle }
                 ].map((stat, index) => (
                   <motion.div
@@ -407,11 +383,16 @@ const HomePage = () => {
                     className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 text-center shadow-lg border border-gray-100"
                   >
                     <stat.icon className="w-8 h-8 text-primary-600 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-gray-900">{(stat.value ?? 0).toLocaleString()}</div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {statsError ? '—' : (stat.value ?? 0).toLocaleString()}
+                    </div>
                     <div className="text-sm text-gray-600">{stat.label}</div>
                   </motion.div>
                 ))}
               </motion.div>
+              {statsError && (
+                <p className="mt-3 text-sm text-gray-600" role="status">統計資料暫時無法載入，請稍後重新整理。</p>
+              )}
             </motion.div>
 
             {/* Hero 圖片 */}
@@ -648,8 +629,8 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* 成功故事 */}
-      <section className="py-20 bg-gray-50">
+      {/* 成功故事；overflow-hidden：輪播切換時卡片從右邊滑入，不要撐出水平捲軸 */}
+      <section className="py-20 bg-gray-50 overflow-hidden">
         <div className="container mx-auto px-4">
           <motion.div
             variants={itemVariants}
@@ -663,6 +644,14 @@ const HomePage = () => {
             </p>
           </motion.div>
 
+          {testimonials.length === 0 ? (
+            <div className="max-w-2xl mx-auto text-center bg-white rounded-2xl p-8 shadow-sm">
+              <p className="text-gray-700">還沒有認養故事。成功認養後，歡迎到社群分享你和毛孩的故事。</p>
+              <Link to="/community" className="inline-block mt-4 text-primary-600 hover:text-primary-700 font-medium">
+                前往社群
+              </Link>
+            </div>
+          ) : (
           <div className="relative max-w-4xl mx-auto">
             {/* 左右箭頭 */}
             <button
@@ -683,8 +672,6 @@ const HomePage = () => {
 
             <AnimatePresence mode="wait">
               {testimonials[currentTestimonial] && (
-                (sampledStories.length > 0 && testimonials[currentTestimonial].id)
-                  ? (
                     <Link
                       to={`/community/${testimonials[currentTestimonial].id}`}
                       key={testimonials[currentTestimonial].id}
@@ -699,11 +686,6 @@ const HomePage = () => {
                       >
                         <div className="grid lg:grid-cols-2 gap-8 items-center">
                           <div>
-                            <div className="flex items-center mb-6">
-                              {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
-                                <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                              ))}
-                            </div>
                             
                             <blockquote className="text-xl text-gray-700 mb-6 leading-relaxed">
                               "{testimonials[currentTestimonial].content}"
@@ -726,7 +708,7 @@ const HomePage = () => {
                                   {testimonials[currentTestimonial].name}
                                 </div>
                                 <div className="text-sm text-gray-600">
-                                  {testimonials[currentTestimonial].pet} 的新家長
+                                  {testimonials[currentTestimonial].subtitle}
                                 </div>
                               </div>
                             </div>
@@ -751,73 +733,6 @@ const HomePage = () => {
                         </div>
                       </motion.div>
                     </Link>
-                  ) : (
-                    <div
-                      key={`fallback-${currentTestimonial}`}
-                      className="block"
-                    >
-                      <motion.div
-                        initial={{ opacity: 0, x: 100 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -100 }}
-                        transition={{ duration: 0.5 }}
-                        className="bg-gradient-to-br from-primary-50 to-primary-50 rounded-3xl p-8 lg:p-12"
-                      >
-                        <div className="grid lg:grid-cols-2 gap-8 items-center">
-                          <div>
-                            <div className="flex items-center mb-6">
-                              {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
-                                <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                              ))}
-                            </div>
-                            
-                            <blockquote className="text-xl text-gray-700 mb-6 leading-relaxed">
-                              "{testimonials[currentTestimonial].content}"
-                            </blockquote>
-                            
-                            <div className="flex items-center">
-                              {testimonials[currentTestimonial].image ? (
-                                <img
-                                  src={testimonials[currentTestimonial].image}
-                                  alt={testimonials[currentTestimonial].name}
-                                  className="w-12 h-12 rounded-full object-cover mr-4"
-                                />
-                              ) : (
-                                <div className="w-12 h-12 rounded-full bg-gray-200 mr-4 flex items-center justify-center text-sm text-gray-600">
-                                  {testimonials[currentTestimonial].name ? testimonials[currentTestimonial].name.charAt(0) : ''}
-                                </div>
-                              )}
-                              <div>
-                                <div className="font-semibold text-gray-900">
-                                  {testimonials[currentTestimonial].name}
-                                </div>
-                                <div className="text-sm text-gray-600">
-                                  {testimonials[currentTestimonial].pet} 的新家長
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="relative">
-                            {testimonials[currentTestimonial].petImage ? (
-                              <img
-                                src={testimonials[currentTestimonial].petImage}
-                                alt={testimonials[currentTestimonial].pet}
-                                className="w-full h-80 object-cover rounded-2xl shadow-xl"
-                              />
-                            ) : (
-                              <div className="w-full h-80 bg-gray-100 rounded-2xl flex items-center justify-center">
-                                <div className="text-center">
-                                  <div className="font-semibold text-gray-900">{testimonials[currentTestimonial].pet}</div>
-                                  <div className="text-xs text-gray-600">已找到家</div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </motion.div>
-                    </div>
-                  )
               )}
             </AnimatePresence>
 
@@ -836,6 +751,7 @@ const HomePage = () => {
               ))}
             </div>
           </div>
+          )}
         </div>
       </section>
 
