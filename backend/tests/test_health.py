@@ -55,3 +55,11 @@ def test_cors_preflight_allows_frontend(client):
     r = client.options("/api/health", headers={
         "Origin": "http://localhost:3000", "Access-Control-Request-Method": "GET"})
     assert r.headers["access-control-allow-origin"] == "http://localhost:3000"
+
+
+def test_root_explains_where_to_go(client):
+    # 打開 http://localhost:5000/ 原本回 404「找不到請求的資源」，容易以為後端壞了
+    r = client.get("/")
+    assert r.status_code == 200
+    assert r.json() == {"success": True, "data": {
+        "name": "Pet Haven API", "status": "ok", "docs": "/api-docs", "health": "/api/health"}}

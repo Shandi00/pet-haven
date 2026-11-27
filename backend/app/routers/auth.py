@@ -96,7 +96,8 @@ async def _touch_login(user_id) -> dict:
         return_document=ReturnDocument.AFTER)
 
 
-@router.post("/register", status_code=201, summary="註冊")
+@router.post("/register", status_code=201,
+             summary="註冊；有設定人機驗證時要帶 captchaToken，同一 IP 每小時最多 10 個帳號（契約 §8）")
 async def register(request: Request, body: dict | None = None):
     auth_limiter.check(request)
     await _require_captcha(request, body)
@@ -133,7 +134,7 @@ async def register(request: Request, body: dict | None = None):
             "user": user_json(doc)}
 
 
-@router.post("/login", summary="登入")
+@router.post("/login", summary="登入；有設定人機驗證時要帶 captchaToken（契約 §8）")
 async def login(request: Request, body: dict | None = None):
     auth_limiter.check(request)
     await _require_captcha(request, body)

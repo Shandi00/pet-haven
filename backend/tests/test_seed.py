@@ -8,7 +8,9 @@ def _login(api, password):
     return api.post("/api/auth/login", json={"email": "shelter@example.com", "password": password})
 
 
-def test_seed_is_idempotent_and_valid(api, sync_db):
+def test_seed_is_idempotent_and_valid(api, sync_db, monkeypatch):
+    # 測的是沒設定 SEED_SHELTER_PASSWORD 的情況；不能受本機 backend/.env 的設定影響
+    monkeypatch.setattr(get_settings(), "seed_shelter_password", SecretStr(""))
     first = api.portal.call(seed.seed)
     assert first["added"] == 8 and first["skipped"] == 0
     second = api.portal.call(seed.seed)

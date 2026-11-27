@@ -42,7 +42,8 @@ async def explain_pet(body: dict | None = None, user: dict = Depends(current_use
     return {"success": True, "data": {"reason": await explain(pet, full)}}
 
 
-@router.post("/chat", summary="AI 助理聊天：先檢索知識庫再回答並附來源；醫療問題與查無資料不呼叫 LLM")
+@router.post("/chat", summary="AI 助理聊天：先用關鍵字檢索知識庫，比對不到再交給 Gemini 依語意挑選，回答附來源；"
+                              "醫療問題與知識庫讀不到時不呼叫 LLM（契約 §4）")
 async def chat(body: dict | None = None, user: dict = Depends(current_user)):
     try:
         data = validate(CHAT, body)
