@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Request
 
 from app.deps import current_user, optional_user
 from app.services.recommendation import generate_recommendations, get_popular_pets
+from app.core.params import limit_param
 
 router = APIRouter(prefix="/api/recommendations", tags=["Recommendations"])
 
@@ -30,11 +31,11 @@ def _int(value, default: int) -> int:
 async def recommendations(request: Request, user: dict | None = Depends(optional_user)):
     q = request.query_params
     limit_raw = q.get("limit", "8")
-    limit = _int(limit_raw, 8)
+    limit = limit_param(limit_raw, 8)
     refresh = q.get("refresh", "false") == "true"
     now = time.time()
     if user:
-        key = f"recommendations:{user['_id']}:{limit_raw}"
+        key = f"recommendations:{user['_id']}:{limit}"
         if not refresh and key in _cache and now - _cache[key][0] < CACHE_TTL:
             ts, data = _cache[key]
             return {"recommendations": data, "fromCache": True, "cacheAge": int((now - ts) * 1000)}
@@ -43,7 +44,7 @@ async def recommendations(request: Request, user: dict | None = Depends(optional
         recs = await (generate_recommendations(user, limit) if has_prefs else get_popular_pets(limit))
     else:
         has_prefs = False
-        key = f"recommendations:guest:{limit_raw}"
+        key = f"recommendations:guest:{limit}"
         if not refresh and key in _cache and now - _cache[key][0] < CACHE_TTL:
             return {"recommendations": _cache[key][1], "fromCache": True, "guest": True}
         recs = await get_popular_pets(limit)

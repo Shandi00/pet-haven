@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, Request
 from app.core.logging import audit
 from app.core.schema import MongooseError
 from app.core.serialize import to_json
+from app.core.params import limit_param
 from app.db import get_db
 from app.deps import current_user
 from app.models.pet import prepare_new_pet
@@ -42,7 +43,7 @@ def _require_staff(user: dict) -> None:
 async def animal_recognition(request: Request, user: dict = Depends(current_user)):
     _require_staff(user)
     q = request.query_params
-    page, limit = _int(q.get("page"), 1), _int(q.get("limit"), 20)
+    page, limit = _int(q.get("page"), 1), limit_param(q.get("limit"), 20, maximum=200)
     params: dict = {"UnitId": gov_data.ANIMAL_UNIT_ID, "$top": limit,
                     "$skip": _int(q.get("skip"), 0) or (page - 1) * limit}
     filters = []
@@ -169,7 +170,7 @@ async def import_animals(body: dict | None = None, user: dict = Depends(current_
 @router.get("/legal-pet-shops", summary="取得政府合法特定寵物業名單")
 async def legal_pet_shops(request: Request, user: dict = Depends(current_user)):
     q = request.query_params
-    page, limit = _int(q.get("page"), 1), _int(q.get("limit"), 20)
+    page, limit = _int(q.get("page"), 1), limit_param(q.get("limit"), 20)
     params: dict = {"UnitId": gov_data.LICENSED_SHOP_UNIT_ID, "$top": limit, "$skip": (page - 1) * limit}
     if q.get("county"):
         params["$filter"] = f"contains(業者地址,'{gov_data.odata_literal(q['county'])}')"
@@ -186,7 +187,7 @@ async def legal_pet_shops(request: Request, user: dict = Depends(current_user)):
 async def legal_pet_shops_db(request: Request, user: dict = Depends(current_user)):
     _require_staff(user)
     q = request.query_params
-    page, limit = _int(q.get("page"), 1), _int(q.get("limit"), 20)
+    page, limit = _int(q.get("page"), 1), limit_param(q.get("limit"), 20)
     query: dict = {}
     if q.get("county"):
         query["address"] = re.compile(re.escape(q["county"]), re.I)

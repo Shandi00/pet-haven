@@ -231,7 +231,8 @@ const ApplicationManagementTab = ({ overview, applications, navigate, onViewDeta
   // 使用目前取得的 applications 計算三個關鍵指標，避免與後端欄位不同步
   const shelterApplications = applications || [];
   const totalCount = shelterApplications.length;
-  const pendingCount = shelterApplications.filter(a => a.status === 'pending').length;
+  // 「審核中」也還在等送養者處理，一起算進待審核
+  const pendingCount = shelterApplications.filter(a => ['pending', 'under-review'].includes(a.status)).length;
   const now = new Date();
   const monthApplications = shelterApplications.filter(a => {
     try {

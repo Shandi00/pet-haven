@@ -9,6 +9,7 @@ from app.core.populate import populate
 from app.db import get_db
 from app.deps import current_user
 from app.models.notification import notification_json
+from app.core.params import limit_param
 
 router = APIRouter(prefix="/api/notifications", tags=["Notifications"])
 
@@ -23,7 +24,7 @@ def _int(value, default: int) -> int:
 @router.get("", summary="我的通知")
 async def list_notifications(request: Request, user: dict = Depends(current_user)):
     q = request.query_params
-    page, limit = _int(q.get("page"), 1), _int(q.get("limit"), 20)
+    page, limit = _int(q.get("page"), 1), limit_param(q.get("limit"), 20)
     query: dict = {"recipient": user["_id"]}
     if q.get("unreadOnly") == "true":
         query["isRead"] = False

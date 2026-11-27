@@ -8,7 +8,7 @@
 - `src/pages/`：一個網址一個頁面。
 - `src/components/`：跨頁共用的元件；`src/components/ui/` 是基礎 UI 元件（Button、Input、Card、Modal、Toast 等，說明見其中的 README.md）。
 - `src/services/api.js`：所有 API 呼叫都集中在這裡，依資源分組（`petAPI`、`adoptionAPI`、`matchingAPI` 等）。新增的 API 在這裡加一組，例如 `aiAPI`。
-- `src/services/mockAPI.js`：假資料模式。設定 `REACT_APP_USE_MOCK=true`，或在瀏覽器把 localStorage 的 `useMockData` 設為 `true`，就能在後端還沒好之前開發畫面。
+- `src/services/mockMode.js`、`src/services/aiMock.js`：AI 功能（配對遊戲、推薦、聊天）的假資料模式。設定 `REACT_APP_USE_MOCK=true`，或在瀏覽器把 localStorage 的 `useMockData` 設為 `true` 就會改用假資料；用完記得移除，畫面上沒有提示。其他頁面一律打後端（舊的 `mockAPI.js` 與假資料檔沒有人使用，已於 2026-11-27 刪除）。
 
 ## 寫法
 

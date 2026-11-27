@@ -9,6 +9,7 @@ from app.core.ratelimit import matching_limiter
 from app.core.schema import Arr, F, cast, validate as schema_validate
 from app.core.serialize import to_json
 from app.core.validation import A, O, S, validate
+from app.core.params import limit_param
 from app.db import get_db
 from app.deps import current_user
 from app.responses import RawError
@@ -84,7 +85,7 @@ async def best_matches(request: Request, user: dict = Depends(current_user)):
     if not has_profiles:
         return {"success": True, "message": "請先完成個人檔案設定以獲得更精準的配對結果",
                 "data": {"matches": [], "hasProfiles": False}}
-    matches = await find_best_matches(full, _int(q.get("limit"), 10), _int(q.get("minScore"), 40))
+    matches = await find_best_matches(full, limit_param(q.get("limit"), 10), _int(q.get("minScore"), 40))
     return {"success": True, "data": {"matches": to_json(matches), "hasProfiles": True, "count": len(matches)}}
 
 

@@ -16,6 +16,7 @@ from app.deps import current_user
 from app.models.message import conversation_id, message_json, prepare_new_message
 from app.models.notification import safe_notify
 from app.responses import ApiError
+from app.core.params import limit_param
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/messages", tags=["Messages"])
@@ -106,7 +107,7 @@ async def _other_user(user_id: str, projection: dict) -> dict:
 @router.get("/conversation/{user_id}", summary="與某人的對話")
 async def conversation(user_id: str, request: Request, user: dict = Depends(current_user)):
     q = request.query_params
-    page, limit = _int(q.get("page"), 1), _int(q.get("limit"), 50)
+    page, limit = _int(q.get("page"), 1), limit_param(q.get("limit"), 50)
     other = await _other_user(user_id, {"username": 1, "firstName": 1, "lastName": 1, "avatar_url": 1})
     conv = conversation_id(user["_id"], other["_id"])
     query: dict = {"conversationId": conv, "status": {"$ne": "deleted"}}

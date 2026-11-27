@@ -1,4 +1,5 @@
 """/api/users：對應舊版 routes/users.js 與 routes/user-stats.js（兩者都掛在 /api/users）。"""
+import json
 import math
 import re
 from datetime import datetime, timedelta, timezone
@@ -17,6 +18,7 @@ from app.models.pet import pet_json
 from app.models.post import post_json
 from app.models.user import ROLES, user_json
 from app.responses import RawError
+from app.core.params import limit_param
 
 router = APIRouter(prefix="/api/users", tags=["Users"])
 
@@ -75,7 +77,7 @@ async def my_stats(user: dict = Depends(current_user)):
 async def my_activities(request: Request, user: dict = Depends(current_user)):
     db = get_db()
     uid = user["_id"]
-    limit = _int(request.query_params.get("limit"), 20) or 20
+    limit = limit_param(request.query_params.get("limit"), 20) or 20
     full = await db.users.find_one({"_id": uid}) or {}
     activities = []
     history = (full.get("browsingHistory") or [])[:5]
@@ -124,6 +126,34 @@ PROFILE_FIELDS = ("firstName", "lastName", "name", "username", "phone", "contact
                   "introduction", "preferences", "recommendationProfile")
 
 
+_TEXT_MAX = {"firstName": 50, "lastName": 50, "name": 50, "phone": 20, "introduction": 500, "avatar_url": 500}
+_DICT_FIELDS = ("contact_info", "address", "preferences", "recommendationProfile")
+_DICT_MAX_BYTES = 5000
+
+
+async def _profile_problem(updates: dict, user: dict) -> str | None:
+    """原本只檢查名稱長度：其他欄位可以是任意型別與大小，名稱也能和別人重複（冒充）。回傳錯誤說明或 None。"""
+    for key, limit in _TEXT_MAX.items():
+        value = updates.get(key)
+        if value is not None and (not isinstance(value, str) or len(value) > limit):
+            return f"{key} 必須是最多 {limit} 字的文字"
+    avatar = updates.get("avatar_url")
+    if avatar and not re.match(r"^https?://", avatar):
+        return "avatar_url 必須是 http 或 https 網址"
+    for key in _DICT_FIELDS:
+        if key in updates and updates[key] is not None and (
+                not isinstance(updates[key], dict) or len(json.dumps(updates[key], default=str)) > _DICT_MAX_BYTES):
+            return f"{key} 格式不正確"
+    name = updates.get("username")
+    if "username" in updates and name != user.get("username"):
+        # 只在改名時檢查：舊帳號與 Google 登入產生的名稱可能有底線，照原樣存檔不能被擋
+        if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9]{3,30}", name):
+            return "使用者名稱需要 3 到 30 個英文字母或數字"
+        if await get_db().users.find_one({"username": name, "_id": {"$ne": user["_id"]}}, {"_id": 1}):
+            return "使用者名稱已被使用"
+    return None
+
+
 @router.put("/profile", summary="更新我的資料（含推薦偏好）")
 async def update_profile(body: dict | None = None, user: dict = Depends(token_user_zh)):
     body = body or {}
@@ -131,9 +161,9 @@ async def update_profile(body: dict | None = None, user: dict = Depends(token_us
     if isinstance(updates.get("recommendationProfile"), dict):
         updates["recommendationProfile"] = {**updates["recommendationProfile"],
                                             "lastUpdated": datetime.now(timezone.utc)}
-    if "username" in updates and (not isinstance(updates["username"], str)
-                                  or not 3 <= len(updates["username"].strip()) <= 30):
-        raise _err(400, "更新使用者資料失敗", details="使用者名稱需要 3 到 30 個字元")
+    problem = await _profile_problem(updates, user)
+    if problem:
+        raise _err(400, "更新使用者資料失敗", details=problem)
     updates["updatedAt"] = datetime.now(timezone.utc)
     await get_db().users.update_one({"_id": user["_id"]}, {"$set": updates})
     full = await get_db().users.find_one({"_id": user["_id"]}, {"password": 0})
@@ -171,7 +201,7 @@ async def toggle_favorite(pet_id: str, user: dict = Depends(token_user_zh)):
 @router.get("/saved-posts", summary="我收藏的貼文")
 async def saved_posts(request: Request, user: dict = Depends(token_user_zh)):
     q = request.query_params
-    page, limit = _int(q.get("page"), 1), _int(q.get("limit"), 15)
+    page, limit = _int(q.get("page"), 1), limit_param(q.get("limit"), 15)
     full = await get_db().users.find_one({"_id": user["_id"]}, {"collections": 1}) or {}
     ids = full.get("collections") or []
     posts = await get_db().posts.find({"_id": {"$in": ids}}).sort("createdAt", -1) \
@@ -201,7 +231,7 @@ async def toggle_saved_post(post_id: str, user: dict = Depends(token_user_zh)):
 @router.get("/admin/all", summary="所有使用者（管理員）")
 async def admin_all(request: Request, admin: dict = Depends(require_admin)):
     q = request.query_params
-    page, limit = _int(q.get("page"), 1), _int(q.get("limit"), 20)
+    page, limit = _int(q.get("page"), 1), limit_param(q.get("limit"), 20)
     query: dict = {}
     if q.get("role"):
         query["role"] = q["role"]
@@ -228,7 +258,7 @@ async def admin_search(request: Request, admin: dict = Depends(require_admin)):
     users = await get_db().users.find(
         {"$or": [{"username": rx}, {"firstName": rx}, {"lastName": rx}, {"email": rx}], "isActive": True},
         {"username": 1, "firstName": 1, "lastName": 1, "email": 1, "role": 1, "createdAt": 1},
-    ).sort([("firstName", 1), ("lastName", 1)]).limit(_int(q.get("limit"), 10)).to_list(None)
+    ).sort([("firstName", 1), ("lastName", 1)]).limit(limit_param(q.get("limit"), 10)).to_list(None)
     return [user_json(u) for u in users]
 
 
@@ -301,7 +331,7 @@ async def user_adoptions(user_id: str, request: Request, user: dict = Depends(to
     if user_id != str(user["_id"]) and user.get("role") not in ("admin", "volunteer"):
         raise _err(403, "沒有權限查看此使用者的認養申請")
     q = request.query_params
-    page, limit = _int(q.get("page"), 1), _int(q.get("limit"), 10)
+    page, limit = _int(q.get("page"), 1), limit_param(q.get("limit"), 10)
     query: dict = {"applicant": oid(user_id)}
     if q.get("status"):
         query["status"] = q["status"]

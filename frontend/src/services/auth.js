@@ -25,6 +25,15 @@ export const AuthProvider = ({ children }) => {
             const userData = JSON.parse(savedUser);
             setUser(userData);
             setIsAuthenticated(true);
+            // 先用登入當下存的資料顯示，再向後端讀最新的（例如在別處改過名字、管理員改過身分）；
+            // token 失效時的 401 由 api.js 的攔截器處理
+            authAPI.getCurrentUser().then((res) => {
+              const fresh = res?.data?.user;
+              if (fresh) {
+                setUser(fresh);
+                localStorage.setItem('user', JSON.stringify(fresh));
+              }
+            }).catch(() => {});
           } catch (parseError) {
             console.warn('解析用戶資料失敗:', parseError);
             // 如果解析失敗，清除無效資料

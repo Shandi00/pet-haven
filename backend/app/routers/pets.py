@@ -15,6 +15,7 @@ from app.core.populate import populate
 from app.core.schema import MongooseError, cast, flatten, validate as schema_validate
 from app.core.uploads import save_images, upload_root
 from app.core.validation import A, ANY, N, O, S, validate
+from app.core.params import limit_param
 from app.db import get_db
 from app.deps import token_user_zh
 from app.models.pet import SCHEMA, SPECIES, age_category, pet_json, prepare_new_pet
@@ -83,7 +84,7 @@ async def _find_pet(pet_id: str) -> dict | None:
 @router.get("/my-pets", summary="我發布的寵物")
 async def my_pets(request: Request, user: dict = Depends(token_user_zh)):
     q = request.query_params
-    page, limit = _int(q.get("page"), 1), _int(q.get("limit"), 12)
+    page, limit = _int(q.get("page"), 1), limit_param(q.get("limit"), 12)
     query = {"createdBy": user["_id"], "isActive": True}
     total = await get_db().pets.count_documents(query)
     total_pages = -(-total // limit) if limit else 0
@@ -167,7 +168,7 @@ async def list_pets(request: Request):
 
 
 async def _featured(request: Request) -> list:
-    limit = _int(request.query_params.get("limit"), 6)
+    limit = limit_param(request.query_params.get("limit"), 6)
     docs = await get_db().pets.find({"featured": True, "adoptionStatus": "available", "isActive": True}) \
         .sort("createdAt", -1).limit(limit).to_list(None)
     return await _json_pets(docs)

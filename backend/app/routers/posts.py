@@ -12,11 +12,12 @@ from app.core.populate import populate
 from app.core.schema import MongooseError, cast, validate as schema_validate
 from app.core.uploads import save_images
 from app.core.validation import A, ANY, N, O, S, validate
+from app.core.params import limit_param
 from app.db import get_db
 from app.deps import current_user, optional_user
 from app.models.comment import comment_json
 from app.models.notification import safe_notify
-from app.models.post import CATEGORIES, SCHEMA, STATUSES, post_json, prepare_new_post, run_save_hooks
+from app.models.post import CATEGORIES, SCHEMA, STATUSES, TYPES, post_json, prepare_new_post, run_save_hooks
 from app.responses import ApiError, RawError
 
 router = APIRouter(prefix="/api/posts", tags=["Posts"])
@@ -80,11 +81,14 @@ def _with_status(post: dict, user: dict | None, saved: set) -> dict:
 @router.get("", summary="貼文列表")
 async def list_posts(request: Request, user: dict | None = Depends(optional_user)):
     q = request.query_params
-    page, limit = _int(q.get("page"), 1), _int(q.get("limit"), 15)
+    page, limit = _int(q.get("page"), 1), limit_param(q.get("limit"), 15)
     filters: dict = {"status": "published"}
     for key in ("type", "category"):
         if q.get(key):
             filters[key] = q[key]
+    if q.get("types") and not q.get("type"):
+        # 走失協尋的「全部」一次查走失與發現兩種；只接受已知的類型
+        filters["type"] = {"$in": [t for t in q["types"].split(",") if t in TYPES]}
     if q.get("tags"):
         filters["tags"] = {"$in": q["tags"].split(",")}
     if q.get("author"):

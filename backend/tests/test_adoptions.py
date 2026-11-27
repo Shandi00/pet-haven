@@ -231,3 +231,11 @@ def test_owner_cannot_apply_for_own_pet(api, make_user, make_pet, sync_db):
     r = api.post("/api/adoptions", json=legacy, headers=oh)
     assert r.status_code == 400 and r.json()["error"] == "不能申請認養自己刊登的動物"
     assert sync_db.adoptions.count_documents({}) == 0
+
+
+def test_apply_rejects_oversized_submission(api, make_user, make_pet, sync_db):
+    # rawSubmission 會原樣存起來，太大的內容可能讓 MongoDB 寫入失敗（500）
+    owner, oh, applicant, ah, xh, pet = setup_flow(make_user, make_pet)
+    r = apply(api, pet, ah, otherNotes="字" * 70_000)
+    assert r.status_code == 400 and r.json()["message"] == "申請資料過大，請精簡後再送出"
+    assert sync_db.adoptions.count_documents({}) == 0

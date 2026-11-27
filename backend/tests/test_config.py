@@ -37,3 +37,17 @@ def test_settings_reject_empty_mongodb_uri(monkeypatch):
     monkeypatch.setenv("MONGODB_URI", "")
     with pytest.raises(ValidationError):
         Settings(_env_file=None)
+
+
+def test_production_requires_long_jwt_secret(monkeypatch):
+    # 弱的 HS256 密鑰可以被暴力破解；正式環境要求至少 32 字元，開發與測試不擋（CI 的測試密鑰較短）
+    monkeypatch.setenv("MONGODB_URI", "mongodb://x")
+    monkeypatch.setenv("JWT_SECRET", "short-secret")
+    monkeypatch.setenv("APP_ENV", "production")
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None)
+    monkeypatch.setenv("JWT_SECRET", "x" * 32)
+    assert Settings(_env_file=None).app_env == "production"
+    monkeypatch.setenv("APP_ENV", "development")
+    monkeypatch.setenv("JWT_SECRET", "short-secret")
+    assert Settings(_env_file=None).jwt_secret == "short-secret"

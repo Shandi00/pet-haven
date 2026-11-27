@@ -12,7 +12,7 @@ const NotificationsPage = () => {
   const [page, setPage] = useState(1);
 
   // 獲取通知列表
-  const { data: notificationsData, isLoading } = useQuery(
+  const { data: notificationsData, isLoading, isError, refetch } = useQuery(
     ['notifications', page, filter],
     async () => {
       const unreadParam = filter === 'unread' ? '&unreadOnly=true' : '';
@@ -253,6 +253,15 @@ const NotificationsPage = () => {
                   </div>
                 </motion.div>
               ))}
+            </div>
+          ) : isError && !notificationsData ? (
+            // 讀取失敗時要說清楚，不能顯示成「目前還沒有任何通知」
+            <div className="text-center py-12" role="alert">
+              <Bell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">通知載入失敗</h3>
+              <button type="button" onClick={() => refetch()} className="text-primary-600 hover:text-primary-700">
+                重試
+              </button>
             </div>
           ) : (
             <div className="text-center py-12">

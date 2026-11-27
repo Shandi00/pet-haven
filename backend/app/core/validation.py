@@ -1,4 +1,5 @@
 """Joi 相容的輸入驗證：abortEarly=false、stripUnknown=true、convert=true，錯誤格式同舊版 middleware/validation.js。"""
+import math
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -86,7 +87,8 @@ def _check(value: Any, rule: Rule, path: list, errs: _Errors) -> Any:
                 num = float(value)
             except ValueError:
                 num = None
-        if isinstance(num, bool) or not isinstance(num, (int, float)):
+        # nan／inf 不是有效數字：原本會在 int(num) 拋錯變成 500（Joi 也不接受 Infinity）
+        if isinstance(num, bool) or not isinstance(num, (int, float)) or not math.isfinite(num):
             errs.add(path, rule, "number.base", f"{lab} must be a number")
             return value
         if rule.integer and num != int(num):

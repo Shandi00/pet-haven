@@ -10,7 +10,7 @@ const MessagesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   // 獲取對話列表
-  const { data: conversations, isLoading } = useQuery(
+  const { data: conversations, isLoading, isError } = useQuery(
     ['conversations'],
     async () => {
       const response = await fetch('http://localhost:5000/api/messages/conversations', {
@@ -141,6 +141,13 @@ const MessagesPage = () => {
                   </div>
                 </motion.div>
               ))}
+            </div>
+          ) : isError && !conversations ? (
+            // 讀取失敗時要說清楚，不能顯示成「還沒有任何對話」
+            <div className="text-center py-12" role="alert">
+              <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">對話載入失敗</h3>
+              <p className="text-gray-600">請稍後再試，頁面會自動重新讀取。</p>
             </div>
           ) : (
             <div className="text-center py-12">

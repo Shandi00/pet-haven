@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -37,6 +37,13 @@ class Settings(BaseSettings):
 
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @model_validator(mode="after")
+    def _strong_jwt_secret_in_production(self):
+        # 短的 HS256 密鑰可以被暴力破解；只在正式環境擋，開發與 CI 的測試密鑰不受影響
+        if self.app_env == "production" and len(self.jwt_secret) < 32:
+            raise ValueError("APP_ENV=production 時 JWT_SECRET 至少要 32 個字元")
+        return self
 
 
 @lru_cache

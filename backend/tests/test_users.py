@@ -59,3 +59,21 @@ def test_stats_activities_and_adoptions(api, make_user):
     assert api.get("/api/users/me/activities", headers=h).json() == {"success": True, "data": []}
     assert api.get(f"/api/users/{user['_id']}/adoptions", headers=h).json()["pagination"]["totalItems"] == 0
     assert api.get(f"/api/users/{user['_id']}/adoptions", headers=oh).status_code == 403
+
+
+def test_profile_update_validates_fields_and_unique_username(api, make_user, sync_db):
+    me, h = make_user()
+    other, _ = make_user()
+    # 不能改成別人已經在用的名稱（冒充），也不能用奇怪的字元
+    assert api.put("/api/users/profile", json={"username": other["username"]}, headers=h).status_code == 400
+    assert api.put("/api/users/profile", json={"username": "admin<b>"}, headers=h).status_code == 400
+    # 沒改名稱時照常存檔（舊帳號的名稱可能有底線，不能因此存不了）
+    sync_db.users.update_one({"_id": me["_id"]}, {"$set": {"username": "old_name_1"}})
+    assert api.put("/api/users/profile", json={"username": "old_name_1", "firstName": "小明"}, headers=h).status_code == 200
+    assert api.put("/api/users/profile", json={"username": "newName9"}, headers=h).status_code == 200
+    # 型別與長度
+    for bad in ({"firstName": {"$ne": ""}}, {"introduction": "字" * 501}, {"address": "台北市"},
+                {"avatar_url": "javascript:alert(1)"}, {"recommendationProfile": ["x"]}):
+        r = api.put("/api/users/profile", json=bad, headers=h)
+        assert r.status_code == 400, bad
+    assert sync_db.users.find_one({"_id": me["_id"]})["firstName"] == "小明"

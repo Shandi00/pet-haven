@@ -8,6 +8,7 @@ from app.core.ids import oid, same_id
 from app.core.populate import populate
 from app.core.schema import MongooseError
 from app.core.validation import O, S, validate
+from app.core.params import limit_param
 from app.db import get_db
 from app.deps import current_user
 from app.models.comment import comment_json, prepare_new_comment, update_comment_count
@@ -42,7 +43,7 @@ def _int(value, default: int) -> int:
 
 def _page(request: Request, default_limit: int) -> tuple[int, int]:
     q = request.query_params
-    return _int(q.get("page"), 1), _int(q.get("limit"), default_limit)
+    return _int(q.get("page"), 1), limit_param(q.get("limit"), default_limit)
 
 
 def _pagination(page: int, limit: int, total: int) -> dict:

@@ -59,15 +59,9 @@ def test_join_only_own_room(api, make_user, fake):
     assert fake.rooms == [("s1", str(user["_id"]))]
 
 
-def test_send_message_rejects_spoofed_sender(api, make_user, fake):
-    user, h = make_user()
-    other = str(ObjectId())
-    run(api, realtime.connect, "s1", {}, {"token": h["Authorization"].split()[1]})
-    run(api, realtime.sendMessage, "s1", {"receiverId": other, "message": {"sender": {"_id": str(ObjectId())}}})
-    assert not [e for e in fake.emitted if e[0] == "newMessage"]
-    msg = {"content": "hi", "sender": {"_id": str(user["_id"])}}
-    run(api, realtime.sendMessage, "s1", {"receiverId": other, "message": msg})
-    assert ("newMessage", msg, other) in fake.emitted
+def test_client_cannot_relay_messages(api):
+    # 用戶端送來的訊息物件可以偽造寄件人與內容；私訊只由伺服器在存進資料庫後推送（messages.py）
+    assert not hasattr(realtime, "sendMessage")
 
 
 def test_typing_uses_authenticated_user_id(api, make_user, fake):
@@ -78,6 +72,5 @@ def test_typing_uses_authenticated_user_id(api, make_user, fake):
 
 
 def test_events_ignored_without_session(api, fake):
-    run(api, realtime.sendMessage, "nosession", {"receiverId": "r", "message": {"sender": {"_id": "x"}}})
     run(api, realtime.typing, "nosession", {"receiverId": "r", "isTyping": True})
     assert fake.emitted == []

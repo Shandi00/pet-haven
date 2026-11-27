@@ -190,3 +190,9 @@ def test_my_pets_and_stats(api, make_user, make_pet):
     assert api.get("/api/pets/my-pets").json() == {"error": "需要提供存取權杖"}
     stats = api.get("/api/pets/stats/overview").json()
     assert stats["available"] == 1 and stats["adopted"] == 1 and stats["bySpecies"][0]["count"] == 2
+
+
+def test_non_finite_numbers_are_rejected_not_500(api):
+    for value in ("nan", "inf", "-inf"):
+        r = api.get("/api/pets", params={"page": value})
+        assert r.status_code == 400, value

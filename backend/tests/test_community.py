@@ -113,3 +113,17 @@ def test_deleted_and_draft_posts_are_hidden_from_others(api, make_user):
     # 已刪除的貼文也不能再按讚、留言
     assert api.post(f"/api/posts/{gone}/like", headers=rh).status_code == 404
     assert api.post("/api/comments", json={"content": "嗨", "post": gone}, headers=rh).status_code == 404
+
+
+def test_posts_filter_by_several_types_and_cap_limit(api, make_user, sync_db):
+    # 走失協尋的「全部」用 types=lost-pet,found-pet，原本後端不支援，會列出所有類型
+    author, _ = make_user()
+    now = datetime.now(timezone.utc)
+    sync_db.posts.insert_many([
+        {"title": f"{t} 貼文", "content": "內容內容內容內容內容", "type": t, "status": "published",
+         "author": author["_id"], "publishedAt": now, "deletedAt": None, "stats": {}}
+        for t in ("lost-pet", "found-pet", "general", "adoption-story")])
+    data = api.get("/api/posts", params={"types": "lost-pet,found-pet,bogus"}).json()["data"]
+    assert sorted(p["type"] for p in data["posts"]) == ["found-pet", "lost-pet"]
+    capped = api.get("/api/posts", params={"limit": "100000"}).json()["data"]["pagination"]
+    assert capped["limit"] == 100

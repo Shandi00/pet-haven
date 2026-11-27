@@ -26,6 +26,7 @@ from app.models.notification import notify_owner_and_shelters, safe_notify
 from app.models.pet import pet_json, set_pet_status
 from app.responses import RawError
 from app.services import review_insights
+from app.core.params import limit_param
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/adoptions", tags=["Adoptions"])
@@ -217,6 +218,8 @@ async def _existing(pet_id, user_id) -> dict | None:
         {"pet": pet_id, "applicant": user_id, "status": {"$nin": ["rejected", "cancelled"]}}, {"_id": 1})
 
 
+APPLY_MAX_BYTES = 64 * 1024  # 正常的申請表只有幾 KB
+
 # 動物收到申請就會變成審核中、從列表消失；不設上限的話，一個帳號就能讓所有動物都無法被申請
 MAX_ACTIVE_APPLICATIONS = 3
 TOO_MANY_ACTIVE = f"同時進行中的申請最多 {MAX_ACTIVE_APPLICATIONS} 份，請等審核結果或取消其他申請"
@@ -299,6 +302,9 @@ def _current_pets(a: dict) -> list:
 
 @router.post("/apply/{pet_id}", status_code=201, summary="提交認養申請（前端使用）")
 async def apply(pet_id: str, request: Request, user: dict = Depends(token_user_zh)):
+    # 申請表會原樣存進 rawSubmission；原本只受整體 55MB 上限限制，太大會讓 MongoDB 寫入失敗（500）
+    if len(await request.body()) > APPLY_MAX_BYTES:
+        raise RawError(400, {"success": False, "message": "申請資料過大，請精簡後再送出"})
     try:
         a = await request.json()
     except ValueError:
@@ -411,7 +417,7 @@ async def apply(pet_id: str, request: Request, user: dict = Depends(token_user_z
 @router.get("/my-applications", summary="我的認養申請")
 async def my_applications(request: Request, user: dict = Depends(token_user_zh)):
     q = request.query_params
-    page, limit = _int(q.get("page"), 1), _int(q.get("limit"), 10)
+    page, limit = _int(q.get("page"), 1), limit_param(q.get("limit"), 10)
     query: dict = {"applicant": user["_id"]}
     if q.get("status"):
         query["status"] = q["status"]
@@ -425,7 +431,7 @@ async def my_applications(request: Request, user: dict = Depends(token_user_zh))
 @router.get("/my-pets-applications", summary="我的動物收到的申請")
 async def my_pets_applications(request: Request, user: dict = Depends(token_user_zh)):
     q = request.query_params
-    page, limit = _int(q.get("page"), 1), _int(q.get("limit"), 10)
+    page, limit = _int(q.get("page"), 1), limit_param(q.get("limit"), 10)
     pet_ids = [p["_id"] async for p in get_db().pets.find({"createdBy": user["_id"]}, {"_id": 1})]
     query: dict = {"pet": {"$in": pet_ids}}
     if q.get("status"):
@@ -448,7 +454,7 @@ async def require_admin(user: dict = Depends(token_user_zh)) -> dict:
 @router.get("/admin/all", summary="所有認養申請（管理員）")
 async def admin_all(request: Request, user: dict = Depends(require_admin)):
     q = request.query_params
-    page, limit = _int(q.get("page"), 1), _int(q.get("limit"), 20)
+    page, limit = _int(q.get("page"), 1), limit_param(q.get("limit"), 20, maximum=1000)
     query: dict = {}
     if q.get("status"):
         query["status"] = q["status"]
