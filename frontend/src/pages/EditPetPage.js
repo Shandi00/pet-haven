@@ -3,12 +3,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation } from 'react-query';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Upload, X } from 'lucide-react';
+import { appendGoodWith, GOOD_WITH_FIELDS, GOOD_WITH_STATE, GOOD_WITH_VALUE } from '../utils/petFormData';
 
 const EditPetPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [photos, setPhotos] = useState([]);
   const [existingPhotos, setExistingPhotos] = useState([]);
+  const [removedPhotos, setRemovedPhotos] = useState([]);
   const [formData, setFormData] = useState(null);
 
   // 獲取寵物資料
@@ -27,8 +29,8 @@ const EditPetPage = () => {
       return response.json();
     },
     {
-      onSuccess: (data) => {
-        // 初始化表單資料
+      onSuccess: ({ pet: data }) => {
+        // 初始化表單資料（API 回傳 { pet }）
         setFormData({
           name: data.name || '',
           species: data.species || 'dog',
@@ -71,6 +73,10 @@ const EditPetPage = () => {
       photos.forEach((photo) => {
         formDataToSend.append('newPhotos', photo);
       });
+      // 畫面上移除的舊照片，後端只會刪這隻動物自己的照片
+      if (removedPhotos.length) {
+        formDataToSend.append('photosToDelete', JSON.stringify(removedPhotos));
+      }
       
       // 添加基本欄位
       formDataToSend.append('name', petData.name);
@@ -101,7 +107,9 @@ const EditPetPage = () => {
       
       // personality 欄位
       formDataToSend.append('personality[activityLevel]', petData.personality.activityLevel || 'moderate');
-      
+      // 相處（T09）：改成不確定時要把舊的適合／不適合清掉，所以不確定也送出
+      appendGoodWith(formDataToSend, petData.personality.goodWith, { clearUnknown: true });
+
       // personalityTraits 使用 JSON 字串
       formDataToSend.append('personalityTraits', JSON.stringify(petData.personality.traits || []));
 
@@ -139,6 +147,8 @@ const EditPetPage = () => {
   };
 
   const removeExistingPhoto = (index) => {
+    const name = existingPhotos[index]?.filename;
+    if (name) setRemovedPhotos(prev => [...prev, name]);
     setExistingPhotos(prev => prev.filter((_, i) => i !== index));
   };
 
@@ -491,6 +501,28 @@ const EditPetPage = () => {
               <option value="moderate">中等 - 平衡活動與休息</option>
               <option value="high">高 - 精力充沛</option>
             </select>
+          </div>
+
+          {/* 相處（T09）：Top 3 推薦的硬條件會用到；不確定存成 null */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {GOOD_WITH_FIELDS.map(({ key, id, label }) => (
+              <div key={key}>
+                <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
+                <select
+                  id={id}
+                  value={GOOD_WITH_VALUE[formData.personality.goodWith?.[key] ?? null]}
+                  onChange={(e) => handleChange('personality', {
+                    ...formData.personality,
+                    goodWith: { ...formData.personality.goodWith, [key]: GOOD_WITH_STATE[e.target.value] },
+                  })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="">不確定</option>
+                  <option value="true">適合</option>
+                  <option value="false">不適合</option>
+                </select>
+              </div>
+            ))}
           </div>
 
           {/* 送養資訊 */}

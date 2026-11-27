@@ -105,6 +105,24 @@ def test_photos_to_delete_only_removes_own_photos(api, make_user, make_pet):
     assert [x["filename"] for x in r.json()["pet"]["photos"]] == ["b.png"]
 
 
+def test_update_good_with_can_be_reset_to_unknown(api, make_user, make_pet):
+    # 編輯表單（multipart）選「不確定」時送空字串，要存回 null，Top 3 才不會再排除這隻動物（T09）
+    owner, oh = make_user()
+    pet = make_pet(owner)
+    url = f"/api/pets/{pet['_id']}"
+    r = api.put(url, data={"personality[goodWith][children]": "false", "personality[goodWith][otherPets]": "true"},
+                headers=oh)
+    assert r.status_code == 200, r.text
+    assert r.json()["pet"]["personality"]["goodWith"]["children"] is False
+    r = api.put(url, data={"personality[goodWith][children]": "", "personality[goodWith][otherPets]": ""}, headers=oh)
+    assert r.status_code == 200, r.text
+    good_with = r.json()["pet"]["personality"]["goodWith"]
+    assert good_with["children"] is None and good_with["otherPets"] is None
+    assert r.json()["pet"]["personality"]["traits"] == ["friendly"]  # 其他個性欄位不受影響
+    bad = api.put(url, data={"personality[goodWith][children]": "maybe"}, headers=oh)
+    assert bad.status_code == 400
+
+
 def test_like_delete_and_sponsorship(api, make_user, make_pet):
     owner, oh = make_user()
     _, uh = make_user()

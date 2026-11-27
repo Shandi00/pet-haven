@@ -3,11 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation } from 'react-query';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Upload, X } from 'lucide-react';
-import { appendGoodWith } from '../utils/petFormData';
-
-// 「相處」下拉選單的值與表單狀態互換：不確定 = null
-const GOOD_WITH_VALUE = { null: '', true: 'true', false: 'false' };
-const GOOD_WITH_STATE = { '': null, true: true, false: false };
+import { appendGoodWith, GOOD_WITH_FIELDS, GOOD_WITH_STATE, GOOD_WITH_VALUE } from '../utils/petFormData';
 
 const CreatePetPage = () => {
   const navigate = useNavigate();
@@ -295,10 +291,7 @@ const CreatePetPage = () => {
 
           {/* 相處（T09）：Top 3 推薦會用到；不確定就不送出，後端存成 null */}
           <div className="grid grid-cols-2 gap-4">
-            {[
-              { key: 'children', id: 'goodWithChildren', label: '適合有小孩的家庭' },
-              { key: 'otherPets', id: 'goodWithOtherPets', label: '適合與其他寵物相處' },
-            ].map(({ key, id, label }) => (
+            {GOOD_WITH_FIELDS.map(({ key, id, label }) => (
               <div key={key}>
                 <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
                 <select id={id} value={GOOD_WITH_VALUE[formData.personality.goodWith[key]]} onChange={(e) => setFormData({...formData, personality: {...formData.personality, goodWith: {...formData.personality.goodWith, [key]: GOOD_WITH_STATE[e.target.value]}}})} className="input-field">

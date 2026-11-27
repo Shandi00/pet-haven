@@ -297,6 +297,12 @@ async def update_pet(pet_id: str, request: Request, user: dict = Depends(token_u
     saved = await save_images(files, "pets", "pet")
     update = {**_strip_protected(body), "updatedBy": user["_id"]}
     _normalize_age(body, update)
+    # 編輯表單的相處選「不確定」時送空字串（multipart 送不了 null），存回 null（未填）（T09）
+    good_with = update["personality"].get("goodWith") if isinstance(update.get("personality"), dict) else None
+    if isinstance(good_with, dict):
+        for key in ("children", "otherPets"):
+            if good_with.get(key) == "":
+                good_with[key] = None
     if body.get("personalityTraits"):
         traits = _json_field(body, "personalityTraits")
         if traits is not None:

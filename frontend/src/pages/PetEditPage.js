@@ -53,7 +53,8 @@ const PetEditPage = () => {
     ['pet', id],
     () => petAPI.getPet(id),
     {
-      select: (response) => response.data,
+      // API 回傳 { pet }；同一個 query key 也可能是送養編輯頁 fetch 存的格式，寫法同 PetDetailPage
+      select: (response) => response.data?.pet || response.pet,
       onSuccess: (data) => {
         setFormData({
           name: data.name || '',
