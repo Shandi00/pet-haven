@@ -52,6 +52,37 @@ def test_main_line_apply_review_complete(api, make_user, make_pet, sync_db):
     assert mine["applications"][0]["status"] == "completed" and "reviewNotes" not in mine["applications"][0]
 
 
+def test_leftover_application_on_adopted_pet_keeps_pet_adopted(api, make_user, make_pet, sync_db):
+    # 動物已被認養，卻還留著一份待審核的舊申請：不能核准；拒絕時只關閉申請，動物不能變回可認養
+    owner, oh, applicant, ah, xh, pet = setup_flow(make_user, make_pet)
+    aid = apply(api, pet, ah).json()["data"]["adoption"]["_id"]
+    sync_db.pets.update_one({"_id": pet["_id"]}, {"$set": {"adoptionStatus": "adopted"}})
+    url = f"/api/adoptions/{aid}/review"
+    r = api.post(url, json={"decision": "approved"}, headers=oh)
+    assert r.status_code == 400 and r.json()["error"] == "這隻動物已被認養，不能再核准申請"
+    assert sync_db.adoptions.find_one({"_id": ObjectId(aid)})["status"] == "pending"
+    r = api.post(url, json={"decision": "rejected", "reason": "已被認養"}, headers=oh)
+    assert r.status_code == 200 and r.json()["adoption"]["status"] == "rejected"
+    assert sync_db.pets.find_one({"_id": pet["_id"]})["adoptionStatus"] == "adopted"
+
+    # 舊的改狀態 API 也一樣
+    aid2 = sync_db.adoptions.insert_one({"pet": pet["_id"], "applicant": applicant["_id"], "status": "pending",
+                                         "applicationId": "AD-LEFTOVER"}).inserted_id
+    r = api.put(f"/api/adoptions/{aid2}/status", json={"status": "approved"}, headers=oh)
+    assert r.status_code == 400 and r.json()["error"] == "這隻動物已被認養，不能再核准申請"
+    assert api.put(f"/api/adoptions/{aid2}/status", json={"status": "rejected"}, headers=oh).status_code == 200
+    assert sync_db.pets.find_one({"_id": pet["_id"]})["adoptionStatus"] == "adopted"
+
+
+def test_reject_keeps_pet_pending_while_other_applications_are_active(api, make_user, make_pet, sync_db):
+    owner, oh, applicant, ah, xh, pet = setup_flow(make_user, make_pet)
+    aid = apply(api, pet, ah).json()["data"]["adoption"]["_id"]
+    sync_db.adoptions.insert_one({"pet": pet["_id"], "applicant": ObjectId(), "status": "approved"})
+    r = api.post(f"/api/adoptions/{aid}/review", json={"decision": "rejected", "reason": "已有其他認養人"}, headers=oh)
+    assert r.status_code == 200
+    assert sync_db.pets.find_one({"_id": pet["_id"]})["adoptionStatus"] == "pending"
+
+
 def test_reject_reason_is_validated_and_sent_to_applicant(api, make_user, make_pet, sync_db):
     owner, oh, applicant, ah, xh, pet = setup_flow(make_user, make_pet)
     aid = apply(api, pet, ah).json()["data"]["adoption"]["_id"]

@@ -77,6 +77,13 @@ describe('MyPetsApplicationsPage 拒絕申請', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   });
 
+  test('動物已被認養時不顯示「通過」，只能拒絕', async () => {
+    renderPage([{ ...app('pending'), pet: { _id: 'p1', name: '咪咪', adoptionStatus: 'adopted' } }]);
+    expect(await screen.findByText('咪咪 已被認養，這份申請只能拒絕。')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '通過' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '拒絕' })).toBeInTheDocument();
+  });
+
   test('只填空白不能送出', async () => {
     renderPage([app('pending')]);
     fireEvent.click(await screen.findByRole('button', { name: '拒絕' }));

@@ -6,6 +6,7 @@ import { X, User, Home, Heart, FileText, Clock, MessageSquare, CheckCircle, XCir
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { getPetPhotoUrl } from '../utils/imageHelpers';
+import ReviewInsights from './ReviewInsights';
 
 const ApplicationDetailModal = ({ isOpen, onClose, applicationId }) => {
   const queryClient = useQueryClient();
@@ -112,12 +113,14 @@ const ApplicationDetailModal = ({ isOpen, onClose, applicationId }) => {
           body: JSON.stringify({ decision, reason })
         }
       );
-      if (!response.ok) throw new Error('Failed to review application');
-      return response.json();
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || '審核失敗');
+      return body;
     },
     {
       onSuccess: (data) => {
         queryClient.invalidateQueries(['applicationDetail', applicationId]);
+        queryClient.invalidateQueries('myPetsApplications');
         queryClient.invalidateQueries('shelterApplications');
         queryClient.invalidateQueries('shelterStats');
         toast.success(data.message);
@@ -126,7 +129,7 @@ const ApplicationDetailModal = ({ isOpen, onClose, applicationId }) => {
         onClose();
       },
       onError: (error) => {
-        toast.error('審核失敗');
+        toast.error(error.message || '審核失敗');
       }
     }
   );
@@ -366,6 +369,10 @@ const ApplicationDetailModal = ({ isOpen, onClose, applicationId }) => {
     )
   );
 
+  // 後端只給審核者（刊登者、admin、volunteer）reviewInsights，用它判斷能不能審核；申請人看不到審核按鈕
+  const canReview = Boolean(application?.reviewInsights);
+  const petAdopted = application?.pet?.adoptionStatus === 'adopted';
+
   if (!isOpen) return null;
 
   const TOP_Z = 2147483647;
@@ -510,6 +517,9 @@ const ApplicationDetailModal = ({ isOpen, onClose, applicationId }) => {
                       </div>
                     </div>
                   </section>
+
+                  {/* 審核輔助：只有審核者會拿到 reviewInsights（契約 §7） */}
+                  <ReviewInsights insights={application.reviewInsights} pet={application.pet} />
 
                   {/* 居住環境 */}
                   <section className="mb-6">
@@ -709,17 +719,22 @@ const ApplicationDetailModal = ({ isOpen, onClose, applicationId }) => {
                   </section>
 
                   {/* 審核決定區域 */}
-                  {['pending', 'under-review'].includes(application.status) && !reviewDecision && (
+                  {canReview && ['pending', 'under-review'].includes(application.status) && !reviewDecision && (
                     <section className="mb-6">
                       <h4 className="text-lg font-semibold text-gray-900 mb-3">審核決定</h4>
+                      {petAdopted && (
+                        <p className="mb-3 text-sm text-gray-600">{application.pet?.name} 已被認養，這份申請只能拒絕。</p>
+                      )}
                       <div className="flex gap-4">
-                        <button
-                          onClick={() => setReviewDecision('approved')}
-                          className="flex-1 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center"
-                        >
-                          <CheckCircle className="w-5 h-5 mr-2" />
-                          核准申請
-                        </button>
+                        {!petAdopted && (
+                          <button
+                            onClick={() => setReviewDecision('approved')}
+                            className="flex-1 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center justify-center"
+                          >
+                            <CheckCircle className="w-5 h-5 mr-2" />
+                            核准申請
+                          </button>
+                        )}
                         <button
                           onClick={() => setReviewDecision('rejected')}
                           className="flex-1 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center"

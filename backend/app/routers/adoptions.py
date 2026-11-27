@@ -19,11 +19,13 @@ from app.core.validation import A, ANY, B, N, O, S, validate
 from app.db import get_db
 from app.deps import token_user_zh
 from app.models.adoption import SCHEMA as ADOPTION_SCHEMA
-from app.models.adoption import DEFAULT_PROJECTION, STATUSES, adoption_json, check_adoption, prepare_new_adoption
+from app.models.adoption import (ACTIVE_STATUSES, DEFAULT_PROJECTION, STATUSES, adoption_json, check_adoption,
+                                 prepare_new_adoption)
 from app.models.message import prepare_new_message
 from app.models.notification import notify_owner_and_shelters, safe_notify
 from app.models.pet import pet_json, set_pet_status
 from app.responses import RawError
+from app.services import review_insights
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/adoptions", tags=["Adoptions"])
@@ -509,6 +511,19 @@ STATUS_NOTICE = {
     "completed": ("adoption_completed", "認養完成", "恭喜完成 {} 的認養程序！", "urgent"),
 }
 PET_STATUS_FOR = {"approved": "pending", "rejected": "available", "cancelled": "available", "completed": "adopted"}
+ADOPTED_PET = "這隻動物已被認養，不能再核准申請"
+
+
+async def _sync_pet_status(pet: dict, adoption_id, target: str) -> None:
+    """申請狀態改變後同步動物狀態。
+    已被認養的動物不動：處理同一隻動物留下的舊申請時，不能讓牠變回可認養或審核中。
+    要變回可認養時，同一隻動物還有其他進行中的申請就維持原狀。"""
+    if pet.get("adoptionStatus") == "adopted" and target != "adopted":
+        return
+    if target == "available" and await get_db().adoptions.count_documents(
+            {"pet": pet["_id"], "_id": {"$ne": adoption_id}, "status": {"$in": list(ACTIVE_STATUSES)}}):
+        return
+    await set_pet_status(pet["_id"], target)
 
 
 async def _load_managed(adoption_id: str, user: dict, error_404: RawError, error_403: RawError) -> tuple[dict, dict]:
@@ -542,13 +557,15 @@ async def update_status(adoption_id: str, body: dict | None = None, user: dict =
                                         _err(403, "只能處理自己動物的申請"))
     if status not in STATUSES:
         raise _err(400, "更新申請狀態失敗", details="Adoption validation failed: status: 請選擇有效的申請狀態")
+    if pet.get("adoptionStatus") == "adopted" and status in ("approved", "completed"):
+        raise _err(400, ADOPTED_PET)
     sets: dict = {"status": status, "updatedAt": datetime.now(timezone.utc)}
     if status in ("approved", "rejected"):
         sets["reviewDecision"] = {"decision": status, "reviewer": user["_id"], "reason": reason,
                                   "reviewDate": datetime.now(timezone.utc)}
     await get_db().adoptions.update_one({"_id": adoption["_id"]}, {"$set": sets})
     if status in PET_STATUS_FOR:
-        await set_pet_status(pet["_id"], PET_STATUS_FOR[status])
+        await _sync_pet_status(pet, adoption["_id"], PET_STATUS_FOR[status])
     await _notify_applicant(adoption, pet, status)
     updated = await _load(adoption_id)
     await populate(updated, "pet", "pets", "name species breed photos adoptionStatus")
@@ -607,7 +624,7 @@ async def cancel(adoption_id: str, user: dict = Depends(token_user_zh)):
         "status": "cancelled", "updatedAt": datetime.now(timezone.utc)}})
     pet = await get_db().pets.find_one({"_id": adoption.get("pet")}) if adoption.get("pet") else None
     if pet and pet.get("adoptionStatus") == "pending":
-        await set_pet_status(pet["_id"], "available")
+        await _sync_pet_status(pet, adoption["_id"], "available")
     if pet and pet.get("createdBy"):
         name = user.get("firstName") or user.get("username") or "申請人"
         content = f"{name} 已取消對 {pet.get('name')} 的認養申請。"
@@ -658,11 +675,13 @@ async def review(adoption_id: str, body: dict | None = None, user: dict = Depend
                                         _fail(403, "您沒有權限審核此申請"))
     if adoption.get("status") not in ("pending", "under-review"):
         raise _fail(400, "此申請已被審核過")
+    if decision == "approved" and pet.get("adoptionStatus") == "adopted":
+        raise _fail(400, ADOPTED_PET)
     decision_doc = {"decision": decision, "reviewer": user["_id"], "reason": reason or "",
                     "reviewDate": datetime.now(timezone.utc)}
     await get_db().adoptions.update_one({"_id": adoption["_id"]}, {"$set": {
         "reviewDecision": decision_doc, "status": decision, "updatedAt": datetime.now(timezone.utc)}})
-    await set_pet_status(pet["_id"], "pending" if decision == "approved" else "available")
+    await _sync_pet_status(pet, adoption["_id"], "pending" if decision == "approved" else "available")
     content = (f"您對 {pet.get('name')} 的認養申請已被核准！" if decision == "approved"
                else f"很抱歉，您對 {pet.get('name')} 的認養申請未通過。{f'原因：{reason}' if reason else ''}")
     await safe_notify({
@@ -687,7 +706,8 @@ async def review(adoption_id: str, body: dict | None = None, user: dict = Depend
             "adoption": {"_id": str(adoption["_id"]), "status": decision, "reviewDecision": to_json(decision_doc)}}
 
 
-@router.get("/{adoption_id}/details", summary="申請詳情（申請人、寵物擁有者或管理員）")
+@router.get("/{adoption_id}/details",
+            summary="申請詳情（申請人、寵物擁有者或管理員）；審核者另外取得 reviewInsights（規則產生的審核輔助）")
 async def details(adoption_id: str, user: dict = Depends(token_user_zh)):
     doc = await _load(adoption_id, None)
     if not doc:
@@ -697,6 +717,8 @@ async def details(adoption_id: str, user: dict = Depends(token_user_zh)):
     is_owner = bool(pet) and same_id(pet.get("createdBy"), user["_id"])
     if not (is_applicant or is_owner or user.get("role") in ("admin", "volunteer")):
         raise _fail(403, "您沒有權限查看此申請（需為申請人、該寵物的發布者或管理員）")
+    # 審核輔助只給審核者，申請人看不到（要在 populate 前算，applicant 還是 ObjectId）
+    insights = await review_insights.build(doc, pet) if pet and not is_applicant and doc.get("applicant") else None
     doc["pet"] = pet
     await populate(doc, "applicant", "users", "username email phone")
     await populate(doc, "reviewNotes.reviewer", "users", "username role")
@@ -706,4 +728,6 @@ async def details(adoption_id: str, user: dict = Depends(token_user_zh)):
     out = adoption_json(doc)
     if pet:
         out["pet"] = pet_json(pet)
+    if insights is not None:
+        out["reviewInsights"] = insights
     return {"success": True, "data": out}

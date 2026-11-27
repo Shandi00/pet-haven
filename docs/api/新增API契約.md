@@ -284,6 +284,46 @@
 - **只回傳上面 7 個欄位**；`ownerName`、`bossName`（負責人姓名，屬個資）、`originalData`、`validNumber` 一律不回傳。
 - 排序：依 `name` 遞增，分頁結果才穩定。
 
+## 7. 審核輔助（T13 延伸，選做，2026-11-27 加入）
+
+既有的 `GET /api/adoptions/:id/details` 多回傳 `data.reviewInsights`，給審核者在「查看申請詳情」參考。**只有寵物刊登者、`admin`、`volunteer` 拿得到**；申請人查看自己的申請時沒有這個欄位。程式在 `backend/app/services/review_insights.py`。
+
+```json
+"reviewInsights": {
+  "pet": { "otherActiveApplications": 1 },
+  "applicant": { "otherActiveApplications": 2, "completedAdoptions": 1, "matchingProfileFilled": true },
+  "match": { "score": 72, "label": "絕佳配對", "breakdown": { "compatibility": 80, "lifestyle": 70, "experience": 60, "environment": 75 } },
+  "checks": [
+    { "level": "warning", "message": "申請表填有 2 位兒童，小白標示不適合有小孩的家庭" },
+    { "level": "info", "message": "小白活動量高，申請人住公寓且沒有院子，請確認每天的運動安排" }
+  ],
+  "source": "rule"
+}
+```
+
+| 欄位 | 說明 |
+|---|---|
+| `pet.otherActiveApplications` | 這隻動物除了這份之外，還在進行中（待審核、審核中、已通過）的申請數 |
+| `applicant.otherActiveApplications`、`completedAdoptions` | 申請人另外進行中的申請數、曾在平台完成認養的次數。**只給數字**，不透露申請的是哪隻動物、對象是誰 |
+| `applicant.matchingProfileFilled` | 申請人的生活方式／養寵物經驗／家庭環境配對檔案是否填過（註冊時的預設值不算） |
+| `match` | 配對檔案有填時，用和 Top 3 相同的計分（`calculate_match`，normalized）算出的分數、等級與四項分數；沒填時是 `null`。原本給認養者看的文字分析不回傳 |
+| `checks` | 申請表答案對照動物資料的確認事項，`warning`（明確衝突）排在 `info`（需要確認）前面；沒有就是空陣列 |
+
+`checks` 的規則（只用兩邊實際填寫的欄位）：
+
+| 條件 | 等級 |
+|---|---|
+| 申請表有兒童，動物 `goodWith.children` 為 `false`／未填 | warning／info |
+| 申請人目前有養寵物，動物 `goodWith.otherPets` 為 `false`／未填 | warning／info |
+| 申請人表示家中有人過敏：動物是貓（同 Top 3 硬條件）／其他 | warning／info |
+| 租屋且填寫尚未取得房東同意 | warning |
+| 動物活動量高，申請人住公寓且沒有院子 | info |
+| 動物有特殊照顧需求（照原文轉述，最多 100 字） | info |
+
+- **全部由規則產生，不呼叫 LLM**（`source` 固定為 `"rule"`），畫面要標示「規則產生，沒有使用 AI」。
+- 只指出要確認的地方：**不替申請人打分數、不建議核准或拒絕**；`match` 是動物與配對檔案的契合度，不是對申請人的評價。是否核准由審核者決定。
+- 平台沒有的資料不判斷，例如《動物保護法》第 33-1 條的棄養紀錄。
+
 ---
 
 ## 附錄：資料欄位（新增到 `User`，T03、T08）

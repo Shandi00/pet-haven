@@ -57,7 +57,7 @@
 | PUT | `/api/adoptions/{adoption_id}/cancel` | 取消申請（申請人） | 登入 |
 | POST | `/api/adoptions/{adoption_id}/notes` | 新增審核備註（寵物擁有者或管理員） | 登入 |
 | POST | `/api/adoptions/{adoption_id}/review` | 審核申請（寵物擁有者或管理員） | 登入 |
-| GET | `/api/adoptions/{adoption_id}/details` | 申請詳情（申請人、寵物擁有者或管理員） | 登入 |
+| GET | `/api/adoptions/{adoption_id}/details` | 申請詳情（申請人、寵物擁有者或管理員）；審核者另外取得 `reviewInsights`（[契約 §7](新增API契約.md)） | 登入 |
 
 ### `auth.py`
 

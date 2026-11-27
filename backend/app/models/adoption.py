@@ -7,6 +7,8 @@ from app.core.serialize import to_json
 from app.db import get_db
 
 STATUSES = ("pending", "under-review", "approved", "rejected", "completed", "cancelled")
+# 還在進行中、會讓動物保持「審核中」的申請狀態
+ACTIVE_STATUSES = ("pending", "under-review", "approved")
 # rawSubmission 在舊版是 select: false，預設不回傳
 DEFAULT_PROJECTION = {"rawSubmission": 0}
 

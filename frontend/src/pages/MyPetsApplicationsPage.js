@@ -66,16 +66,18 @@ const MyPetsApplicationsPage = () => {
         },
         body: JSON.stringify({ decision, reason })
       });
-      if (!response.ok) throw new Error('審核失敗');
-      return response.json();
+      const body = await response.json().catch(() => ({}));
+      // 顯示後端的原因（例如動物已被認養不能再核准）
+      if (!response.ok) throw new Error(body.error || '審核失敗，請稍後再試');
+      return body;
     },
     {
       onSuccess: () => {
         toast.success('審核完成');
         queryClient.invalidateQueries(['myPetsApplications']);
       },
-      onError: () => {
-        toast.error('審核失敗,請稍後再試');
+      onError: (error) => {
+        toast.error(error.message);
       }
     }
   );
@@ -296,14 +298,18 @@ const MyPetsApplicationsPage = () => {
                       <div className="flex flex-wrap gap-3">
                       {app.status === 'pending' && (
                         <>
-                          <button
-                            onClick={() => reviewMutation.mutate({ id: app._id, decision: 'approved', reason: '' })}
-                            disabled={reviewMutation.isLoading}
-                            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
-                          >
-                            <CheckCircle className="w-4 h-4" />
-                            通過
-                          </button>
+                          {app.pet?.adoptionStatus === 'adopted' ? (
+                            <p className="w-full text-sm text-gray-600">{app.pet?.name} 已被認養，這份申請只能拒絕。</p>
+                          ) : (
+                            <button
+                              onClick={() => reviewMutation.mutate({ id: app._id, decision: 'approved', reason: '' })}
+                              disabled={reviewMutation.isLoading}
+                              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                              通過
+                            </button>
+                          )}
                           <button
                             onClick={() => openReject(app)}
                             disabled={reviewMutation.isLoading}
