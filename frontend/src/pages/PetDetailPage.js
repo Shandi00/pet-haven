@@ -165,8 +165,10 @@ const PetDetailPage = () => {
 
   // Story 3.6: 處理助養點擊
   const handleSponsorClick = async () => {
-    if (!pet?.sponsorship?.externalLink) {
-      alert('助養連結尚未設定');
+    const link = pet?.sponsorship?.externalLink;
+    // 只開 https 連結：舊資料可能存了 javascript: 之類的連結，不能直接交給 window.open
+    if (!link || !/^https:\/\//i.test(link)) {
+      toast.error('助養連結尚未設定');
       return;
     }
 
@@ -177,7 +179,7 @@ const PetDetailPage = () => {
       }).catch(err => console.error('記錄助養點擊失敗:', err));
 
       // 開啟外部連結
-      window.open(pet.sponsorship.externalLink, '_blank', 'noopener,noreferrer');
+      window.open(link, '_blank', 'noopener,noreferrer');
     } catch (error) {
       console.error('助養點擊處理失敗:', error);
     }

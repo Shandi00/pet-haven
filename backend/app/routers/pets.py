@@ -251,7 +251,7 @@ async def create_pet(request: Request, user: dict = Depends(token_user_zh)):
     body, files = await read_body(request, "photos")
     saved = await save_images(files, "pets", "pet")
     try:
-        data = {**_strip_protected(body), "createdBy": user["_id"], "adoptionStatus": "available",
+        data = {**_strip_protected(body, user), "createdBy": user["_id"], "adoptionStatus": "available",
                 "isActive": True}
         _normalize_age(body, data)
         if saved:
@@ -273,12 +273,20 @@ async def create_pet(request: Request, user: dict = Depends(token_user_zh)):
     return {"message": "寵物資料新增成功", "pet": pet_json(doc)}
 
 
-# 不讓使用者透過 body 改這些欄位（舊版直接 {...req.body}）
-_PROTECTED = ("_id", "createdBy", "likes", "views", "adoptionHistory", "createdAt", "updatedAt")
+# 不讓使用者透過 body 改這些欄位（舊版直接 {...req.body}）。
+# 照片只能由上傳產生（否則可寫入別人的檔名再用 photosToDelete 刪掉）；govData 只由政府資料匯入產生
+_PROTECTED = ("_id", "createdBy", "likes", "views", "adoptionHistory", "createdAt", "updatedAt", "photos", "govData")
+FEATURE_ROLES = ("shelter", "admin")
 
 
-def _strip_protected(body: dict) -> dict:
-    return {k: v for k, v in body.items() if k not in _PROTECTED}
+def _strip_protected(body: dict, user: dict) -> dict:
+    data = {k: v for k, v in body.items() if k not in _PROTECTED}
+    if user.get("role") not in FEATURE_ROLES:
+        data.pop("featured", None)  # 首頁精選只給收容所與管理員設定（收容所編輯頁有這個選項）
+    if isinstance(data.get("sponsorship"), dict):
+        # 點擊次數只由 /sponsorship/click 累加
+        data["sponsorship"] = {k: v for k, v in data["sponsorship"].items() if k != "clickCount"}
+    return data
 
 
 def _can_manage(user: dict, pet: dict) -> bool:
@@ -295,7 +303,7 @@ async def update_pet(pet_id: str, request: Request, user: dict = Depends(token_u
         raise _err(403, "您沒有權限編輯此寵物資訊")
     body, files = await read_body(request, "newPhotos")
     saved = await save_images(files, "pets", "pet")
-    update = {**_strip_protected(body), "updatedBy": user["_id"]}
+    update = {**_strip_protected(body, user), "updatedBy": user["_id"]}
     _normalize_age(body, update)
     # 編輯表單的相處選「不確定」時送空字串（multipart 送不了 null），存回 null（未填）（T09）
     good_with = update["personality"].get("goodWith") if isinstance(update.get("personality"), dict) else None

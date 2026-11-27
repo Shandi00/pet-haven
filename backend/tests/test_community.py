@@ -77,6 +77,25 @@ def test_comments_reply_like_report_edit(api, make_user, sync_db):
     assert [c["_id"] for c in detail] != [] and cid not in [c["_id"] for c in detail]
 
 
+def test_comment_output_hides_ip_and_reporters(api, make_user, sync_db):
+    # 留言者的 IP 與檢舉人是個資，公開的留言 API 不能回傳（AGENTS.md）
+    author, ah = make_user()
+    reader, rh = make_user()
+    pid = api.post("/api/posts", json={"title": "分享", "content": "認養後的生活真的很開心"}, headers=ah).json()["data"]["_id"]
+    cid = api.post("/api/comments", json={"content": "好棒", "post": pid}, headers=rh).json()["data"]["_id"]
+    api.post(f"/api/comments/{cid}/reply", json={"content": "謝謝"}, headers=ah)
+    assert api.post(f"/api/comments/{cid}/report", json={"reason": "spam"}, headers=ah).status_code == 200
+    assert sync_db.comments.find_one({"_id": ObjectId(cid)}).get("reports")  # 資料庫仍保留，供管理用
+    outputs = [api.get(f"/api/comments/post/{pid}").json()["data"]["comments"][0],
+               api.get(f"/api/comments/user/{reader['_id']}").json()["data"]["comments"][0],
+               api.get(f"/api/comments/{cid}/replies").json()["data"]["replies"][0],
+               *api.get(f"/api/posts/{pid}").json()["data"]["comments"]]
+    for c in outputs:
+        assert "ipAddress" not in c and "reports" not in c
+        for reply in c.get("replies") or []:
+            assert "ipAddress" not in reply and "reports" not in reply
+
+
 def test_deleted_and_draft_posts_are_hidden_from_others(api, make_user):
     author, ah = make_user()
     _, rh = make_user()

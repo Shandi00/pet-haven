@@ -48,6 +48,10 @@ def comment_json(doc: dict | None) -> dict | None:
     if doc is None:
         return None
     out = to_json(doc)
+    # IP 與檢舉人是個資，資料庫保留供管理，但不對外回傳（AGENTS.md）；populate 進來的回覆也一樣
+    for c in [out, *[r for r in out.get("replies") or [] if isinstance(r, dict)]]:
+        c.pop("ipAddress", None)
+        c.pop("reports", None)
     out["replyCount"] = len(doc.get("replies") or [])
     out["isReply"] = doc.get("parentComment") is not None
     out["level"] = 1 if doc.get("parentComment") else 0

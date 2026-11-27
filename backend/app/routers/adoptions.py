@@ -217,6 +217,16 @@ async def _existing(pet_id, user_id) -> dict | None:
         {"pet": pet_id, "applicant": user_id, "status": {"$nin": ["rejected", "cancelled"]}}, {"_id": 1})
 
 
+# 動物收到申請就會變成審核中、從列表消失；不設上限的話，一個帳號就能讓所有動物都無法被申請
+MAX_ACTIVE_APPLICATIONS = 3
+TOO_MANY_ACTIVE = f"同時進行中的申請最多 {MAX_ACTIVE_APPLICATIONS} 份，請等審核結果或取消其他申請"
+
+
+async def _too_many_active(user_id) -> bool:
+    return await get_db().adoptions.count_documents(
+        {"applicant": user_id, "status": {"$in": list(ACTIVE_STATUSES)}}) >= MAX_ACTIVE_APPLICATIONS
+
+
 async def _insert(data: dict) -> dict:
     doc = await prepare_new_adoption(data)
     doc["_id"] = (await get_db().adoptions.insert_one(doc)).inserted_id
@@ -236,6 +246,8 @@ async def create_adoption(body: dict | None = None, user: dict = Depends(token_u
         raise _err(400, "不能申請認養自己刊登的動物")
     if await _existing(pet_id, user["_id"]):
         raise _err(400, "您已經為此寵物提交過認養申請")
+    if await _too_many_active(user["_id"]):
+        raise _err(400, TOO_MANY_ACTIVE)
     ad = a.get("applicantDetails") or {}
     try:
         adoption = await _insert({
@@ -303,6 +315,8 @@ async def apply(pet_id: str, request: Request, user: dict = Depends(token_user_z
         raise RawError(400, {"success": False, "message": "不能申請認養自己刊登的動物"})
     if await _existing(pid, user["_id"]):
         raise RawError(400, {"success": False, "message": "您已經為此寵物提交過認養申請，請勿重複申請"})
+    if await _too_many_active(user["_id"]):
+        raise RawError(400, {"success": False, "message": TOO_MANY_ACTIVE})
 
     missing = [k for k in ("age",) if not a.get("age") and a.get("age") != 0]
     if not a.get("occupation"):

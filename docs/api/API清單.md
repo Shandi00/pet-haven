@@ -46,7 +46,7 @@
 | 方法 | 路徑 | 說明 | 權限 |
 |---|---|---|---|
 | POST | `/api/adoptions` | 提交認養申請（舊格式） | 登入 |
-| POST | `/api/adoptions/apply/{pet_id}` | 提交認養申請（前端使用） | 登入 |
+| POST | `/api/adoptions/apply/{pet_id}` | 提交認養申請（前端使用）；每人同時進行中的申請最多 3 份 | 登入 |
 | GET | `/api/adoptions/my-applications` | 我的認養申請 | 登入 |
 | GET | `/api/adoptions/my-pets-applications` | 我的動物收到的申請 | 登入 |
 | GET | `/api/adoptions/admin/all` | 所有認養申請（管理員） | 登入＋admin |

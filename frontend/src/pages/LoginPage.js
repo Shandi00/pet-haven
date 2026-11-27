@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '../services/auth';
 import { Heart, Eye, EyeOff, Loader } from 'lucide-react';
 import GoogleLoginButton from '../components/GoogleLoginButton';
+// ?redirect= 只接受站內路徑，避免被當成跳到外站的跳板（開放式轉址）
+import { safeRedirect } from '../utils/safeRedirect';
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +26,7 @@ const LoginPage = () => {
       const result = await login(data);
       if (result.success) {
         // 檢查是否有重定向的目標頁面
-        const redirectParam = new URLSearchParams(window.location.search).get('redirect');
+        const redirectParam = safeRedirect(new URLSearchParams(window.location.search).get('redirect'));
         
         if (redirectParam) {
           navigate(redirectParam);
@@ -197,7 +199,7 @@ const LoginPage = () => {
             <GoogleLoginButton
               onSuccess={(result) => {
                 // 檢查是否有重定向的目標頁面
-                const redirectParam = new URLSearchParams(window.location.search).get('redirect');
+                const redirectParam = safeRedirect(new URLSearchParams(window.location.search).get('redirect'));
                 
                 if (redirectParam) {
                   navigate(redirectParam);

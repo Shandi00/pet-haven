@@ -105,6 +105,49 @@ def test_photos_to_delete_only_removes_own_photos(api, make_user, make_pet):
     assert [x["filename"] for x in r.json()["pet"]["photos"]] == ["b.png"]
 
 
+def test_body_cannot_set_photos_gov_data_or_click_count(api, make_user, make_pet, sync_db, tmp_path, monkeypatch):
+    # 照片只能由上傳產生：不能在資料裡寫入別人的檔名，再用 photosToDelete 刪掉別人的照片檔
+    from app.config import get_settings
+    monkeypatch.setattr(get_settings(), "upload_path", str(tmp_path))
+    (tmp_path / "pets").mkdir()
+    victim_file = tmp_path / "pets" / "victim.png"
+    victim_file.write_bytes(PNG)
+    _, h = make_user()
+    fake = {"photos[0][url]": "/uploads/pets/victim.png", "photos[0][filename]": "victim.png",
+            "govData[animalId]": "999", "featured": "true", "sponsorship[clickCount]": "999"}
+    r = api.post("/api/pets", data=form_fields(**fake), files=[("photos", ("a.png", io.BytesIO(PNG), "image/png"))],
+                 headers=h)
+    assert r.status_code == 201, r.text
+    pet = r.json()["pet"]
+    assert [p["filename"] for p in pet["photos"]] != ["victim.png"] and len(pet["photos"]) == 1
+    doc = sync_db.pets.find_one({"_id": ObjectId(pet["_id"])})
+    assert not (doc.get("govData") or {}).get("animalId")  # 不能假冒政府匯入的資料
+    assert doc.get("featured") is not True  # 一般使用者不能設首頁精選
+    assert (doc.get("sponsorship") or {}).get("clickCount", 0) == 0
+    r = api.put(f"/api/pets/{pet['_id']}", data={**fake, "photosToDelete": '["victim.png"]'}, headers=h)
+    assert r.status_code == 200, r.text
+    assert victim_file.exists()
+
+
+def test_shelter_can_feature_own_pet(api, make_user, make_pet):
+    owner, oh = make_user("shelter")
+    pet = make_pet(owner)
+    r = api.put(f"/api/pets/{pet['_id']}", data={"featured": "true"}, headers=oh)
+    assert r.status_code == 200 and r.json()["pet"]["featured"] is True
+
+
+def test_sponsorship_link_must_be_https_even_in_partial_update(api, make_user, make_pet):
+    owner, oh = make_user("shelter")
+    pet = make_pet(owner)
+    url = f"/api/pets/{pet['_id']}"
+    ok = api.put(url, data={"sponsorship[enabled]": "true", "sponsorship[externalLink]": "https://example.org/give"},
+                 headers=oh)
+    assert ok.status_code == 200, ok.text
+    # 之後只改連結、不帶 enabled，原本會略過 https 檢查
+    bad = api.put(url, data={"sponsorship[externalLink]": "javascript:alert(1)"}, headers=oh)
+    assert bad.status_code == 400 and "HTTPS" in bad.json()["details"]
+
+
 def test_update_good_with_can_be_reset_to_unknown(api, make_user, make_pet):
     # 編輯表單（multipart）選「不確定」時送空字串，要存回 null，Top 3 才不會再排除這隻動物（T09）
     owner, oh = make_user()

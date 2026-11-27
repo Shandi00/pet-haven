@@ -15,9 +15,9 @@ def _now():
     return datetime.now(timezone.utc)
 
 
-def _https_if_enabled(value, root):
-    sp = root.get("sponsorship") or {}
-    return not sp.get("enabled") or not value or bool(re.match(r"^https://.+", value))
+def _https_link(value, root):
+    # 有填就一律要 https：原本只在同一次資料有 enabled 時才檢查，只改連結的部分更新可以存進 javascript:
+    return not value or bool(re.match(r"^https://.+", value))
 
 
 SCHEMA = {
@@ -84,7 +84,7 @@ SCHEMA = {
     "adoptionHistory": Arr(F("oid")),
     "sponsorship": {
         "enabled": F("bool", default=False),
-        "externalLink": F("str", trim=True, validator=_https_if_enabled, validator_msg="助養連結必須使用 HTTPS 協定"),
+        "externalLink": F("str", trim=True, validator=_https_link, validator_msg="助養連結必須使用 HTTPS 協定"),
         "clickCount": F("num", default=0, min=(0, "點擊次數不能為負數")),
         "lastClickedAt": F("date"),
     },

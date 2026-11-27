@@ -114,6 +114,22 @@ def test_reject_keeps_pet_pending_while_other_applications_are_active(api, make_
     assert sync_db.pets.find_one({"_id": pet["_id"]})["adoptionStatus"] == "pending"
 
 
+def test_active_applications_are_capped_per_applicant(api, make_user, make_pet, sync_db):
+    # 一個帳號不能對每隻動物都送申請、讓牠們全部變成審核中而從列表消失
+    owner, oh = make_user("shelter")
+    applicant, ah = make_user("user")
+    pets = [make_pet(owner, name=f"毛孩{i}") for i in range(4)]
+    for p in pets[:3]:
+        assert apply(api, p, ah).status_code == 201
+    r = apply(api, pets[3], ah)
+    assert r.status_code == 400 and r.json()["message"] == "同時進行中的申請最多 3 份，請等審核結果或取消其他申請"
+    assert sync_db.pets.find_one({"_id": pets[3]["_id"]})["adoptionStatus"] == "available"
+    # 取消一份之後就能再申請
+    first = sync_db.adoptions.find_one({"applicant": applicant["_id"], "pet": pets[0]["_id"]})
+    assert api.put(f"/api/adoptions/{first['_id']}/cancel", headers=ah).status_code == 200
+    assert apply(api, pets[3], ah).status_code == 201
+
+
 def test_reject_reason_is_validated_and_sent_to_applicant(api, make_user, make_pet, sync_db):
     owner, oh, applicant, ah, xh, pet = setup_flow(make_user, make_pet)
     aid = apply(api, pet, ah).json()["data"]["adoption"]["_id"]
