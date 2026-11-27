@@ -32,7 +32,7 @@ def shelter_password() -> str:
     return get_settings().seed_shelter_password.get_secret_value() or DEFAULT_SHELTER_PASSWORD
 
 
-# 首頁「成功故事」的示範資料：原本寫死在 HomePage.js，2026-11-27 改存資料庫（社群的領養故事貼文）。
+# 首頁「成功故事」的示範資料：原本寫死在 HomePage.jsx，2026-11-27 改存資料庫（社群的領養故事貼文）。
 # 作者是示範帳號：Email 用保留的 .test 網域、密碼隨機產生且不保存（沒有人能登入），貼文標籤加「示範」。
 # 不連到 seed 的寵物，避免「小白已找到家」但小白仍在待認養列表上；照片也不和 seed 寵物共用。
 # 原本寫死資料裡小白那張其實是潛水照，已換成實際看過內容的狗狗照片。

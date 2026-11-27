@@ -5,10 +5,10 @@
 ### 1.0 使用者個人資料
 | 功能編號 | 功能名稱 | 實作狀態 | 前端頁面 | 後端 API |
 |---------|---------|---------|---------|---------|
-| 1.1.1 | Google 帳號快速註冊/登入 |  | LoginPage.js | /api/auth/google |
-| 1.2 | 個人使用者資料填寫 |  | RegisterPage.js, ProfilePage.js | /api/users/profile |
-| 1.3.1 | 機構使用者資料自動帶入 |  | RegisterPage.js | /api/auth/register |
-| 1.4 | 個人資料編輯 |  | ProfilePage.js | /api/users/profile |
+| 1.1.1 | Google 帳號快速註冊/登入 |  | LoginPage.jsx | /api/auth/google |
+| 1.2 | 個人使用者資料填寫 |  | RegisterPage.jsx, ProfilePage.jsx | /api/users/profile |
+| 1.3.1 | 機構使用者資料自動帶入 |  | RegisterPage.jsx | /api/auth/register |
+| 1.4 | 個人資料編輯 |  | ProfilePage.jsx | /api/users/profile |
 
 **使用方式:**
 - 前往 http://localhost:3000/register 註冊
@@ -20,14 +20,14 @@
 ### 2.0 寵物資料
 | 功能編號 | 功能名稱 | 實作狀態 | 前端頁面 | 後端 API |
 |---------|---------|---------|---------|---------|
-| 2.1.1 | 顯示寵物縮圖與名稱 |  | PetsPage.js, HomePage.js | /api/pets |
-| 2.1.2 | 顯示寵物詳細資訊 |  | PetDetailPage.js | /api/pets/:id |
-| 2.1.3 | 顯示送養者設定認養需求 |  | PetDetailPage.js | /api/pets/:id |
-| 2.1.4 | 機構寵物連接到機構資料 |  | PetDetailPage.js | /api/pets/:id (populate shelter) |
-| 2.2.1 | 寵物搜尋與篩選 |  | PetsPage.js | /api/pets (with query params) |
-| 2.3.1 | 寵物資料新增/修改/刪除 |  | ShelterDashboardPage.js, PetEditPage.js | /api/pets |
+| 2.1.1 | 顯示寵物縮圖與名稱 |  | PetsPage.jsx, HomePage.jsx | /api/pets |
+| 2.1.2 | 顯示寵物詳細資訊 |  | PetDetailPage.jsx | /api/pets/:id |
+| 2.1.3 | 顯示送養者設定認養需求 |  | PetDetailPage.jsx | /api/pets/:id |
+| 2.1.4 | 機構寵物連接到機構資料 |  | PetDetailPage.jsx | /api/pets/:id (populate shelter) |
+| 2.2.1 | 寵物搜尋與篩選 |  | PetsPage.jsx | /api/pets (with query params) |
+| 2.3.1 | 寵物資料新增/修改/刪除 |  | ShelterDashboardPage.jsx, PetEditPage.jsx | /api/pets |
 | 2.4.1 | 已認養寵物自動標記 |  | 後端自動處理 | /api/adoptions/:id/status |
-| 2.5.1 | 寵物排序 |  | PetsPage.js | /api/pets?sort=... |
+| 2.5.1 | 寵物排序 |  | PetsPage.jsx | /api/pets?sort=... |
 
 **使用方式:**
 - 瀏覽寵物: http://localhost:3000/pets
@@ -39,10 +39,10 @@
 ### 3.0 認養申請
 | 功能編號 | 功能名稱 | 實作狀態 | 前端頁面 | 後端 API |
 |---------|---------|---------|---------|---------|
-| 3.1 | 私訊媒合功能 |  | MessagesPage.js, ConversationPage.js | /api/messages |
-| 3.2 | 認養者填寫資料 |  | AdoptionApplicationPage.js | /api/adoptions |
-| 3.3 | 認養狀態更新 |  | MyApplicationsPage.js | /api/adoptions/:id/status |
-| 3.4 | 機構認養審核 |  | ShelterDashboardPage.js | /api/adoptions/admin |
+| 3.1 | 私訊媒合功能 |  | MessagesPage.jsx, ConversationPage.jsx | /api/messages |
+| 3.2 | 認養者填寫資料 |  | AdoptionApplicationPage.jsx | /api/adoptions |
+| 3.3 | 認養狀態更新 |  | MyApplicationsPage.jsx | /api/adoptions/:id/status |
+| 3.4 | 機構認養審核 |  | ShelterDashboardPage.jsx | /api/adoptions/admin |
 
 **使用方式:**
 - 申請認養: 點選寵物詳情頁的「申請認養」按鈕
@@ -55,12 +55,12 @@
 ### 額外功能 (超出 PRD)
 | 功能名稱 | 實作狀態 | 前端頁面 | 後端 API |
 |---------|---------|---------|---------|
-| 社群討論區 |  | CommunityPage.js, PostDetailPage.js | /api/posts, /api/comments |
-| 走失寵物專區 |  | LostPetsPage.js | /api/posts?type=lost |
-| 即時通知系統 |  | NotificationsPage.js | /api/notifications |
-| 寵物推薦系統 |  | HomePage.js | /api/recommendations |
-| 使用者儀表板 |  | UserDashboardPage.js | /api/users/dashboard |
-| **寵物贊助功能** (Epic 3) |  | PetDetailPage.js, ShelterDashboardPage.js | /api/pets/:id/sponsor-click |
+| 社群討論區 |  | CommunityPage.jsx, PostDetailPage.jsx | /api/posts, /api/comments |
+| 走失寵物專區 |  | LostPetsPage.jsx | /api/posts?type=lost |
+| 即時通知系統 |  | NotificationsPage.jsx | /api/notifications |
+| 寵物推薦系統 |  | HomePage.jsx | /api/recommendations |
+| 使用者儀表板 |  | UserDashboardPage.jsx | /api/users/dashboard |
+| **寵物贊助功能** (Epic 3) |  | PetDetailPage.jsx, ShelterDashboardPage.jsx | /api/pets/:id/sponsor-click |
 | API 文件 (Swagger) |  | N/A | /api-docs |
 
 ---

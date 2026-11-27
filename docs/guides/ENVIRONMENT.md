@@ -17,6 +17,6 @@
 
 JWT_SECRET 與 SESSION_SECRET 請使用各自獨立的隨機值。開發時可分別執行 `node -e "process.stdout.write(require('crypto').randomBytes(32).toString('hex'))"` 產生。
 
-前端預設連到 http://localhost:5000/api。若需覆寫，建立 frontend/.env.local 並設定 `REACT_APP_API_URL`；環境變數更新後要重新啟動前端。實際支援的其他前端變數可在 frontend/src 搜尋 process.env。
+前端預設連到 http://localhost:5000/api。若需覆寫，建立 frontend/.env.local 並設定 `REACT_APP_API_URL`；環境變數更新後要重新啟動前端。實際支援的其他前端變數可在 frontend/src 搜尋 import.meta.env（前端用 Vite，只會讀取 `REACT_APP_` 開頭的變數）。
 
 Google 登入流程詳見 [Google 登入](../auth/GOOGLE_LOGIN.md)。日誌詳見 [LOGGING.md](../../backend/LOGGING.md)。

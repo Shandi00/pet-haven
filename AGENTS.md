@@ -58,7 +58,7 @@ docker compose up --build   # 用 Docker 同時啟動前後端（需要 backend/
 
 ### 一定要做
 
-- 先重用既有邏輯：後端搬遷時以 `backend-legacy/` 的實作為準，例如 `services/advancedMatchingService.js`（規則配對）、`services/recommendationService.js`（熱門推薦）、`PUT /api/matching/profile/*`（配對檔案），不要另寫一套邏輯不同的程式；前端重用 `components/MatchAnalysisPanel.js`。
+- 先重用既有邏輯：後端搬遷時以 `backend-legacy/` 的實作為準，例如 `services/advancedMatchingService.js`（規則配對）、`services/recommendationService.js`（熱門推薦）、`PUT /api/matching/profile/*`（配對檔案），不要另寫一套邏輯不同的程式；前端重用 `components/MatchAnalysisPanel.jsx`。
 - 會改資料的 API 一律驗證登入與角色；只能處理自己的資源（自己的申請、自己的動物）。`admin` 例外。
 - 改動 API 時同步更新 swagger 註解。
 - 新增或移除元件、角色、使用案例時，同步更新 `docs/architecture/diagrams/` 的 `.puml`，重新輸出 `.svg`，兩者一起 commit。

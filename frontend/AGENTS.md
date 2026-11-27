@@ -4,7 +4,7 @@
 
 ## 結構
 
-- `src/App.js`：路由表。新增頁面要在這裡註冊。需要登入的新頁面，用 `src/services/auth.js` 的 `ProtectedRoute` 包起來。目前既有頁面沒有用它，各自在頁面內檢查登入狀態。
+- `src/App.jsx`：路由表。新增頁面要在這裡註冊。需要登入的新頁面，用 `src/services/auth.jsx` 的 `ProtectedRoute` 包起來。目前既有頁面沒有用它，各自在頁面內檢查登入狀態。
 - `src/pages/`：一個網址一個頁面。
 - `src/components/`：跨頁共用的元件；`src/components/ui/` 是基礎 UI 元件（Button、Input、Card、Modal、Toast 等，說明見其中的 README.md）。
 - `src/services/api.js`：所有 API 呼叫都集中在這裡，依資源分組（`petAPI`、`adoptionAPI`、`matchingAPI` 等）。新增的 API 在這裡加一組，例如 `aiAPI`。
@@ -22,8 +22,12 @@
 ## 測試
 
 ```bash
-npm test -- --watchAll=false   # 單元測試（react-scripts / jest）
+npm test                       # 單元測試（Vitest），跑一次就結束；改程式時自動重跑用 npm run test:watch
+npm run lint                   # ESLint：Hooks 用法錯誤與未定義變數會報錯，其餘為警告
 npm run test:e2e               # Playwright，測試放在 e2e/，需要前後端都在執行
 ```
 
+- 前端用 Vite 建置（設定在 `vite.config.mjs`）。有 JSX 的檔案要用 `.jsx` 副檔名，`.js` 裡寫 JSX 會無法建置。
+- 環境變數沿用 `REACT_APP_` 開頭，程式裡用 `import.meta.env.REACT_APP_xxx` 讀取（不是 `process.env`）；測試中要改值用 `vi.stubEnv`。
+- 測試用 Vitest 的 `vi.fn`、`vi.mock`（寫法和 jest 相同）；模擬預設匯出時，回傳的物件要有 `default`。
 - 動到展示主線（建檔、遊戲、推薦、回饋、聊天、申請）時，要新增或更新 `e2e/` 的測試。

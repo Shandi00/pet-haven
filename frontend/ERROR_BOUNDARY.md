@@ -12,7 +12,7 @@
 
 ## 架構
 
-### 1. ErrorFallback 元件 (`src/components/ErrorFallback.js`)
+### 1. ErrorFallback 元件 (`src/components/ErrorFallback.jsx`)
 
 友善的錯誤 UI 元件,當錯誤發生時顯示給使用者。
 
@@ -29,7 +29,7 @@
 - 漸層背景
 - 清晰的視覺層次
 
-### 2. App.js 整合
+### 2. App.jsx 整合
 
 應用程式最外層包裹 ErrorBoundary,捕獲所有子元件的錯誤。
 
@@ -55,7 +55,7 @@ function App() {
 }
 ```
 
-### 3. 測試頁面 (`src/pages/ErrorTestPage.js`)
+### 3. 測試頁面 (`src/pages/ErrorTestPage.jsx`)
 
 僅開發環境可用的測試頁面,用於驗證 ErrorBoundary 是否正常運作。
 
@@ -65,7 +65,7 @@ function App() {
 
 ### 全域錯誤邊界 (已實作)
 
-App.js 中的最外層 ErrorBoundary 會捕獲所有未處理的錯誤。
+App.jsx 中的最外層 ErrorBoundary 會捕獲所有未處理的錯誤。
 
 ### 局部錯誤邊界 (可選)
 
@@ -119,7 +119,7 @@ function CustomErrorFallback({ error, resetErrorBoundary }) {
 const handleError = (error, errorInfo) => {
   console.error('錯誤捕獲:', error, errorInfo);
   
-  if (process.env.NODE_ENV === 'production') {
+  if (import.meta.env.MODE === 'production') {
     // 發送到錯誤追蹤服務 (如 Sentry)
     // Sentry.captureException(error, { extra: errorInfo });
     
@@ -196,7 +196,7 @@ function MyComponent() {
 ### 單元測試
 
 ```bash
-npm test -- ErrorFallback.test.js
+npm test -- ErrorFallback.test.jsx
 ```
 
 ### 手動測試

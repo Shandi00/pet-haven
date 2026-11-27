@@ -51,5 +51,5 @@ node backend/test-oauth-config.js
 | `401 invalid_client`／The OAuth client was not found | Client ID 或密鑰錯誤、用戶端已刪除，或憑證剛建立尚未生效。重新複製憑證並確認前後端使用同一個 Client ID。 |
 | `redirect_uri_mismatch` | `GOOGLE_CALLBACK_URL` 與 Console 的重新導向 URI 不一致；協定、主機、埠號、路徑都必須完全相同。 |
 | `access_denied`／無法登入測試帳號 | 同意畫面在測試模式，該帳號未加入測試使用者。 |
-| 按鈕沒有出現 | frontend/public/index.html 需載入 `https://accounts.google.com/gsi/client`；確認 `REACT_APP_GOOGLE_CLIENT_ID` 已設定並重啟前端，查看瀏覽器主控台錯誤。 |
+| 按鈕沒有出現 | frontend/index.html 需載入 `https://accounts.google.com/gsi/client`；確認 `REACT_APP_GOOGLE_CLIENT_ID` 已設定並重啟前端，查看瀏覽器主控台錯誤。 |
 | `Invalid token` | 密鑰錯誤、token 過期或電腦時間不同步，重新登入一次。 |
